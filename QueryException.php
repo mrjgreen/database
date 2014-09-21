@@ -1,4 +1,4 @@
-<?php namespace Illuminate\Database\QueryException;
+<?php namespace Illuminate\Database;
 
 use PDOException;
 
