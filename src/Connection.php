@@ -146,9 +146,7 @@ class Connection implements ConnectionInterface {
 	 */
 	public function table($table)
 	{
-		$processor = $this->getPostProcessor();
-
-		$query = new Query\Builder($this, $this->getQueryGrammar(), $processor);
+		$query = new Query\Builder($this, $this->getQueryGrammar());
 
 		return $query->from($table);
 	}
@@ -397,8 +395,6 @@ class Connection implements ConnectionInterface {
 		{
 			$this->pdo->beginTransaction();
 		}
-
-		$this->fireConnectionEvent('beganTransaction');
 	}
 
 	/**
@@ -411,8 +407,6 @@ class Connection implements ConnectionInterface {
 		if ($this->transactions == 1) $this->pdo->commit();
 
 		--$this->transactions;
-
-		$this->fireConnectionEvent('committed');
 	}
 
 	/**
@@ -432,8 +426,6 @@ class Connection implements ConnectionInterface {
 		{
 			--$this->transactions;
 		}
-
-		$this->fireConnectionEvent('rollingBack');
 	}
 
 	/**

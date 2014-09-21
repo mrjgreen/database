@@ -1,10 +1,8 @@
 <?php namespace Illuminate\Database\Query;
 
 use Closure;
-use Illuminate\Support\Collection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Grammars\Grammar;
-use Illuminate\Database\Query\Processors\Processor;
 
 class Builder {
 
@@ -1517,16 +1515,20 @@ class Builder {
 		// First we will just get all of the column values for the record result set
 		// then we can associate those values with the column if it was specified
 		// otherwise we can just give these values back without a specific key.
-		$results = new Collection($this->get($columns));
+		$results = $this->get($columns);
 
-		$values = $results->fetch($columns[0])->all();
+        $values = array_map(function($row) use($columns){
+            return $row[$columns[0]];
+        }, $results);
 
 		// If a key was specified and we have results, we will go ahead and combine
 		// the values with the keys of all of the records so that the values can
 		// be accessed by the key of the rows instead of simply being numeric.
 		if ( ! is_null($key) && count($results) > 0)
 		{
-			$keys = $results->fetch($key)->all();
+            $keys = array_map(function($row) use($key){
+                return $row[$key];
+            }, $results);
 
 			return array_combine($keys, $values);
 		}
