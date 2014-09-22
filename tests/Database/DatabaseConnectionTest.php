@@ -47,7 +47,6 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('baz', $results);
 	}
 
-
 	public function testUpdateCallsTheAffectingStatementMethod()
 	{
 		$connection = $this->getMockConnection(array('affectingStatement'));

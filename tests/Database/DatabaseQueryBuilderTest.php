@@ -686,6 +686,21 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue($result);
 	}
 
+    public function testInsertIgnoreMethod()
+    {
+        $builder = $this->getBuilder();
+        $builder->getConnection()->shouldReceive('insert')->once()->with('replace into "users" ("email") values (?)', array('foo'))->andReturn(true);
+        $result = $builder->from('users')->replace(array('email' => 'foo'));
+        $this->assertTrue($result);
+    }
+
+    public function testReplaceMethod()
+    {
+        $builder = $this->getBuilder();
+        $builder->getConnection()->shouldReceive('insert')->once()->with('insert ignore into "users" ("email") values (?)', array('foo'))->andReturn(true);
+        $result = $builder->from('users')->insertIgnore(array('email' => 'foo'));
+        $this->assertTrue($result);
+    }
 
 	public function testSQLiteMultipleInserts()
 	{
