@@ -91,11 +91,13 @@ class MySqlConnector extends Connector implements ConnectorInterface {
 	 */
 	protected function getHostDsn(array $config)
 	{
-		extract($config);
+        $dsn = "mysql:host={$config['host']}";
 
-		return isset($config['port'])
-                        ? "mysql:host={$host};port={$port};dbname={$database}"
-                        : "mysql:host={$host};dbname={$database}";
+        isset($config['port']) and $dsn .= ";port={$config['port']}";
+
+        isset($config['database']) and $dsn .= ";dbname={$config['database']}";
+
+		return $dsn;
 	}
 
 }
