@@ -7,6 +7,31 @@ use Illuminate\Database\Query\Grammars\PostgresGrammar;
 use Illuminate\Database\Query\Grammars\SqlServerGrammar;
 use Illuminate\Database\Query\Grammars\SQLiteGrammar;
 
+/**
+ * Class ConnectionFactory
+ * @package Illuminate\Database\Connectors
+ *
+ * Build a connection from a config with a format like:
+ *
+ *
+ * <code>
+ *  array(
+ *      'read' => array(
+ *          'host' => '192.168.1.1',
+ *      ),
+ *      'write' => array(
+ *          'host' => '196.168.1.2'
+ *      ),
+ *      'driver'    => 'mysql',
+ *      'database'  => 'database',
+ *      'username'  => 'root',
+ *      'password'  => '',
+ *      'charset'   => 'utf8',
+ *      'collation' => 'utf8_unicode_ci',
+ *      'prefix'    => '',
+ *  )
+ * </code>
+ */
 class ConnectionFactory {
 
 	/**
