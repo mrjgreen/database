@@ -10,15 +10,6 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testSettingDefaultCallsGetDefaultGrammar()
-	{
-		$connection = $this->getMockConnection();
-		$mock = m::mock('StdClass');
-		$connection->expects($this->once())->method('getDefaultQueryGrammar')->will($this->returnValue($mock));
-		$connection->useDefaultQueryGrammar();
-		$this->assertEquals($mock, $connection->getQueryGrammar());
-	}
-
 	public function testSelectOneCallsSelectAndReturnsSingleResult()
 	{
 		$connection = $this->getMockConnection(array('select'));
@@ -141,7 +132,6 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 	public function testFromCreatesNewQueryBuilder()
 	{
 		$conn = $this->getMockConnection();
-		$conn->setQueryGrammar(m::mock('Illuminate\Database\Query\Grammars\Grammar'));
 		$builder = $conn->table('users');
 		$this->assertInstanceOf('Illuminate\Database\Query\Builder', $builder);
 		$this->assertEquals('users', $builder->from);
@@ -177,8 +167,7 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 	protected function getMockConnection($methods = array(), $pdo = null)
 	{
 		$pdo = $pdo ?: new DatabaseConnectionTestMockPDO;
-		$defaults = array('getDefaultQueryGrammar', 'getDefaultPostProcessor', 'getDefaultSchemaGrammar');
-		return $this->getMock('Illuminate\Database\Connection', array_merge($defaults, $methods), array($pdo));
+        return $this->getMock('Illuminate\Database\Connection', $methods ?: null, array($pdo));
 	}
 
 }

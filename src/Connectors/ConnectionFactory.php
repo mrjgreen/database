@@ -1,31 +1,13 @@
 <?php namespace Illuminate\Database\Connectors;
 
 use PDO;
-use Illuminate\Container\Container;
-use Illuminate\Database\MySqlConnection;
-use Illuminate\Database\SQLiteConnection;
-use Illuminate\Database\PostgresConnection;
-use Illuminate\Database\SqlServerConnection;
+use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Grammars\MySqlGrammar;
+use Illuminate\Database\Query\Grammars\PostgresGrammar;
+use Illuminate\Database\Query\Grammars\SqlServerGrammar;
+use Illuminate\Database\Query\Grammars\SQLiteGrammar;
 
 class ConnectionFactory {
-
-	/**
-	 * The IoC container instance.
-	 *
-	 * @var \Illuminate\Container\Container
-	 */
-	protected $container;
-
-	/**
-	 * Create a new connection factory instance.
-	 *
-	 * @param  \Illuminate\Container\Container  $container
-	 * @return void
-	 */
-	public function __construct(Container $container)
-	{
-		$this->container = $container;
-	}
 
 	/**
 	 * Establish a PDO connection based on the configuration.
@@ -56,7 +38,7 @@ class ConnectionFactory {
 	{
 		$pdo = $this->createConnector($config)->connect($config);
 
-		return $this->createConnection($config['driver'], $pdo, $config['database'], $config['prefix'], $config);
+		return $this->createConnection($config['driver'], $pdo, $config['prefix']);
 	}
 
 	/**
@@ -170,11 +152,6 @@ class ConnectionFactory {
 			throw new \InvalidArgumentException("A driver must be specified.");
 		}
 
-		if ($this->container->bound($key = "db.connector.{$config['driver']}"))
-		{
-			return $this->container->make($key);
-		}
-
 		switch ($config['driver'])
 		{
 			case 'mysql':
@@ -198,36 +175,37 @@ class ConnectionFactory {
 	 *
 	 * @param  string   $driver
 	 * @param  \PDO     $connection
-	 * @param  string   $database
 	 * @param  string   $prefix
-	 * @param  array    $config
 	 * @return \Illuminate\Database\Connection
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	protected function createConnection($driver, PDO $connection, $database, $prefix = '', array $config = array())
+	protected function createConnection($driver, PDO $connection, $prefix = '')
 	{
-		if ($this->container->bound($key = "db.connection.{$driver}"))
-		{
-			return $this->container->make($key, array($connection, $database, $prefix, $config));
-		}
-
 		switch ($driver)
 		{
 			case 'mysql':
-				return new MySqlConnection($connection, $database, $prefix, $config);
+                $queryGrammar = new MySqlGrammar();
+                break;
 
 			case 'pgsql':
-				return new PostgresConnection($connection, $database, $prefix, $config);
+                $queryGrammar = new PostgresGrammar();
+                break;
 
 			case 'sqlite':
-				return new SQLiteConnection($connection, $database, $prefix, $config);
+                $queryGrammar = new SQLiteGrammar();
+                break;
 
 			case 'sqlsrv':
-				return new SqlServerConnection($connection, $database, $prefix, $config);
+                $queryGrammar = new SqlServerGrammar();
+                break;
+
+            default:
+                throw new \InvalidArgumentException("Unsupported driver [$driver]");
 		}
 
-		throw new \InvalidArgumentException("Unsupported driver [$driver]");
+        return new Connection($connection, $queryGrammar, $prefix);
+
 	}
 
 }

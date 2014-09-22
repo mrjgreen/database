@@ -1,5 +1,6 @@
 <?php namespace Illuminate\Database;
 
+use Illuminate\Database\Query\Grammars\Grammar;
 use PDO;
 use Closure;
 use DateTime;
@@ -69,12 +70,6 @@ class Connection implements ConnectionInterface {
 	 */
 	protected $pretending = false;
 
-	/**
-	 * The name of the connected database.
-	 *
-	 * @var string
-	 */
-	protected $database;
 
 	/**
 	 * The table prefix for the connection.
@@ -84,58 +79,19 @@ class Connection implements ConnectionInterface {
 	protected $tablePrefix = '';
 
 	/**
-	 * The database connection configuration options.
-	 *
-	 * @var array
-	 */
-	protected $config = array();
-
-	/**
 	 * Create a new database connection instance.
 	 *
 	 * @param  \PDO     $pdo
-	 * @param  string   $database
 	 * @param  string   $tablePrefix
-	 * @param  array    $config
 	 * @return void
 	 */
-	public function __construct(PDO $pdo, $database = '', $tablePrefix = '', array $config = array())
+	public function __construct(PDO $pdo, Grammar $queryGrammar = null, $tablePrefix = '')
 	{
 		$this->pdo = $pdo;
 
-		// First we will setup the default properties. We keep track of the DB
-		// name we are connected to since it is needed when some reflective
-		// type commands are run such as checking whether a table exists.
-		$this->database = $database;
+		$this->queryGrammar = $queryGrammar ?: new Grammar();
 
-		$this->tablePrefix = $tablePrefix;
-
-		$this->config = $config;
-
-		// We need to initialize a query grammar and the query post processors
-		// which are both very important parts of the database abstractions
-		// so we initialize these to their default values while starting.
-		$this->useDefaultQueryGrammar();
-	}
-
-	/**
-	 * Set the query grammar to the default implementation.
-	 *
-	 * @return void
-	 */
-	public function useDefaultQueryGrammar()
-	{
-		$this->queryGrammar = $this->getDefaultQueryGrammar();
-	}
-
-	/**
-	 * Get the default query grammar instance.
-	 *
-	 * @return \Illuminate\Database\Query\Grammars\Grammar
-	 */
-	protected function getDefaultQueryGrammar()
-	{
-		return new Query\Grammars\Grammar;
+        $this->tablePrefix = $tablePrefix;
 	}
 
 	/**
@@ -617,11 +573,6 @@ class Connection implements ConnectionInterface {
 	 */
 	public function logQuery($query, $bindings, $time = null)
 	{
-		if (isset($this->events))
-		{
-			$this->events->fire('illuminate.query', array($query, $bindings, $time, $this->getName()));
-		}
-
 		if ( ! $this->loggingQueries) return;
 
 		$this->queryLog[] = compact('query', 'bindings', 'time');
@@ -697,27 +648,6 @@ class Connection implements ConnectionInterface {
 		$this->reconnector = $reconnector;
 
 		return $this;
-	}
-
-	/**
-	 * Get the database connection name.
-	 *
-	 * @return string|null
-	 */
-	public function getName()
-	{
-		return $this->getConfig('name');
-	}
-
-	/**
-	 * Get an option from the configuration options.
-	 *
-	 * @param  string  $option
-	 * @return mixed
-	 */
-	public function getConfig($option)
-	{
-		return isset($this->config[$option]) ? $this->config[$option] : null;
 	}
 
 	/**
@@ -830,27 +760,6 @@ class Connection implements ConnectionInterface {
 	public function logging()
 	{
 		return $this->loggingQueries;
-	}
-
-	/**
-	 * Get the name of the connected database.
-	 *
-	 * @return string
-	 */
-	public function getDatabaseName()
-	{
-		return $this->database;
-	}
-
-	/**
-	 * Set the name of the connected database.
-	 *
-	 * @param  string  $database
-	 * @return string
-	 */
-	public function setDatabaseName($database)
-	{
-		$this->database = $database;
 	}
 
 	/**
