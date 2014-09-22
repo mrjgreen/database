@@ -741,6 +741,39 @@ class Grammar {
 		return $joiner.$union['query']->toSql();
 	}
 
+    /**
+     * Compile an insert statement into SQL.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $values
+     * @return string
+     */
+    protected function doCompileInsert(Builder $query, array $values, $type)
+    {
+        // Essentially we will force every insert to be treated as a batch insert which
+        // simply makes creating the SQL easier for us since we can utilize the same
+        // basic routine regardless of an amount of records given to us to insert.
+        $table = $this->wrapTable($query->from);
+
+        if ( ! is_array(reset($values)))
+        {
+            $values = array($values);
+        }
+
+        $columns = $this->columnize(array_keys(reset($values)));
+
+        // We need to build a list of parameter place-holders of values that are bound
+        // to the query. Each insert should have the exact same amount of parameter
+        // bindings so we can just go off the first list of values in this array.
+        $parameters = $this->parameterize(reset($values));
+
+        $value = array_fill(0, count($values), "($parameters)");
+
+        $parameters = implode(', ', $value);
+
+        return "$type into $table ($columns) values $parameters";
+    }
+
 	/**
 	 * Compile an insert statement into SQL.
 	 *
@@ -750,29 +783,32 @@ class Grammar {
 	 */
 	public function compileInsert(Builder $query, array $values)
 	{
-		// Essentially we will force every insert to be treated as a batch insert which
-		// simply makes creating the SQL easier for us since we can utilize the same
-		// basic routine regardless of an amount of records given to us to insert.
-		$table = $this->wrapTable($query->from);
-
-		if ( ! is_array(reset($values)))
-		{
-			$values = array($values);
-		}
-
-		$columns = $this->columnize(array_keys(reset($values)));
-
-		// We need to build a list of parameter place-holders of values that are bound
-		// to the query. Each insert should have the exact same amount of parameter
-		// bindings so we can just go off the first list of values in this array.
-		$parameters = $this->parameterize(reset($values));
-
-		$value = array_fill(0, count($values), "($parameters)");
-
-		$parameters = implode(', ', $value);
-
-		return "insert into $table ($columns) values $parameters";
+		return $this->doCompileInsert($query, $values, 'insert');
 	}
+
+    /**
+     * Compile an insert statement into SQL.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $values
+     * @return string
+     */
+    public function compileInsertIgnore(Builder $query, array $values)
+    {
+        return $this->doCompileInsert($query, $values, 'insert ignore');
+    }
+
+    /**
+     * Compile an insert statement into SQL.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  array  $values
+     * @return string
+     */
+    public function compileReplace(Builder $query, array $values)
+    {
+        return $this->doCompileInsert($query, $values, 'replace');
+    }
 
 	/**
 	 * Compile an insert and get ID statement into SQL.
