@@ -131,33 +131,6 @@ class Builder {
 	 */
 	protected $backups = array();
 
-	/**
-	 * The key that should be used when caching the query.
-	 *
-	 * @var string
-	 */
-	protected $cacheKey;
-
-	/**
-	 * The number of minutes to cache the query.
-	 *
-	 * @var int
-	 */
-	protected $cacheMinutes;
-
-	/**
-	 * The tags for the query cache.
-	 *
-	 * @var array
-	 */
-	protected $cacheTags;
-
-	/**
-	 * The cache driver to be used.
-	 *
-	 * @var string
-	 */
-	protected $cacheDriver;
 
 	/**
 	 * All of the available clause operators.
@@ -934,69 +907,6 @@ class Builder {
 	}
 
 	/**
-	 * Handles dynamic "where" clauses to the query.
-	 *
-	 * @param  string  $method
-	 * @param  string  $parameters
-	 * @return $this
-	 */
-	public function dynamicWhere($method, $parameters)
-	{
-		$finder = substr($method, 5);
-
-		$segments = preg_split('/(And|Or)(?=[A-Z])/', $finder, -1, PREG_SPLIT_DELIM_CAPTURE);
-
-		// The connector variable will determine which connector will be used for the
-		// query condition. We will change it as we come across new boolean values
-		// in the dynamic method strings, which could contain a number of these.
-		$connector = 'and';
-
-		$index = 0;
-
-		foreach ($segments as $segment)
-		{
-			// If the segment is not a boolean connector, we can assume it is a column's name
-			// and we will add it to the query as a new constraint as a where clause, then
-			// we can keep iterating through the dynamic method string's segments again.
-			if ($segment != 'And' && $segment != 'Or')
-			{
-				$this->addDynamic($segment, $connector, $parameters, $index);
-
-				$index++;
-			}
-
-			// Otherwise, we will store the connector so we know how the next where clause we
-			// find in the query should be connected to the previous ones, meaning we will
-			// have the proper boolean connector to connect the next where clause found.
-			else
-			{
-				$connector = $segment;
-			}
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Add a single dynamic where clause statement to the query.
-	 *
-	 * @param  string  $segment
-	 * @param  string  $connector
-	 * @param  array   $parameters
-	 * @param  int     $index
-	 * @return void
-	 */
-	protected function addDynamic($segment, $connector, $parameters, $index)
-	{
-		// Once we have parsed out the columns and formatted the boolean operators we
-		// are ready to add it to this query as a where clause just like any other
-		// clause on the query. Then we'll increment the parameter index values.
-		$bool = strtolower($connector);
-
-		$this->where(snake_case($segment), '=', $parameters[$index], $bool);
-	}
-
-	/**
 	 * Add a "group by" clause to the query.
 	 *
 	 * @return $this
@@ -1265,66 +1175,15 @@ class Builder {
 	}
 
 	/**
-	 * Indicate that the query results should be cached.
-	 *
-	 * @param  \DateTime|int  $minutes
-	 * @param  string  $key
-	 * @return $this
-	 */
-	public function remember($minutes, $key = null)
-	{
-		list($this->cacheMinutes, $this->cacheKey) = array($minutes, $key);
-
-		return $this;
-	}
-
-	/**
-	 * Indicate that the query results should be cached forever.
-	 *
-	 * @param  string  $key
-	 * @return \Illuminate\Database\Query\Builder|static
-	 */
-	public function rememberForever($key = null)
-	{
-		return $this->remember(-1, $key);
-	}
-
-	/**
-	 * Indicate that the results, if cached, should use the given cache tags.
-	 *
-	 * @param  array|mixed  $cacheTags
-	 * @return $this
-	 */
-	public function cacheTags($cacheTags)
-	{
-		$this->cacheTags = $cacheTags;
-
-		return $this;
-	}
-
-	/**
-	 * Indicate that the results, if cached, should use the given cache driver.
-	 *
-	 * @param  string  $cacheDriver
-	 * @return $this
-	 */
-	public function cacheDriver($cacheDriver)
-	{
-		$this->cacheDriver = $cacheDriver;
-
-		return $this;
-	}
-
-	/**
 	 * Execute a query for a single record by ID.
 	 *
 	 * @param  int    $id
 	 * @param  array  $columns
 	 * @return mixed|static
 	 */
-	public function find($id, $columns = array('*'))
+	public function find($id, $columns = array('*'), $column = 'id')
 	{
-		return $this->where('id', '=', $id)->first($columns);
+		return $this->where($column, '=', $id)->first($columns);
 	}
 
 	/**
@@ -1361,8 +1220,6 @@ class Builder {
 	 */
 	public function get($columns = array('*'))
 	{
-		if ( ! is_null($this->cacheMinutes)) return $this->getCached($columns);
-
 		return $this->getFresh($columns);
 	}
 
@@ -1387,91 +1244,6 @@ class Builder {
 	protected function runSelect()
 	{
 		return $this->connection->select($this->toSql(), $this->getBindings());
-	}
-
-	/**
-	 * Execute the query as a cached "select" statement.
-	 *
-	 * @param  array  $columns
-	 * @return array
-	 */
-	public function getCached($columns = array('*'))
-	{
-		if (is_null($this->columns)) $this->columns = $columns;
-
-		// If the query is requested to be cached, we will cache it using a unique key
-		// for this database connection and query statement, including the bindings
-		// that are used on this query, providing great convenience when caching.
-		list($key, $minutes) = $this->getCacheInfo();
-
-		$cache = $this->getCache();
-
-		$callback = $this->getCacheCallback($columns);
-
-		// If the "minutes" value is less than zero, we will use that as the indicator
-		// that the value should be remembered values should be stored indefinitely
-		// and if we have minutes we will use the typical remember function here.
-		if ($minutes < 0)
-		{
-			return $cache->rememberForever($key, $callback);
-		}
-
-		return $cache->remember($key, $minutes, $callback);
-	}
-
-	/**
-	 * Get the cache object with tags assigned, if applicable.
-	 *
-	 * @return \Illuminate\Cache\CacheManager
-	 */
-	protected function getCache()
-	{
-		$cache = $this->connection->getCacheManager()->driver($this->cacheDriver);
-
-		return $this->cacheTags ? $cache->tags($this->cacheTags) : $cache;
-	}
-
-	/**
-	 * Get the cache key and cache minutes as an array.
-	 *
-	 * @return array
-	 */
-	protected function getCacheInfo()
-	{
-		return array($this->getCacheKey(), $this->cacheMinutes);
-	}
-
-	/**
-	 * Get a unique cache key for the complete query.
-	 *
-	 * @return string
-	 */
-	public function getCacheKey()
-	{
-		return $this->cacheKey ?: $this->generateCacheKey();
-	}
-
-	/**
-	 * Generate the unique cache key for the query.
-	 *
-	 * @return string
-	 */
-	public function generateCacheKey()
-	{
-		$name = $this->connection->getName();
-
-		return md5($name.$this->toSql().serialize($this->getBindings()));
-	}
-
-	/**
-	 * Get the Closure callback used when caching queries.
-	 *
-	 * @param  array  $columns
-	 * @return \Closure
-	 */
-	protected function getCacheCallback($columns)
-	{
-		return function() use ($columns) { return $this->getFresh($columns); };
 	}
 
 	/**
@@ -1932,7 +1704,12 @@ class Builder {
 	 */
 	public function getBindings()
 	{
-		return array_flatten($this->bindings);
+        $return = array();
+
+        // Flatten a multi-dimensional array, creating a single-dimensional array
+        array_walk_recursive($this->bindings, function($x) use (&$return) { $return[] = $x; });
+
+        return $return;
 	}
 
 	/**
@@ -2027,25 +1804,19 @@ class Builder {
 		return $this->grammar;
 	}
 
-	/**
-	 * Handle dynamic method calls into the method.
-	 *
-	 * @param  string  $method
-	 * @param  array   $parameters
-	 * @return mixed
-	 *
-	 * @throws \BadMethodCallException
-	 */
-	public function __call($method, $parameters)
-	{
-		if (starts_with($method, 'where'))
-		{
-			return $this->dynamicWhere($method, $parameters);
-		}
+    /**
+     * Handle dynamic method calls into the method.
+     *
+     * @param  string  $method
+     * @param  array   $parameters
+     * @return mixed
+     *
+     * @throws \BadMethodCallException
+     */
+    public function __call($method, $parameters)
+    {
+        $className = get_class($this);
 
-		$className = get_class($this);
-
-		throw new \BadMethodCallException("Call to undefined method {$className}::{$method}()");
-	}
-
+        throw new \BadMethodCallException("Call to undefined method {$className}::{$method}()");
+    }
 }

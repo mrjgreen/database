@@ -137,7 +137,7 @@ class ConnectionFactory {
 	 */
 	protected function mergeReadWriteConfig(array $config, array $merge)
 	{
-		return array_except(array_merge($config, $merge), array('read', 'write'));
+        return array_diff_key(array_merge($config, $merge), array_flip(array('read', 'write')));
 	}
 
 	/**
@@ -149,7 +149,10 @@ class ConnectionFactory {
 	 */
 	protected function parseConfig(array $config, $name)
 	{
-		return array_add(array_add($config, 'prefix', ''), 'name', $name);
+        return $config + array(
+            'prefix'    => '',
+            'name'      => $name
+        );
 	}
 
 	/**

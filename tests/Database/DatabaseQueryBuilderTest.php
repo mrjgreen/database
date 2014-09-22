@@ -53,66 +53,6 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	public function testSelectWithCaching()
-	{
-		$cache = m::mock('stdClass');
-		$driver = m::mock('stdClass');
-		$query = $this->setupCacheTestQuery($cache, $driver);
-
-		$query = $query->remember(5);
-
-		$driver->shouldReceive('remember')
-						 ->once()
-						 ->with($query->getCacheKey(), 5, m::type('Closure'))
-						 ->andReturnUsing(function($key, $minutes, $callback) { return $callback(); });
-
-
-		$this->assertEquals($query->get(), array('results'));
-	}
-
-
-	public function testSelectWithCachingForever()
-	{
-		$cache = m::mock('stdClass');
-		$driver = m::mock('stdClass');
-		$query = $this->setupCacheTestQuery($cache, $driver);
-
-		$query = $query->rememberForever();
-
-		$driver->shouldReceive('rememberForever')
-												->once()
-												->with($query->getCacheKey(), m::type('Closure'))
-												->andReturnUsing(function($key, $callback) { return $callback(); });
-
-
-
-		$this->assertEquals($query->get(), array('results'));
-	}
-
-
-	public function testSelectWithCachingAndTags()
-	{
-		$taggedCache = m::mock('StdClass');
-		$cache = m::mock('stdClass');
-		$driver = m::mock('stdClass');
-
-		$driver->shouldReceive('tags')
-				->once()
-				->with(array('foo','bar'))
-				->andReturn($taggedCache);
-
-		$query = $this->setupCacheTestQuery($cache, $driver);
-		$query = $query->cacheTags(array('foo', 'bar'))->remember(5);
-
-		$taggedCache->shouldReceive('remember')
-						->once()
-						->with($query->getCacheKey(), 5, m::type('Closure'))
-						->andReturnUsing(function($key, $minutes, $callback) { return $callback(); });
-
-		$this->assertEquals($query->get(), array('results'));
-	}
-
-
 	public function testBasicAlias()
 	{
 		$builder = $this->getBuilder();
@@ -920,43 +860,6 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('users')->where('foo', null);
 		$this->assertEquals('select * from "users" where "foo" is null', $builder->toSql());
-	}
-
-
-	public function testDynamicWhere()
-	{
-		$method     = 'whereFooBarAndBazOrQux';
-		$parameters = array('corge', 'waldo', 'fred');
-		$builder    = m::mock('Illuminate\Database\Query\Builder')->makePartial();
-
-		$builder->shouldReceive('where')->with('foo_bar', '=', $parameters[0], 'and')->once()->andReturn($builder);
-		$builder->shouldReceive('where')->with('baz', '=', $parameters[1], 'and')->once()->andReturn($builder);
-		$builder->shouldReceive('where')->with('qux', '=', $parameters[2], 'or')->once()->andReturn($builder);
-
-		$this->assertEquals($builder, $builder->dynamicWhere($method, $parameters));
-	}
-
-
-	public function testDynamicWhereIsNotGreedy()
-	{
-		$method     = 'whereIosVersionAndAndroidVersionOrOrientation';
-		$parameters = array('6.1', '4.2', 'Vertical');
-		$builder    = m::mock('Illuminate\Database\Query\Builder')->makePartial();
-
-		$builder->shouldReceive('where')->with('ios_version', '=', '6.1', 'and')->once()->andReturn($builder);
-		$builder->shouldReceive('where')->with('android_version', '=', '4.2', 'and')->once()->andReturn($builder);
-		$builder->shouldReceive('where')->with('orientation', '=', 'Vertical', 'or')->once()->andReturn($builder);
-
-		$builder->dynamicWhere($method, $parameters);
-	}
-
-
-	public function testCallTriggersDynamicWhere()
-	{
-		$builder = $this->getBuilder();
-
-		$this->assertEquals($builder, $builder->whereFooAndBar('baz', 'qux'));
-		$this->assertCount(2, $builder->wheres);
 	}
 
 

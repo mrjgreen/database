@@ -717,7 +717,7 @@ class Connection implements ConnectionInterface {
 	 */
 	public function getConfig($option)
 	{
-		return array_get($this->config, $option);
+		return isset($this->config[$option]) ? $this->config[$option] : null;
 	}
 
 	/**
