@@ -1,9 +1,11 @@
 <?php namespace Illuminate\Database\Query\Grammars;
 
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Query\Expression;
 
 class Grammar {
 
+    const DATE_SQL = 'Y-m-d H:i:s';
 	/**
 	 * The components that make up a select clause.
 	 *
@@ -162,7 +164,7 @@ class Grammar {
      */
     public function isExpression($value)
     {
-        return $value instanceof Query\Expression;
+        return $value instanceof Expression;
     }
 
     /**
@@ -172,7 +174,7 @@ class Grammar {
      */
     public function getDateFormat()
     {
-        return 'Y-m-d H:i:s';
+        return self::DATE_SQL;
     }
 
     /**

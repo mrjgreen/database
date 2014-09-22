@@ -759,23 +759,13 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testInsertGetIdMethod()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('insert')->once()->with($builder, 'insert into "users" ("email") values (?)', array('foo'), 'id');
+		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email") values (?)', array('foo'));
         $pdoMock = m::mock('PDO');
-        $pdoMock->shouldReceive('lastInsertIt')->andReturn(1);
+        $pdoMock->shouldReceive('lastInsertId')->andReturn(1);
         $builder->getConnection()->shouldReceive('getPdo')->once()->andReturn($pdoMock);
-		$result = $builder->from('users')->insertGetId(array('email' => 'foo'), 'id');
+		$result = $builder->from('users')->insertGetId(array('email' => 'foo'));
 		$this->assertEquals(1, $result);
 	}
-
-
-	public function testInsertGetIdMethodRemovesExpressions()
-	{
-		$builder = $this->getBuilder();
-		$builder->getProcessor()->shouldReceive('processInsertGetId')->once()->with($builder, 'insert into "users" ("email", "bar") values (?, bar)', array('foo'), 'id')->andReturn(1);
-		$result = $builder->from('users')->insertGetId(array('email' => 'foo', 'bar' => new Illuminate\Database\Query\Expression('bar')), 'id');
-		$this->assertEquals(1, $result);
-	}
-
 
 	public function testInsertMethodRespectsRawBindings()
 	{
