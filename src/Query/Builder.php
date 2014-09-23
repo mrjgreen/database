@@ -1576,7 +1576,7 @@ class Builder {
         // is the same type of result returned by the raw connection instance.
         $bindings = $this->cleanBindings($bindings);
 
-        return $this->connection->insert($sql, $bindings);
+        return $this->connection->query($sql, $bindings);
     }
 
 	/**
@@ -1592,7 +1592,7 @@ class Builder {
 
 		$values = $this->cleanBindings($values);
 
-        $this->connection->insert($sql, $values);
+        $this->connection->query($sql, $values);
 
         $pdo = $this->connection->getPdo();
 
@@ -1613,7 +1613,7 @@ class Builder {
 
 		$sql = $this->grammar->compileUpdate($this, $values);
 
-		return $this->connection->update($sql, $this->cleanBindings($bindings));
+		return $this->connection->query($sql, $this->cleanBindings($bindings));
 	}
 
 	/**
@@ -1630,7 +1630,7 @@ class Builder {
 
 		$columns = array_merge(array($column => $this->raw("$wrapped + $amount")), $extra);
 
-		return $this->update($columns);
+		return $this->query($columns);
 	}
 
 	/**
@@ -1647,7 +1647,7 @@ class Builder {
 
 		$columns = array_merge(array($column => $this->raw("$wrapped - $amount")), $extra);
 
-		return $this->update($columns);
+		return $this->query($columns);
 	}
 
 	/**
@@ -1665,7 +1665,7 @@ class Builder {
 
 		$sql = $this->grammar->compileDelete($this);
 
-		return $this->connection->delete($sql, $this->getBindings());
+		return $this->connection->query($sql, $this->getBindings());
 	}
 
 	/**

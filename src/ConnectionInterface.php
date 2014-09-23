@@ -48,33 +48,6 @@ interface ConnectionInterface {
     public function fetchAll($query, $bindings = array());
 
 	/**
-	 * Run an insert statement against the database.
-	 *
-	 * @param  string  $query
-	 * @param  array   $bindings
-	 * @return bool
-	 */
-	public function insert($query, $bindings = array());
-
-	/**
-	 * Run an update statement against the database.
-	 *
-	 * @param  string  $query
-	 * @param  array   $bindings
-	 * @return int
-	 */
-	public function update($query, $bindings = array());
-
-	/**
-	 * Run a delete statement against the database.
-	 *
-	 * @param  string  $query
-	 * @param  array   $bindings
-	 * @return int
-	 */
-	public function delete($query, $bindings = array());
-
-	/**
 	 * Execute an SQL statement and return the boolean result.
 	 *
 	 * @param  string  $query

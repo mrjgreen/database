@@ -681,7 +681,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testInsertMethod()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email") values (?)', array('foo'))->andReturn(true);
+		$builder->getConnection()->shouldReceive('query')->once()->with('insert into "users" ("email") values (?)', array('foo'))->andReturn(true);
 		$result = $builder->from('users')->insert(array('email' => 'foo'));
 		$this->assertTrue($result);
 	}
@@ -689,7 +689,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
     public function testInsertIgnoreMethod()
     {
         $builder = $this->getBuilder();
-        $builder->getConnection()->shouldReceive('insert')->once()->with('replace into "users" ("email") values (?)', array('foo'))->andReturn(true);
+        $builder->getConnection()->shouldReceive('query')->once()->with('replace into "users" ("email") values (?)', array('foo'))->andReturn(true);
         $result = $builder->from('users')->replace(array('email' => 'foo'));
         $this->assertTrue($result);
     }
@@ -697,7 +697,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
     public function testReplaceMethod()
     {
         $builder = $this->getBuilder();
-        $builder->getConnection()->shouldReceive('insert')->once()->with('insert ignore into "users" ("email") values (?)', array('foo'))->andReturn(true);
+        $builder->getConnection()->shouldReceive('query')->once()->with('insert ignore into "users" ("email") values (?)', array('foo'))->andReturn(true);
         $result = $builder->from('users')->insertIgnore(array('email' => 'foo'));
         $this->assertTrue($result);
     }
@@ -705,7 +705,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testSQLiteMultipleInserts()
 	{
 		$builder = $this->getSQLiteBuilder();
-		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email", "name") select ? as "email", ? as "name" union select ? as "email", ? as "name"', array('foo', 'taylor', 'bar', 'dayle'))->andReturn(true);
+		$builder->getConnection()->shouldReceive('query')->once()->with('insert into "users" ("email", "name") select ? as "email", ? as "name" union select ? as "email", ? as "name"', array('foo', 'taylor', 'bar', 'dayle'))->andReturn(true);
 		$result = $builder->from('users')->insert(array(array('email' => 'foo', 'name' => 'taylor'), array('email' => 'bar', 'name' => 'dayle')));
 		$this->assertTrue($result);
 	}
@@ -714,7 +714,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testInsertGetIdMethod()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email") values (?)', array('foo'));
+		$builder->getConnection()->shouldReceive('query')->once()->with('insert into "users" ("email") values (?)', array('foo'));
         $pdoMock = m::mock('PDO');
         $pdoMock->shouldReceive('lastInsertId')->andReturn(1);
         $builder->getConnection()->shouldReceive('getPdo')->once()->andReturn($pdoMock);
@@ -725,7 +725,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testInsertMethodRespectsRawBindings()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('insert')->once()->with('insert into "users" ("email") values (CURRENT TIMESTAMP)', array())->andReturn(true);
+		$builder->getConnection()->shouldReceive('query')->once()->with('insert into "users" ("email") values (CURRENT TIMESTAMP)', array())->andReturn(true);
 		$result = $builder->from('users')->insert(array('email' => new Raw('CURRENT TIMESTAMP')));
 		$this->assertTrue($result);
 	}
@@ -734,12 +734,12 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testUpdateMethod()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('update')->once()->with('update "users" set "email" = ?, "name" = ? where "id" = ?', array('foo', 'bar', 1))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('update "users" set "email" = ?, "name" = ? where "id" = ?', array('foo', 'bar', 1))->andReturn(1);
 		$result = $builder->from('users')->where('id', '=', 1)->update(array('email' => 'foo', 'name' => 'bar'));
 		$this->assertEquals(1, $result);
 
 		$builder = $this->getMySqlBuilder();
-		$builder->getConnection()->shouldReceive('update')->once()->with('update `users` set `email` = ?, `name` = ? where `id` = ? order by `foo` desc limit 5', array('foo', 'bar', 1))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('update `users` set `email` = ?, `name` = ? where `id` = ? order by `foo` desc limit 5', array('foo', 'bar', 1))->andReturn(1);
 		$result = $builder->from('users')->where('id', '=', 1)->orderBy('foo', 'desc')->limit(5)->update(array('email' => 'foo', 'name' => 'bar'));
 		$this->assertEquals(1, $result);
 	}
@@ -748,7 +748,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testUpdateMethodWithJoins()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('update')->once()->with('update "users" inner join "orders" on "users"."id" = "orders"."user_id" set "email" = ?, "name" = ? where "users"."id" = ?', array('foo', 'bar', 1))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('update "users" inner join "orders" on "users"."id" = "orders"."user_id" set "email" = ?, "name" = ? where "users"."id" = ?', array('foo', 'bar', 1))->andReturn(1);
 		$result = $builder->from('users')->join('orders', 'users.id', '=', 'orders.user_id')->where('users.id', '=', 1)->update(array('email' => 'foo', 'name' => 'bar'));
 		$this->assertEquals(1, $result);
 	}
@@ -757,7 +757,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testUpdateMethodWithoutJoinsOnPostgres()
 	{
 		$builder = $this->getPostgresBuilder();
-		$builder->getConnection()->shouldReceive('update')->once()->with('update "users" set "email" = ?, "name" = ? where "id" = ?', array('foo', 'bar', 1))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('update "users" set "email" = ?, "name" = ? where "id" = ?', array('foo', 'bar', 1))->andReturn(1);
 		$result = $builder->from('users')->where('id', '=', 1)->update(array('email' => 'foo', 'name' => 'bar'));
 		$this->assertEquals(1, $result);
 	}
@@ -766,7 +766,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testUpdateMethodWithJoinsOnPostgres()
 	{
 		$builder = $this->getPostgresBuilder();
-		$builder->getConnection()->shouldReceive('update')->once()->with('update "users" set "email" = ?, "name" = ? from "orders" where "users"."id" = ? and "users"."id" = "orders"."user_id"', array('foo', 'bar', 1))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('update "users" set "email" = ?, "name" = ? from "orders" where "users"."id" = ? and "users"."id" = "orders"."user_id"', array('foo', 'bar', 1))->andReturn(1);
 		$result = $builder->from('users')->join('orders', 'users.id', '=', 'orders.user_id')->where('users.id', '=', 1)->update(array('email' => 'foo', 'name' => 'bar'));
 		$this->assertEquals(1, $result);
 	}
@@ -775,7 +775,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testUpdateMethodRespectsRaw()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('update')->once()->with('update "users" set "email" = foo, "name" = ? where "id" = ?', array('bar', 1))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('update "users" set "email" = foo, "name" = ? where "id" = ?', array('bar', 1))->andReturn(1);
 		$result = $builder->from('users')->where('id', '=', 1)->update(array('email' => new Raw('foo'), 'name' => 'bar'));
 		$this->assertEquals(1, $result);
 	}
@@ -784,12 +784,12 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testDeleteMethod()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('delete')->once()->with('delete from "users" where "email" = ?', array('foo'))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('delete from "users" where "email" = ?', array('foo'))->andReturn(1);
 		$result = $builder->from('users')->where('email', '=', 'foo')->delete();
 		$this->assertEquals(1, $result);
 
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('delete')->once()->with('delete from "users" where "id" = ?', array(1))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('delete from "users" where "id" = ?', array(1))->andReturn(1);
 		$result = $builder->from('users')->delete(1);
 		$this->assertEquals(1, $result);
 	}
@@ -798,12 +798,12 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testDeleteWithJoinMethod()
 	{
 		$builder = $this->getMySqlBuilder();
-		$builder->getConnection()->shouldReceive('delete')->once()->with('delete `users` from `users` inner join `contacts` on `users`.`id` = `contacts`.`id` where `email` = ?', array('foo'))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('delete `users` from `users` inner join `contacts` on `users`.`id` = `contacts`.`id` where `email` = ?', array('foo'))->andReturn(1);
 		$result = $builder->from('users')->join('contacts', 'users.id', '=', 'contacts.id')->where('email', '=', 'foo')->delete();
 		$this->assertEquals(1, $result);
 
 		$builder = $this->getMySqlBuilder();
-		$builder->getConnection()->shouldReceive('delete')->once()->with('delete `users` from `users` inner join `contacts` on `users`.`id` = `contacts`.`id` where `id` = ?', array(1))->andReturn(1);
+		$builder->getConnection()->shouldReceive('query')->once()->with('delete `users` from `users` inner join `contacts` on `users`.`id` = `contacts`.`id` where `id` = ?', array(1))->andReturn(1);
 		$result = $builder->from('users')->join('contacts', 'users.id', '=', 'contacts.id')->delete(1);
 		$this->assertEquals(1, $result);
 	}

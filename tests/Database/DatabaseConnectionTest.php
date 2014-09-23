@@ -27,7 +27,7 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 		$statement->expects($this->once())->method('execute')->with($this->equalTo(array('foo' => 'bar')));
 		$statement->expects($this->once())->method('fetchAll')->will($this->returnValue(array('boom')));
 		$pdo->expects($this->once())->method('prepare')->with('foo')->will($this->returnValue($statement));
-		$mock = $this->getMockConnection(array('prepareBindings'), $writePdo);
+		$mock = $this->getMockConnection(array('prepareBindings', 'query'), $writePdo);
         $mock->enableQueryLog();
 		$mock->setReadPdo($pdo);
 		$mock->setPdo($pdo);
@@ -40,31 +40,13 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue(is_numeric($log[0]['time']));
 	}
 
-	public function testInsertCallsTheRunMethod()
+	public function testQueryCallsTheRunMethod()
 	{
 		$connection = $this->getMockConnection(array('run'));
 		$connection->expects($this->once())->method('run')->with($this->equalTo('foo'), $this->equalTo(array('bar')))->will($this->returnValue('baz'));
-		$results = $connection->insert('foo', array('bar'));
+		$results = $connection->query('foo', array('bar'));
 		$this->assertEquals('baz', $results);
 	}
-
-	public function testUpdateCallsTheRunMethod()
-	{
-		$connection = $this->getMockConnection(array('run'));
-		$connection->expects($this->once())->method('run')->with($this->equalTo('foo'), $this->equalTo(array('bar')))->will($this->returnValue('baz'));
-		$results = $connection->update('foo', array('bar'));
-		$this->assertEquals('baz', $results);
-	}
-
-
-	public function testDeleteCallsTheRunMethod()
-	{
-		$connection = $this->getMockConnection(array('run'));
-		$connection->expects($this->once())->method('run')->with($this->equalTo('foo'), $this->equalTo(array('bar')))->will($this->returnValue('baz'));
-		$results = $connection->delete('foo', array('bar'));
-		$this->assertEquals('baz', $results);
-	}
-
 
 	public function testQueryProperlyCallsPDO()
 	{

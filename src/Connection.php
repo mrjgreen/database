@@ -169,42 +169,6 @@ class Connection implements ConnectionInterface {
     }
 
 	/**
-	 * Run an insert statement against the database.
-	 *
-	 * @param  string  $query
-	 * @param  array   $bindings
-	 * @return bool
-	 */
-	public function insert($query, $bindings = array())
-	{
-		return $this->run($query, $bindings);
-	}
-
-	/**
-	 * Run an update statement against the database.
-	 *
-	 * @param  string  $query
-	 * @param  array   $bindings
-	 * @return int
-	 */
-	public function update($query, $bindings = array())
-	{
-		return $this->run($query, $bindings);
-	}
-
-	/**
-	 * Run a delete statement against the database.
-	 *
-	 * @param  string  $query
-	 * @param  array   $bindings
-	 * @return int
-	 */
-	public function delete($query, $bindings = array())
-	{
-		return $this->run($query, $bindings);
-	}
-
-	/**
 	 * Prepare the query bindings for execution.
 	 *
 	 * @param  array  $bindings
@@ -651,18 +615,4 @@ class Connection implements ConnectionInterface {
 
 		$this->getQueryGrammar()->setTablePrefix($prefix);
 	}
-
-	/**
-	 * Set the table prefix and return the grammar.
-	 *
-	 * @param  \Illuminate\Database\Grammar  $grammar
-	 * @return \Illuminate\Database\Grammar
-	 */
-	public function withTablePrefix(Grammar $grammar)
-	{
-		$grammar->setTablePrefix($this->tablePrefix);
-
-		return $grammar;
-	}
-
 }
