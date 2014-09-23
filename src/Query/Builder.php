@@ -1838,7 +1838,7 @@ class Builder {
 	}
 
     /**
-     * Handle dynamic method calls into the method.
+     * Catch non-existent methods and throw a catchable error
      *
      * @param  string  $method
      * @param  array   $parameters
