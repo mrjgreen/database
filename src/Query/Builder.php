@@ -1002,28 +1002,6 @@ class Builder {
 	}
 
 	/**
-	 * Add an "order by" clause for a timestamp to the query.
-	 *
-	 * @param  string  $column
-	 * @return \Illuminate\Database\Query\Builder|static
-	 */
-	public function latest($column = 'created_at')
-	{
-		return $this->orderBy($column, 'desc');
-	}
-
-	/**
-	 * Add an "order by" clause for a timestamp to the query.
-	 *
-	 * @param  string  $column
-	 * @return \Illuminate\Database\Query\Builder|static
-	 */
-	public function oldest($column = 'created_at')
-	{
-		return $this->orderBy($column, 'asc');
-	}
-
-	/**
 	 * Add a raw "order by" clause to the query.
 	 *
 	 * @param  string  $sql
@@ -1220,20 +1198,9 @@ class Builder {
 	 */
 	public function get($columns = array('*'))
 	{
-		return $this->getFresh($columns);
-	}
+        if (is_null($this->columns)) $this->columns = $columns;
 
-	/**
-	 * Execute the query as a fresh "select" statement.
-	 *
-	 * @param  array  $columns
-	 * @return array|static[]
-	 */
-	public function getFresh($columns = array('*'))
-	{
-		if (is_null($this->columns)) $this->columns = $columns;
-
-		return $this->runSelect();
+        return $this->runSelect();
 	}
 
 	/**

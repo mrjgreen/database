@@ -504,15 +504,21 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 
 	public function testBasicJoins()
 	{
-		$builder = $this->getBuilder();
-		$builder->select('*')->from('users')->join('contacts', 'users.id', '=', 'contacts.id')->leftJoin('photos', 'users.id', '=', 'photos.id');
-		$this->assertEquals('select * from "users" inner join "contacts" on "users"."id" = "contacts"."id" left join "photos" on "users"."id" = "photos"."id"', $builder->toSql());
+        foreach(array('left join' => 'leftJoin', 'right join' => 'rightJoin') as $joinQuery => $joinType)
+        {
+            $builder = $this->getBuilder();
+            $builder->select('*')->from('users')->join('contacts', 'users.id', '=', 'contacts.id')->$joinType('photos', 'users.id', '=', 'photos.id');
+            $this->assertEquals('select * from "users" inner join "contacts" on "users"."id" = "contacts"."id" '.$joinQuery.' "photos" on "users"."id" = "photos"."id"', $builder->toSql());
 
-		$builder = $this->getBuilder();
-		$builder->select('*')->from('users')->leftJoinWhere('photos', 'users.id', '=', 'bar')->joinWhere('photos', 'users.id', '=', 'foo');
-		$this->assertEquals('select * from "users" left join "photos" on "users"."id" = ? inner join "photos" on "users"."id" = ?', $builder->toSql());
-		$this->assertEquals(array('bar', 'foo'), $builder->getBindings());
+            $builder = $this->getBuilder();
+            $builder->select('*')->from('users')->{$joinType . 'Where'}('photos', 'users.id', '=', 'bar')->joinWhere('photos', 'users.id', '=', 'foo');
+            $this->assertEquals('select * from "users" '.$joinQuery.' "photos" on "users"."id" = ? inner join "photos" on "users"."id" = ?', $builder->toSql());
+            $this->assertEquals(array('bar', 'foo'), $builder->getBindings());
+        }
+
 	}
+
+
 
 
 	public function testComplexJoin()
