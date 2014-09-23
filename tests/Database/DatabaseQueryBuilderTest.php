@@ -1014,40 +1014,35 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	protected function getBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\Grammar;
-		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
-		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
+		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar);
 	}
 
 
 	protected function getPostgresBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\PostgresGrammar;
-		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
-		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
+		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar);
 	}
 
 
 	protected function getMySqlBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\MySqlGrammar;
-		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
-		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
+		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar);
 	}
 
 
 	protected function getSQLiteBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\SQLiteGrammar;
-		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
-		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
+		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar);
 	}
 
 
 	protected function getSqlServerBuilder()
 	{
 		$grammar = new Illuminate\Database\Query\Grammars\SqlServerGrammar;
-		$processor = m::mock('Illuminate\Database\Query\Processors\Processor');
-		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar, $processor);
+		return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar);
 	}
 
 }
