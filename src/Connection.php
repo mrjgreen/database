@@ -61,7 +61,7 @@ class Connection implements ConnectionInterface {
 	 *
 	 * @var bool
 	 */
-	protected $loggingQueries = true;
+	protected $loggingQueries = false;
 
 	/**
 	 * Indicates if the connection is in a "dry run".
@@ -125,23 +125,11 @@ class Connection implements ConnectionInterface {
 	 * @param  array   $bindings
 	 * @return mixed
 	 */
-	public function selectOne($query, $bindings = array())
+	public function fetchOne($query, $bindings = array())
 	{
-		$records = $this->select($query, $bindings);
+		$records = $this->fetch($query, $bindings);
 
 		return count($records) > 0 ? reset($records) : null;
-	}
-
-	/**
-	 * Run a select statement against the database.
-	 *
-	 * @param  string  $query
-	 * @param  array   $bindings
-	 * @return array
-	 */
-	public function selectFromWriteConnection($query, $bindings = array())
-	{
-		return $this->select($query, $bindings, false);
 	}
 
 	/**
@@ -152,33 +140,33 @@ class Connection implements ConnectionInterface {
 	 * @param  bool  $useReadPdo
 	 * @return array
 	 */
-	public function select($query, $bindings = array(), $useReadPdo = true)
+	public function fetch($query, $bindings = array(), $useReadPdo = true)
 	{
-		return $this->run($query, $bindings, function($me, $query, $bindings) use ($useReadPdo)
-		{
-			if ($me->pretending()) return array();
-
-			// For select statements, we'll simply execute the query and return an array
-			// of the database result set. Each element in the array will be a single
-			// row from the database table, and will either be an array or objects.
-			$statement = $this->getPdoForSelect($useReadPdo)->prepare($query);
-
-			$statement->execute($me->prepareBindings($bindings));
-
-			return $statement->fetchAll($me->getFetchMode());
-		});
+		return $this->run($query, $bindings, $useReadPdo)->fetchAll($this->getFetchMode());
 	}
 
-	/**
-	 * Get the PDO connection to use for a select query.
-	 *
-	 * @param  bool  $useReadPdo
-	 * @return \PDO
-	 */
-	protected function getPdoForSelect($useReadPdo = true)
-	{
-		return $useReadPdo ? $this->getReadPdo() : $this->getPdo();
-	}
+    /**
+     * Run a select statement against the database.
+     *
+     * @param  string  $query
+     * @param  array  $bindings
+     * @param  bool  $useReadPdo
+     * @return array
+     */
+    public function fetchAll($query, $bindings = array(), $useReadPdo = true)
+    {
+        return $this->run($query, $bindings, $useReadPdo)->fetchAll($this->getFetchMode());
+    }
+
+    /**
+     * @param string $query
+     * @param array $bindings
+     * @return bool|int|\PDOStatement
+     */
+    public function query($query, $bindings = array())
+    {
+        return $this->run($query, $bindings);
+    }
 
 	/**
 	 * Run an insert statement against the database.
@@ -189,7 +177,7 @@ class Connection implements ConnectionInterface {
 	 */
 	public function insert($query, $bindings = array())
 	{
-		return $this->statement($query, $bindings);
+		return $this->run($query, $bindings);
 	}
 
 	/**
@@ -201,7 +189,7 @@ class Connection implements ConnectionInterface {
 	 */
 	public function update($query, $bindings = array())
 	{
-		return $this->affectingStatement($query, $bindings);
+		return $this->run($query, $bindings);
 	}
 
 	/**
@@ -213,66 +201,7 @@ class Connection implements ConnectionInterface {
 	 */
 	public function delete($query, $bindings = array())
 	{
-		return $this->affectingStatement($query, $bindings);
-	}
-
-	/**
-	 * Execute an SQL statement and return the boolean result.
-	 *
-	 * @param  string  $query
-	 * @param  array   $bindings
-	 * @return bool
-	 */
-	public function statement($query, $bindings = array())
-	{
-		return $this->run($query, $bindings, function($me, $query, $bindings)
-		{
-			if ($me->pretending()) return true;
-
-			$bindings = $me->prepareBindings($bindings);
-
-			return $me->getPdo()->prepare($query)->execute($bindings);
-		});
-	}
-
-	/**
-	 * Run an SQL statement and get the number of rows affected.
-	 *
-	 * @param  string  $query
-	 * @param  array   $bindings
-	 * @return int
-	 */
-	public function affectingStatement($query, $bindings = array())
-	{
-		return $this->run($query, $bindings, function($me, $query, $bindings)
-		{
-			if ($me->pretending()) return 0;
-
-			// For update or delete statements, we want to get the number of rows affected
-			// by the statement and return that back to the developer. We'll first need
-			// to execute the statement and then we'll use PDO to fetch the affected.
-			$statement = $me->getPdo()->prepare($query);
-
-			$statement->execute($me->prepareBindings($bindings));
-
-			return $statement->rowCount();
-		});
-	}
-
-	/**
-	 * Run a raw, unprepared query against the PDO connection.
-	 *
-	 * @param  string  $query
-	 * @return bool
-	 */
-	public function unprepared($query)
-	{
-		return $this->run($query, array(), function($me, $query)
-		{
-			if ($me->pretending()) return true;
-
-			return (bool) $me->getPdo()->exec($query);
-		});
+		return $this->run($query, $bindings);
 	}
 
 	/**
@@ -421,107 +350,54 @@ class Connection implements ConnectionInterface {
 	 *
 	 * @param  string    $query
 	 * @param  array     $bindings
-	 * @param  \Closure  $callback
-	 * @return mixed
+	 * @param  bool      $useReadPdo
+	 * @return \PDOStatement|int
 	 *
 	 * @throws \Illuminate\Database\QueryException
 	 */
-	protected function run($query, $bindings, Closure $callback)
+	protected function run($query, $bindings, $useReadPdo = false)
 	{
 		$this->reconnectIfMissingConnection();
 
 		$start = microtime(true);
 
-		// Here we will run this query. If an exception occurs we'll determine if it was
-		// caused by a connection that has been lost. If that is the cause, we'll try
-		// to re-establish connection and re-run the query with a fresh connection.
-		try
-		{
-			$result = $this->runQueryCallback($query, $bindings, $callback);
-		}
-		catch (QueryException $e)
-		{
-			$result = $this->tryAgainIfCausedByLostConnection(
-				$e, $query, $bindings, $callback
-			);
-		}
+        $statement = $this->execute($query, $bindings, $useReadPdo);
 
-		// Once we have run the query we will calculate the time that it took to run and
-		// then log the query, bindings, and execution time so we will report them on
-		// the event that the developer needs them. We'll log time in milliseconds.
-		$time = $this->getElapsedTime($start);
+		$this->logQuery($query, $bindings, $start);
 
-		$this->logQuery($query, $bindings, $time);
-
-		return $result;
+        return $statement;
 	}
 
-	/**
-	 * Run a SQL statement.
-	 *
-	 * @param  string    $query
-	 * @param  array     $bindings
-	 * @param  \Closure  $callback
-	 * @return mixed
-	 *
-	 * @throws \Illuminate\Database\QueryException
-	 */
-	protected function runQueryCallback($query, $bindings, Closure $callback)
-	{
-		// To execute the statement, we'll simply call the callback, which will actually
-		// run the SQL against the PDO connection. Then we can calculate the time it
-		// took to execute and log the query SQL, bindings and time in our memory.
-		try
-		{
-			$result = $callback($this, $query, $bindings);
-		}
+    private function execute($query, $bindings, $useReadPdo)
+    {
+        if ($this->pretending()) return new \PDOStatement();
 
-		// If an exception occurs when attempting to run a query, we'll format the error
-		// message to include the bindings with SQL, which will make this exception a
-		// lot more helpful to the developer instead of just the database's errors.
-		catch (\Exception $e)
-		{
-			throw new QueryException(
-				$query, $this->prepareBindings($bindings), $e
-			);
-		}
+        $pdo = $useReadPdo ? $this->getReadPdo() : $this->getPdo();
 
-		return $result;
-	}
+        // To execute the statement, we'll simply call the callback, which will actually
+        // run the SQL against the PDO connection. Then we can calculate the time it
+        // took to execute and log the query SQL, bindings and time in our memory.
+        try
+        {
+            // For update or delete statements, we want to get the number of rows affected
+            // by the statement and return that back to the developer. We'll first need
+            // to execute the statement and then we'll use PDO to fetch the affected.
+            $statement = $pdo->prepare($query);
 
-	/**
-	 * Handle a query exception that occurred during query execution.
-	 *
-	 * @param  \Illuminate\Database\QueryException  $e
-	 * @param  string    $query
-	 * @param  array     $bindings
-	 * @param  \Closure  $callback
-	 * @return mixed
-	 *
-	 * @throws \Illuminate\Database\QueryException
-	 */
-	protected function tryAgainIfCausedByLostConnection(QueryException $e, $query, $bindings, Closure $callback)
-	{
-		if ($this->causedByLostConnection($e))
-		{
-			$this->reconnect();
+            $statement->execute($this->prepareBindings($bindings));
+        }
+            // If an exception occurs when attempting to run a query, we'll format the error
+            // message to include the bindings with SQL, which will make this exception a
+            // lot more helpful to the developer instead of just the database's errors.
+        catch (\Exception $e)
+        {
+            throw new QueryException(
+                $query, $this->prepareBindings($bindings), $e
+            );
+        }
 
-			return $this->runQueryCallback($query, $bindings, $callback);
-		}
-
-		throw $e;
-	}
-
-	/**
-	 * Determine if the given exception was caused by a lost connection.
-	 *
-	 * @param  \Illuminate\Database\QueryException
-	 * @return bool
-	 */
-	protected function causedByLostConnection(QueryException $e)
-	{
-		return str_contains($e->getPrevious()->getMessage(), 'server has gone away');
-	}
+        return $statement;
+    }
 
 	/**
 	 * Disconnect from the underlying PDO connection.
@@ -568,25 +444,16 @@ class Connection implements ConnectionInterface {
 	 *
 	 * @param  string  $query
 	 * @param  array   $bindings
-	 * @param  $time
+	 * @param  float   $start
 	 * @return void
 	 */
-	public function logQuery($query, $bindings, $time = null)
+	protected function logQuery($query, $bindings, $start = null)
 	{
 		if ( ! $this->loggingQueries) return;
 
-		$this->queryLog[] = compact('query', 'bindings', 'time');
-	}
+        $time = $start ? round((microtime(true) - $start) * 1000, 2) : null;
 
-	/**
-	 * Get the elapsed time since a given starting point.
-	 *
-	 * @param  int    $start
-	 * @return float
-	 */
-	protected function getElapsedTime($start)
-	{
-		return round((microtime(true) - $start) * 1000, 2);
+		$this->queryLog[] = compact('query', 'bindings', 'time');
 	}
 
 	/**

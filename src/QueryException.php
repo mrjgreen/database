@@ -52,8 +52,24 @@ class QueryException extends PDOException {
 	 */
 	protected function formatMessage($sql, $bindings, $previous)
 	{
-		return $previous->getMessage().' (SQL: '.str_replace_array('\?', $bindings, $sql).')';
+		return $previous->getMessage().' (SQL: '.$this->replaceArray('\?', $bindings, $sql).')';
 	}
+
+    /**
+     * @param $search
+     * @param array $replace
+     * @param $subject
+     * @return mixed
+     */
+    private function replaceArray($search, array $replace, $subject)
+    {
+        foreach ($replace as $value)
+        {
+           $subject = preg_replace('/'.$search.'/', $value, $subject, 1);
+        }
+
+        return $subject;
+    }
 
 	/**
 	 * Get the SQL for the query.
