@@ -169,131 +169,6 @@ class Connection implements ConnectionInterface {
     }
 
 	/**
-	 * Prepare the query bindings for execution.
-	 *
-	 * @param  array  $bindings
-	 * @return array
-	 */
-	public function prepareBindings(array $bindings)
-	{
-		$grammar = $this->getQueryGrammar();
-
-		foreach ($bindings as $key => $value)
-		{
-			// We need to transform all instances of the DateTime class into an actual
-			// date string. Each query grammar maintains its own date string format
-			// so we'll just ask the grammar for the format to get from the date.
-			if ($value instanceof DateTime)
-			{
-				$bindings[$key] = $value->format($grammar->getDateFormat());
-			}
-			elseif ($value === false)
-			{
-				$bindings[$key] = 0;
-			}
-		}
-
-		return $bindings;
-	}
-
-	/**
-	 * Execute a Closure within a transaction.
-	 *
-	 * @param  \Closure  $callback
-	 * @return mixed
-	 *
-	 * @throws \Exception
-	 */
-	public function transaction(Closure $callback)
-	{
-		$this->beginTransaction();
-
-		// We'll simply execute the given callback within a try / catch block
-		// and if we catch any exception we can rollback the transaction
-		// so that none of the changes are persisted to the database.
-		try
-		{
-			$result = $callback($this);
-
-			$this->commit();
-		}
-
-		// If we catch an exception, we will roll back so nothing gets messed
-		// up in the database. Then we'll re-throw the exception so it can
-		// be handled how the developer sees fit for their applications.
-		catch (\Exception $e)
-		{
-			$this->rollBack();
-
-			throw $e;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Start a new database transaction.
-	 *
-	 * @return void
-	 */
-	public function beginTransaction()
-	{
-		++$this->transactions;
-
-		if ($this->transactions == 1)
-		{
-			$this->pdo->beginTransaction();
-		}
-
-        return $this;
-	}
-
-	/**
-	 * Commit the active database transaction.
-	 *
-	 * @return void
-	 */
-	public function commit()
-	{
-		if ($this->transactions == 1) $this->pdo->commit();
-
-		--$this->transactions;
-
-        return $this;
-	}
-
-	/**
-	 * Rollback the active database transaction.
-	 *
-	 * @return void
-	 */
-	public function rollBack()
-	{
-		if ($this->transactions == 1)
-		{
-			$this->transactions = 0;
-
-			$this->pdo->rollBack();
-		}
-		else
-		{
-			--$this->transactions;
-		}
-
-        return $this;
-	}
-
-	/**
-	 * Get the number of active transactions.
-	 *
-	 * @return int
-	 */
-	public function transactionLevel()
-	{
-		return $this->transactions;
-	}
-
-	/**
 	 * Execute the given callback in "dry run" mode.
 	 *
 	 * @param  \Closure  $callback
@@ -338,6 +213,12 @@ class Connection implements ConnectionInterface {
         return $statement;
 	}
 
+    /**
+     * @param $query
+     * @param $bindings
+     * @param $useReadPdo
+     * @return \PDOStatement
+     */
     private function execute($query, $bindings, $useReadPdo)
     {
         if ($this->pretending()) return new \PDOStatement();
@@ -367,6 +248,131 @@ class Connection implements ConnectionInterface {
         }
 
         return $statement;
+    }
+
+    /**
+     * Prepare the query bindings for execution.
+     *
+     * @param  array  $bindings
+     * @return array
+     */
+    public function prepareBindings(array $bindings)
+    {
+        $grammar = $this->getQueryGrammar();
+
+        foreach ($bindings as $key => $value)
+        {
+            // We need to transform all instances of the DateTime class into an actual
+            // date string. Each query grammar maintains its own date string format
+            // so we'll just ask the grammar for the format to get from the date.
+            if ($value instanceof DateTime)
+            {
+                $bindings[$key] = $value->format($grammar->getDateFormat());
+            }
+            elseif ($value === false)
+            {
+                $bindings[$key] = 0;
+            }
+        }
+
+        return $bindings;
+    }
+
+    /**
+     * Execute a Closure within a transaction.
+     *
+     * @param  \Closure  $callback
+     * @return mixed
+     *
+     * @throws \Exception
+     */
+    public function transaction(Closure $callback)
+    {
+        $this->beginTransaction();
+
+        // We'll simply execute the given callback within a try / catch block
+        // and if we catch any exception we can rollback the transaction
+        // so that none of the changes are persisted to the database.
+        try
+        {
+            $result = $callback($this);
+
+            $this->commit();
+        }
+
+            // If we catch an exception, we will roll back so nothing gets messed
+            // up in the database. Then we'll re-throw the exception so it can
+            // be handled how the developer sees fit for their applications.
+        catch (\Exception $e)
+        {
+            $this->rollBack();
+
+            throw $e;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Start a new database transaction.
+     *
+     * @return void
+     */
+    public function beginTransaction()
+    {
+        ++$this->transactions;
+
+        if ($this->transactions == 1)
+        {
+            $this->pdo->beginTransaction();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Commit the active database transaction.
+     *
+     * @return void
+     */
+    public function commit()
+    {
+        if ($this->transactions == 1) $this->pdo->commit();
+
+        --$this->transactions;
+
+        return $this;
+    }
+
+    /**
+     * Rollback the active database transaction.
+     *
+     * @return void
+     */
+    public function rollBack()
+    {
+        if ($this->transactions == 1)
+        {
+            $this->transactions = 0;
+
+            $this->pdo->rollBack();
+        }
+        else
+        {
+            --$this->transactions;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get the number of active transactions.
+     *
+     * @return int
+     */
+    public function transactionLevel()
+    {
+        return $this->transactions;
     }
 
 	/**
