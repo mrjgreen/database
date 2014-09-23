@@ -138,7 +138,7 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testPretendOnlyLogsQueries()
 	{
-		$connection = $this->getMockConnection(array('fetchAll'));
+		$connection = $this->getMockConnection();
         $connection->enableQueryLog();
 		$queries = $connection->pretend(function($connection)
 		{
