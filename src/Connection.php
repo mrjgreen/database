@@ -244,6 +244,8 @@ class Connection implements ConnectionInterface {
 		{
 			$this->pdo->beginTransaction();
 		}
+
+        return $this;
 	}
 
 	/**
@@ -256,6 +258,8 @@ class Connection implements ConnectionInterface {
 		if ($this->transactions == 1) $this->pdo->commit();
 
 		--$this->transactions;
+
+        return $this;
 	}
 
 	/**
@@ -275,6 +279,8 @@ class Connection implements ConnectionInterface {
 		{
 			--$this->transactions;
 		}
+
+        return $this;
 	}
 
 	/**
@@ -306,7 +312,7 @@ class Connection implements ConnectionInterface {
 
 		$this->pretending = false;
 
-		return $this->queryLog;
+        return $this;
 	}
 
 	/**
@@ -371,6 +377,8 @@ class Connection implements ConnectionInterface {
 	public function disconnect()
 	{
 		$this->setPdo(null)->setReadPdo(null);
+
+        return $this;
 	}
 
 	/**
@@ -510,6 +518,8 @@ class Connection implements ConnectionInterface {
 	public function setQueryGrammar(Query\Grammars\Grammar $grammar)
 	{
 		$this->queryGrammar = $grammar;
+
+        return $this;
 	}
 
 	/**
@@ -541,6 +551,8 @@ class Connection implements ConnectionInterface {
 	public function setFetchMode($fetchMode)
 	{
 		$this->fetchMode = $fetchMode;
+
+        return $this;
 	}
 
 	/**
@@ -561,6 +573,8 @@ class Connection implements ConnectionInterface {
 	public function flushQueryLog()
 	{
 		$this->queryLog = array();
+
+        return $this;
 	}
 
 	/**
@@ -571,6 +585,8 @@ class Connection implements ConnectionInterface {
 	public function enableQueryLog()
 	{
 		$this->loggingQueries = true;
+
+        return $this;
 	}
 
 	/**
@@ -581,6 +597,8 @@ class Connection implements ConnectionInterface {
 	public function disableQueryLog()
 	{
 		$this->loggingQueries = false;
+
+        return $this;
 	}
 
 	/**
@@ -614,5 +632,7 @@ class Connection implements ConnectionInterface {
 		$this->tablePrefix = $prefix;
 
 		$this->getQueryGrammar()->setTablePrefix($prefix);
+
+        return $this;
 	}
 }

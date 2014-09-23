@@ -125,7 +125,7 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 		$queries = $connection->pretend(function($connection)
 		{
 			$connection->fetchAll('foo bar', array('baz'));
-		});
+		})->getQueryLog();
 		$this->assertEquals('foo bar', $queries[0]['query']);
 		$this->assertEquals(array('baz'), $queries[0]['bindings']);
 	}
