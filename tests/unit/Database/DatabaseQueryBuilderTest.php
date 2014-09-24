@@ -560,7 +560,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testFindReturnsFirstResultByID()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select * from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select * from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
 		$results = $builder->from('users')->find(1);
 		$this->assertEquals(array('foo' => 'bar'), $results);
 	}
@@ -569,7 +569,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testFirstMethodReturnsFirstResult()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select * from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select * from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
 		$results = $builder->from('users')->where('id', '=', 1)->first();
 		$this->assertEquals(array('foo' => 'bar'), $results);
 	}
@@ -578,12 +578,12 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testListMethodsGetsArrayOfColumnValues()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->andReturn(array(array('foo' => 'bar'), array('foo' => 'baz')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->andReturn(array(array('foo' => 'bar'), array('foo' => 'baz')));
 		$results = $builder->from('users')->where('id', '=', 1)->lists('foo');
 		$this->assertEquals(array('bar', 'baz'), $results);
 
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->andReturn(array(array('id' => 1, 'foo' => 'bar'), array('id' => 10, 'foo' => 'baz')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->andReturn(array(array('id' => 1, 'foo' => 'bar'), array('id' => 10, 'foo' => 'baz')));
 		$results = $builder->from('users')->where('id', '=', 1)->lists('foo', 'id');
 		$this->assertEquals(array(1 => 'bar', 10 => 'baz'), $results);
 	}
@@ -593,13 +593,13 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	{
 		// Test without glue.
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->andReturn(array(array('foo' => 'bar'), array('foo' => 'baz')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->andReturn(array(array('foo' => 'bar'), array('foo' => 'baz')));
 		$results = $builder->from('users')->where('id', '=', 1)->implode('foo');
 		$this->assertEquals('barbaz', $results);
 
 		// Test with glue.
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->andReturn(array(array('foo' => 'bar'), array('foo' => 'baz')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->andReturn(array(array('foo' => 'bar'), array('foo' => 'baz')));
 		$results = $builder->from('users')->where('id', '=', 1)->implode('foo', ',');
 		$this->assertEquals('bar,baz', $results);
 	}
@@ -607,7 +607,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testPluckMethodReturnsSingleColumn()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select "foo" from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select "foo" from "users" where "id" = ? limit 1', array(1))->andReturn(array(array('foo' => 'bar')));
 		$results = $builder->from('users')->where('id', '=', 1)->pluck('foo');
 		$this->assertEquals('bar', $results);
 	}
@@ -616,27 +616,27 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testAggregateFunctions()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select count(*) as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select count(*) as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
 		$results = $builder->from('users')->count();
 		$this->assertEquals(1, $results);
 
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select count(*) as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select count(*) as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
 		$results = $builder->from('users')->exists();
 		$this->assertTrue($results);
 
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select max("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select max("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
 		$results = $builder->from('users')->max('id');
 		$this->assertEquals(1, $results);
 
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select min("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select min("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
 		$results = $builder->from('users')->min('id');
 		$this->assertEquals(1, $results);
 
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select sum("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select sum("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
 		$results = $builder->from('users')->sum('id');
 		$this->assertEquals(1, $results);
 	}
@@ -645,9 +645,9 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testAggregateResetFollowedByGet()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select count(*) as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
-		$builder->getConnection()->shouldReceive('select')->once()->with('select sum("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 2)));
-		$builder->getConnection()->shouldReceive('select')->once()->with('select "column1", "column2" from "users"', array())->andReturn(array(array('column1' => 'foo', 'column2' => 'bar')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select count(*) as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select sum("id") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 2)));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select "column1", "column2" from "users"', array())->andReturn(array(array('column1' => 'foo', 'column2' => 'bar')));
 		$builder->from('users')->select('column1', 'column2');
 		$count = $builder->count();
 		$this->assertEquals(1, $count);
@@ -661,8 +661,8 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testAggregateResetFollowedBySelectGet()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select count("column1") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
-		$builder->getConnection()->shouldReceive('select')->once()->with('select "column2", "column3" from "users"', array())->andReturn(array(array('column2' => 'foo', 'column3' => 'bar')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select count("column1") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select "column2", "column3" from "users"', array())->andReturn(array(array('column2' => 'foo', 'column3' => 'bar')));
 		$builder->from('users');
 		$count = $builder->count('column1');
 		$this->assertEquals(1, $count);
@@ -674,8 +674,8 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testAggregateResetFollowedByGetWithColumns()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('select')->once()->with('select count("column1") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
-		$builder->getConnection()->shouldReceive('select')->once()->with('select "column2", "column3" from "users"', array())->andReturn(array(array('column2' => 'foo', 'column3' => 'bar')));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select count("column1") as aggregate from "users"', array())->andReturn(array(array('aggregate' => 1)));
+		$builder->getConnection()->shouldReceive('fetchAll')->once()->with('select "column2", "column3" from "users"', array())->andReturn(array(array('column2' => 'foo', 'column3' => 'bar')));
 		$builder->from('users');
 		$count = $builder->count('column1');
 		$this->assertEquals(1, $count);

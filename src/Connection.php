@@ -107,6 +107,56 @@ class Connection implements ConnectionInterface {
 		return $query->from($table);
 	}
 
+    /**
+     * @param $table
+     * @param $values
+     * @return bool
+     */
+    public function insert($table, $values)
+    {
+        return $this->table($table)->insert($values);
+    }
+
+    /**
+     * @param $table
+     * @param $values
+     * @return bool
+     */
+    public function insertIgnore($table, $values)
+    {
+        return $this->table($table)->insertIgnore($values);
+    }
+
+    /**
+     * @param $table
+     * @param $values
+     * @return bool
+     */
+    public function replace($table, $values)
+    {
+        return $this->table($table)->replace($values);
+    }
+
+    /**
+     * @param $table
+     * @param $values
+     * @return bool
+     */
+    public function delete($table, $where, $bindings = array())
+    {
+        return $this->table($table)->whereRaw($where, $bindings)->delete();
+    }
+
+    /**
+     * @param $table
+     * @param $values
+     * @return bool
+     */
+    public function update($table, $values, $where, $bindings = array())
+    {
+        return $this->table($table)->whereRaw($where, $bindings)->update($values);
+    }
+
 	/**
 	 * Get a new raw query expression.
 	 *

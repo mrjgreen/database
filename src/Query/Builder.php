@@ -1200,18 +1200,21 @@ class Builder {
 	{
         if (is_null($this->columns)) $this->columns = $columns;
 
-        return $this->runSelect();
+        return $this->connection->fetchAll($this->toSql(), $this->getBindings());
 	}
 
-	/**
-	 * Run the query as a "select" statement against the connection.
-	 *
-	 * @return array
-	 */
-	protected function runSelect()
-	{
-		return $this->connection->select($this->toSql(), $this->getBindings());
-	}
+    /**
+     * Execute the query as a "select" statement.
+     *
+     * @param  array  $columns
+     * @return array|static[]
+     */
+    public function query($columns = array('*'))
+    {
+        if (is_null($this->columns)) $this->columns = $columns;
+
+        return $this->connection->query($this->toSql(), $this->getBindings());
+    }
 
 	/**
 	 * Chunk the results of the query.
@@ -1597,7 +1600,7 @@ class Builder {
 
 		$columns = array_merge(array($column => $this->raw("$wrapped + $amount")), $extra);
 
-		return $this->query($columns);
+		return $this->update($columns);
 	}
 
 	/**
@@ -1614,7 +1617,7 @@ class Builder {
 
 		$columns = array_merge(array($column => $this->raw("$wrapped - $amount")), $extra);
 
-		return $this->query($columns);
+		return $this->update($columns);
 	}
 
 	/**
