@@ -52,6 +52,34 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('select distinct "foo", "bar" from "users"', $builder->toSql());
 	}
 
+    public function testSubSelectRawString()
+    {
+        $builder = $this->getBuilder();
+        $builder->selectSub('select * from test', 'tmp')->from('users');
+        $this->assertEquals('select (select * from test) as "tmp" from "users"', $builder->toSql());
+    }
+
+    public function testSubSelectClosure()
+    {
+        $builder = $this->getBuilder();
+
+        $builder->selectSub(function($build){
+            $build->select('foo')->where('bar','=','baz')->from('test');
+        }, 'tmp')->from('users');
+
+        $this->assertEquals('select (select "foo" from "test" where "bar" = ?) as "tmp" from "users"', $builder->toSql());
+        $this->assertEquals(array('baz'), $builder->getBindings());
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testSubSelectThrowsInvalidArgument()
+    {
+        $builder = $this->getBuilder();
+
+        $builder->selectSub(array('test'), 'tmp')->from('users');
+    }
 
 	public function testBasicAlias()
 	{
@@ -77,6 +105,13 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array(0 => 1), $builder->getBindings());
 	}
 
+    public function testArrayWheres()
+    {
+        $builder = $this->getBuilder();
+        $builder->select('*')->from('users')->where(array('id' => 1, 'name' => 2));
+        $this->assertEquals('select * from "users" where ("id" = ? and "name" = ?)', $builder->toSql());
+        $this->assertEquals(array(0 => 1, 1 => 2), $builder->getBindings());
+    }
 
 	public function testMySqlWrappingProtectsQuotationMarks()
 	{
@@ -1010,6 +1045,59 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('foo', 'bar', 'baz'), $builder->getBindings());
 	}
 
+    public function testCountAllRowsBacksUpLimitsOffsetsAndOrders()
+    {
+        $builder = $this->getBuilder();
+
+        $builder->from('users')->orderBy('baz')->offset(5)->limit(1);
+
+        $builder->getConnection()->shouldReceive('fetchAll')->once()->with('select count(*) as aggregate from "users"',array())
+            ->andReturn(array(array('aggregate' => 10)));
+
+        $this->assertEquals(10, $builder->getTotalRowCount());
+    }
+
+    public function testIncrementAndDecrement()
+    {
+        $builder = $this->getBuilder();
+
+        $builder->getConnection()->shouldReceive('raw')->once()->with('"foo" + 1')->andReturn(new \Illuminate\Database\Query\Expression('"foo" + 1'));
+
+        $builder->getConnection()->shouldReceive('query')->once()->with('update "users" set "foo" = "foo" + 1', array());
+
+        $builder->from('users')->increment('foo');
+
+
+        $builder->getConnection()->shouldReceive('raw')->once()->with('"foo" - 4')->andReturn(new \Illuminate\Database\Query\Expression('"foo" - 4'));
+
+        $builder->getConnection()->shouldReceive('query')->once()->with('update "users" set "foo" = "foo" - 4', array());
+
+        $builder->decrement('foo', 4);
+    }
+
+    public function testGettingAndSettingBindings()
+    {
+        $builder = $this->getBuilder();
+
+        $bindings = array(
+            1,
+            2,
+        );
+
+        $builder->setBindings($bindings);
+
+        $this->assertEquals($bindings, $builder->getBindings());
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testSettingInvalidBindingThrowsException()
+    {
+        $builder = $this->getBuilder();
+
+        $builder->setBindings(array(1), 'non-existent');
+    }
 
 	protected function getBuilder()
 	{
