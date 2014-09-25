@@ -249,6 +249,22 @@ class Connection implements ConnectionInterface {
         return $this->pdo->lastInsertId($name);
     }
 
+    /**
+     * Escape a value ready to be inserted into the database
+     *
+     * @param string $string The unquoted string
+     * @param string $quotedString The quoted string
+     */
+    public function quote($string)
+    {
+        if(is_array($string))
+        {
+            return array_map(array($this->pdo, 'quote'), $string);
+        }
+
+        return $this->pdo->quote($string);
+    }
+
 	/**
 	 * Run a SQL statement and log its execution context.
 	 *
