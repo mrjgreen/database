@@ -3,13 +3,6 @@
 class JoinClause {
 
 	/**
-	 * The query builder instance.
-	 *
-	 * @var \Illuminate\Database\Query\Builder
-	 */
-	public $query;
-
-	/**
 	 * The type of join being performed.
 	 *
 	 * @var string
@@ -30,6 +23,11 @@ class JoinClause {
 	 */
 	public $clauses = array();
 
+    /**
+     * @var array
+     */
+    public $bindings = array();
+
 	/**
 	 * Create a new join clause instance.
 	 *
@@ -38,10 +36,9 @@ class JoinClause {
 	 * @param  string  $table
 	 * @return void
 	 */
-	public function __construct(Builder $query, $type, $table)
+	public function __construct($type, $table)
 	{
 		$this->type = $type;
-		$this->query = $query;
 		$this->table = $table;
 	}
 
@@ -59,7 +56,7 @@ class JoinClause {
 	{
 		$this->clauses[] = compact('first', 'operator', 'second', 'boolean', 'where');
 
-		if ($where) $this->query->addBinding($second, 'join');
+		if ($where) $this->bindings[] = $second;
 
 		return $this;
 	}

@@ -277,14 +277,14 @@ class Builder {
 	 */
 	public function join($table, $one, $operator = null, $two = null, $type = 'inner', $where = false)
 	{
+        $this->joins[] = $join = new JoinClause($type, $table);
+
 		// If the first "column" of the join is really a Closure instance the developer
 		// is trying to build a join with a complex "on" clause containing more than
 		// one condition, so we'll add the join and call a Closure with the query.
 		if ($one instanceof Closure)
 		{
-			$this->joins[] = new JoinClause($this, $type, $table);
-
-			call_user_func($one, end($this->joins));
+            call_user_func($one, $join);
 		}
 
 		// If the column is simply a string, we can assume the join simply has a basic
@@ -292,11 +292,7 @@ class Builder {
 		// this simple join clauses attached to it. There is not a join callback.
 		else
 		{
-			$join = new JoinClause($this, $type, $table);
-
-			$this->joins[] = $join->on(
-				$one, $operator, $two, 'and', $where
-			);
+            $join->on($one, $operator, $two, 'and', $where);
 		}
 
 		return $this;
@@ -1519,9 +1515,7 @@ class Builder {
 
         $this->connection->query($sql, $values);
 
-        $pdo = $this->connection->getPdo();
-
-        $id = is_null($sequence) ? $pdo->lastInsertId() : $pdo->lastInsertId($sequence);
+        $id = is_null($sequence) ? $this->connection->lastInsertId() : $this->connection->lastInsertId($sequence);
 
         return is_numeric($id) ? (int) $id : $id;
 	}

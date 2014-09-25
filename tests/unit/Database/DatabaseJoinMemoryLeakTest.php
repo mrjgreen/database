@@ -10,41 +10,37 @@ class DatabaseJoinMemoryLeakTest extends PHPUnit_Framework_TestCase {
         m::close();
     }
 
-
     public function testItDoesNotLeakMemoryOnNewQuery()
     {
-        $i = 5;
-
         $builderMain = $this->getBuilder();
 
-        $last = null;
-
-        while($i--)
-        {
+        $this->runMemoryTest(function() use($builderMain){
             $builder = $builderMain->newQuery();
             $builder->select('*')->from('users');
 
-            $prev = $last;
-            $last = memory_get_usage();
-        }
-
-        $this->assertEquals($prev, $last);
-
+        });
     }
-
 
     public function testItDoesNotLeakMemoryOnNewQueryWithJoin()
     {
-        $i = 5;
-
         $builderMain = $this->getBuilder();
+
+        $this->runMemoryTest(function() use($builderMain){
+            $builder = $builderMain->newQuery();
+            $builder->select('*')->join('new', 'col', '=', 'col2')->from('users');
+
+        });
+    }
+
+    protected function runMemoryTest(\Closure $callback)
+    {
+        $i = 5;
 
         $last = null;
 
         while($i--)
         {
-            $builder = $builderMain->newQuery();
-            $builder->select('*')->join('new','col','=','col2')->from('users');
+            $callback();
 
             $prev = $last;
             $last = memory_get_usage();

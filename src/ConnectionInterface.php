@@ -56,6 +56,14 @@ interface ConnectionInterface {
 	 */
 	public function query($query, $bindings = array());
 
+    /**
+     * Return the auto-increment ID of the last inserted row
+     *
+     * @param null $name
+     * @return mixed|string
+     */
+    public function lastInsertId($name = null);
+
 	/**
 	 * Prepare the query bindings for execution.
 	 *

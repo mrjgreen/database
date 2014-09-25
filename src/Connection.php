@@ -240,6 +240,15 @@ class Connection implements ConnectionInterface {
         return $this;
 	}
 
+    /**
+     * @param null $name
+     * @return mixed|string
+     */
+    public function lastInsertId($name = null)
+    {
+        return $this->pdo->lastInsertId($name);
+    }
+
 	/**
 	 * Run a SQL statement and log its execution context.
 	 *

@@ -756,9 +756,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	{
 		$builder = $this->getBuilder();
 		$builder->getConnection()->shouldReceive('query')->once()->with('insert into "users" ("email") values (?)', array('foo'));
-        $pdoMock = m::mock('PDO');
-        $pdoMock->shouldReceive('lastInsertId')->andReturn(1);
-        $builder->getConnection()->shouldReceive('getPdo')->once()->andReturn($pdoMock);
+        $builder->getConnection()->shouldReceive('lastInsertId')->once()->andReturn(1);
 		$result = $builder->from('users')->insertGetId(array('email' => 'foo'));
 		$this->assertEquals(1, $result);
 	}
