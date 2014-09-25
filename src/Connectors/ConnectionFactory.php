@@ -38,20 +38,33 @@ class ConnectionFactory {
 	 * Establish a PDO connection based on the configuration.
 	 *
 	 * @param  array   $config
-	 * @param  string  $name
 	 * @return \Illuminate\Database\Connection
 	 */
-	public function make(array $config, $name = null)
+	public function make(array $config)
 	{
-		$config = $this->parseConfig($config, $name);
+        return $this->makeConnection($config)->setReconnector(function(Connection $connection) use($config)
+        {
+            $fresh = $this->makeConnection($config);
 
-		if (isset($config['read']))
-		{
-			return $this->createReadWriteConnection($config);
-		}
-
-		return $this->createSingleConnection($config);
+            $connection->setPdo($fresh->getPdo())->setReadPdo($fresh->getReadPdo());
+        });
 	}
+
+    /**
+     * Establish a PDO connection based on the configuration, return wrapped in a Connection instance.
+     *
+     * @param $config
+     * @return Connection
+     */
+    protected function makeConnection($config)
+    {
+        if(isset($config['read']))
+        {
+            return $this->createReadWriteConnection($config);
+        }
+
+        return $this->createSingleConnection($config);
+    }
 
 	/**
 	 * Create a single database connection instance.
@@ -63,7 +76,7 @@ class ConnectionFactory {
 	{
 		$pdo = $this->createConnector($config)->connect($config);
 
-		return $this->createConnection($config['driver'], $pdo, $config['prefix']);
+		return $this->createConnection($config['driver'], $pdo, isset($config['prefix']) ? $config['prefix'] : '');
 	}
 
 	/**
@@ -148,21 +161,6 @@ class ConnectionFactory {
 	}
 
 	/**
-	 * Parse and prepare the database configuration.
-	 *
-	 * @param  array   $config
-	 * @param  string  $name
-	 * @return array
-	 */
-	protected function parseConfig(array $config, $name)
-	{
-        return $config + array(
-            'prefix'    => '',
-            'name'      => $name
-        );
-	}
-
-	/**
 	 * Create a connector instance based on the configuration.
 	 *
 	 * @param  array  $config
@@ -232,5 +230,4 @@ class ConnectionFactory {
         return new Connection($connection, $queryGrammar, $prefix);
 
 	}
-
 }

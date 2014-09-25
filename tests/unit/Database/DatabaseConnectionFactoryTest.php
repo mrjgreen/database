@@ -17,17 +17,23 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 	public function testMakeCallsCreateConnection()
 	{
 		$factory = $this->getMock('Illuminate\Database\Connectors\ConnectionFactory', array('createConnector', 'createConnection'));
-		$connector = m::mock('stdClass');
-		$config = array('driver' => 'mysql', 'prefix' => 'prefix', 'database' => 'database', 'name' => 'foo');
-		$pdo = new DatabaseConnectionFactoryPDOStub;
-		$connector->shouldReceive('connect')->once()->with($config)->andReturn($pdo);
-		$factory->expects($this->once())->method('createConnector')->with($config)->will($this->returnValue($connector));
-		$mockConnection = m::mock('stdClass');
-		$passedConfig = array_merge($config, array('name' => 'foo'));
-		$factory->expects($this->once())->method('createConnection')->with($this->equalTo('mysql'), $this->equalTo($pdo), $this->equalTo('prefix'))->will($this->returnValue($mockConnection));
-		$connection = $factory->make($config, 'foo');
 
-		$this->assertEquals($mockConnection, $connection);
+		$config = array('driver' => 'mysql', 'prefix' => 'prefix', 'database' => 'database');
+
+		$pdo = new DatabaseConnectionFactoryPDOStub;
+
+        $connector = m::mock('stdClass');
+		$connector->shouldReceive('connect')->once()->with($config)->andReturn($pdo);
+
+        $mockConnection = $this->getMock('Illuminate\Database\Connection', array('setReconnector'), array($pdo));
+        $mockConnection->expects($this->once())->method('setReconnector')->will($this->returnValue($mockConnection));
+
+		$factory->expects($this->once())->method('createConnector')->with($config)->will($this->returnValue($connector));
+		$factory->expects($this->once())->method('createConnection')->with($this->equalTo('mysql'), $this->equalTo($pdo), $this->equalTo('prefix'))->will($this->returnValue($mockConnection));
+
+        $connection = $factory->make($config);
+
+		$this->assertSame($mockConnection, $connection);
 	}
 
 
@@ -46,14 +52,15 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 		$expect['database'] = 'database';
 		$pdo = new DatabaseConnectionFactoryPDOStub;
 		$connector->shouldReceive('connect')->twice()->with($expect)->andReturn($pdo);
-		$factory->expects($this->exactly(2))->method('createConnector')->with($expect)->will($this->returnValue($connector));
-		$mockConnection = m::mock('stdClass');
-		$mockConnection->shouldReceive('setReadPdo')->once()->andReturn($mockConnection);
-		$passedConfig = array_merge($expect, array('name' => 'foo'));
+
+        $mockConnection = $this->getMock('Illuminate\Database\Connection', array('setReconnector'), array($pdo));
+        $mockConnection->expects($this->once())->method('setReconnector')->will($this->returnValue($mockConnection));
+
+        $factory->expects($this->exactly(2))->method('createConnector')->with($expect)->will($this->returnValue($connector));
 		$factory->expects($this->once())->method('createConnection')->with($this->equalTo('mysql'), $this->equalTo($pdo), $this->equalTo('prefix'))->will($this->returnValue($mockConnection));
 		$connection = $factory->make($config, 'foo');
 
-		$this->assertEquals($mockConnection, $connection);
+		$this->assertSame($mockConnection, $connection);
 	}
 
 	public function testProperInstancesAreReturnedForProperDrivers()

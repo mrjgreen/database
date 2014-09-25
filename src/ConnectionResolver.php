@@ -1,5 +1,7 @@
 <?php namespace Illuminate\Database;
 
+use Illuminate\Database\Connectors\ConnectionFactory;
+
 class ConnectionResolver implements ConnectionResolverInterface {
 
 	/**
@@ -8,6 +10,11 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	 * @var array
 	 */
 	protected $connections = array();
+
+    /**
+     * @var ConnectionFactory
+     */
+    protected $connectionFactory;
 
 	/**
 	 * The default connection name.
@@ -22,8 +29,10 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	 * @param  array  $connections
 	 * @return void
 	 */
-	public function __construct(array $connections = array())
+	public function __construct(array $connections = array(), ConnectionFactory $connectionFactory = null)
 	{
+        $this->connectionFactory = $connectionFactory;
+
 		foreach ($connections as $name => $connection)
 		{
 			$this->addConnection($name, $connection);
@@ -40,18 +49,30 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	{
 		if (is_null($name)) $name = $this->getDefaultConnection();
 
+        if(!$this->connections[$name] instanceof Connection)
+        {
+            $this->connections[$name] = $this->makeConnection($this->connections[$name]);
+        }
+
 		return $this->connections[$name];
 	}
 
 	/**
 	 * Add a connection to the resolver.
+     *
+     * Can be an instance of \Illuminate\Database\Connection or a valid config array, if a connection factory has been set
 	 *
 	 * @param  string  $name
-	 * @param  \Illuminate\Database\Connection  $connection
+	 * @param  \Illuminate\Database\Connection | array  $connection
 	 * @return void
 	 */
-	public function addConnection($name, Connection $connection)
+	public function addConnection($name, $connection)
 	{
+        if(!$connection instanceof Connection && !is_array($connection))
+        {
+            throw new \InvalidArgumentException('Argument 2 must be an instance of \Illuminate\Database\Connection or an array containing a valid connection configuration. Type "' . gettype($connection) . '" given.');
+        }
+
 		$this->connections[$name] = $connection;
 	}
 
@@ -86,5 +107,19 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	{
 		$this->default = $name;
 	}
+
+    /**
+     * @param array $config
+     * @return Connection
+     */
+    protected function makeConnection(array $config)
+    {
+        if(is_null($this->connectionFactory))
+        {
+            throw new \LogicException("No connection factory available.");
+        }
+
+        return $this->connectionFactory->make($config);
+    }
 
 }
