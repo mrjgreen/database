@@ -83,7 +83,7 @@ class ConnectionResolver implements ConnectionResolverInterface {
      * Can be an instance of \Database\Connection or a valid config array, if a connection factory has been set
 	 *
 	 * @param  string  $name
-	 * @param  \Database\Connection | array  $connection
+	 * @param  array  $connection
 	 * @return void
 	 */
 	public function addConnection($name, $connection)
