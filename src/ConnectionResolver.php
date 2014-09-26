@@ -5,11 +5,18 @@ use Database\Connectors\ConnectionFactory;
 class ConnectionResolver implements ConnectionResolverInterface {
 
 	/**
-	 * All of the registered connections.
+	 * All of the registered connection configs.
 	 *
 	 * @var array
 	 */
 	protected $connections = array();
+
+    /**
+     * All of the registered connections.
+     *
+     * @var array
+     */
+    protected $connectionCache = array();
 
     /**
      * @var ConnectionFactory
@@ -29,7 +36,7 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	 * @param  array  $connections
 	 * @return void
 	 */
-	public function __construct(array $connections = array(), ConnectionFactory $connectionFactory = null)
+	public function __construct(array $connections = array(), ConnectionFactory $connectionFactory)
 	{
         $this->connectionFactory = $connectionFactory;
 
@@ -49,13 +56,26 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	{
 		if (is_null($name)) $name = $this->getDefaultConnection();
 
-        if(!$this->connections[$name] instanceof Connection)
+        if(!isset($this->connectionCache[$name]))
         {
-            $this->connections[$name] = $this->makeConnection($this->connections[$name]);
+            $this->connectionCache[$name] = $this->makeConnection($this->connections[$name]);
         }
 
-		return $this->connections[$name];
+		return $this->connectionCache[$name];
 	}
+
+    /**
+     * Get a database connection instance.
+     *
+     * @param  string  $name
+     * @return \Database\Connection
+     */
+    public function connectionConfig($name = null)
+    {
+        if (is_null($name)) $name = $this->getDefaultConnection();
+
+        return $this->connections[$name];
+    }
 
 	/**
 	 * Add a connection to the resolver.
@@ -68,9 +88,9 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	 */
 	public function addConnection($name, $connection)
 	{
-        if(!$connection instanceof Connection && !is_array($connection))
+        if(!is_array($connection))
         {
-            throw new \InvalidArgumentException('Argument 2 must be an instance of \Database\Connection or an array containing a valid connection configuration. Type "' . gettype($connection) . '" given.');
+            throw new \InvalidArgumentException('Argument 2 must be an array containing a valid connection configuration. Type "' . gettype($connection) . '" given.');
         }
 
 		$this->connections[$name] = $connection;

@@ -16,7 +16,6 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
             'test1' => array(
                 'foo' => 'bar'
             ),
-            'test2' => m::mock('Database\Connection')
         );
 
         $factory = m::mock('Database\Connectors\ConnectionFactory');
@@ -32,26 +31,28 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
         $connection = $resolver->connection('test1');
 
         $this->assertSame($connectionMock, $connection);
-
-        $factory->shouldReceive('make')->never();
-
-        $connection = $resolver->connection('test2');
-
-        $this->assertSame($configs['test2'], $connection);
 	}
 
     public function testItReturnsADefaultConnection()
     {
         $configs = array(
-            'test' => m::mock('Database\Connection')
+            'test' => array(
+                'foo' => 'bar'
+            ),
         );
 
-        $resolver = $this->getMock('Database\ConnectionResolver', null, array($configs));
+        $factory = m::mock('Database\Connectors\ConnectionFactory');
+
+        $connectionMock = m::mock('stdClass');
+
+        $factory->shouldReceive('make')->once()->with($configs['test'])->andReturn($connectionMock);
+
+        $resolver = $this->getMock('Database\ConnectionResolver', null, array($configs, $factory));
 
         $resolver->setDefaultConnection('test');
 
         $connection = $resolver->connection();
 
-        $this->assertSame($configs['test'], $connection);
+        $this->assertSame($connectionMock, $connection);
     }
 }
