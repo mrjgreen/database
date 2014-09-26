@@ -58,7 +58,7 @@ class ConnectionResolver implements ConnectionResolverInterface {
 
         if(!isset($this->connectionCache[$name]))
         {
-            $this->connectionCache[$name] = $this->makeConnection($this->connectionConfig($name));
+            $this->connectionCache[$name] = $this->connectionFactory->make($this->connectionConfig($name));
         }
 
 		return $this->connectionCache[$name];
@@ -127,19 +127,4 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	{
 		$this->default = $name;
 	}
-
-    /**
-     * @param array $config
-     * @return Connection
-     */
-    protected function makeConnection(array $config)
-    {
-        if(is_null($this->connectionFactory))
-        {
-            throw new \LogicException("No connection factory available.");
-        }
-
-        return $this->connectionFactory->make($config);
-    }
-
 }
