@@ -1,6 +1,6 @@
-<?php namespace Illuminate\Database;
+<?php namespace Database;
 
-use Illuminate\Database\Connectors\ConnectionFactory;
+use Database\Connectors\ConnectionFactory;
 
 class ConnectionResolver implements ConnectionResolverInterface {
 
@@ -43,7 +43,7 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	 * Get a database connection instance.
 	 *
 	 * @param  string  $name
-	 * @return \Illuminate\Database\Connection
+	 * @return \Database\Connection
 	 */
 	public function connection($name = null)
 	{
@@ -60,17 +60,17 @@ class ConnectionResolver implements ConnectionResolverInterface {
 	/**
 	 * Add a connection to the resolver.
      *
-     * Can be an instance of \Illuminate\Database\Connection or a valid config array, if a connection factory has been set
+     * Can be an instance of \Database\Connection or a valid config array, if a connection factory has been set
 	 *
 	 * @param  string  $name
-	 * @param  \Illuminate\Database\Connection | array  $connection
+	 * @param  \Database\Connection | array  $connection
 	 * @return void
 	 */
 	public function addConnection($name, $connection)
 	{
         if(!$connection instanceof Connection && !is_array($connection))
         {
-            throw new \InvalidArgumentException('Argument 2 must be an instance of \Illuminate\Database\Connection or an array containing a valid connection configuration. Type "' . gettype($connection) . '" given.');
+            throw new \InvalidArgumentException('Argument 2 must be an instance of \Database\Connection or an array containing a valid connection configuration. Type "' . gettype($connection) . '" given.');
         }
 
 		$this->connections[$name] = $connection;

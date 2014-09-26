@@ -1,7 +1,7 @@
 <?php
 
 use Mockery as m;
-use Illuminate\Database\Query\Builder;
+use Database\Query\Builder;
 
 class DatabaseJoinMemoryLeakTest extends PHPUnit_Framework_TestCase {
 
@@ -52,8 +52,8 @@ class DatabaseJoinMemoryLeakTest extends PHPUnit_Framework_TestCase {
 
     protected function getBuilder()
     {
-        $grammar = new Illuminate\Database\Query\Grammars\Grammar;
-        return new Builder(m::mock('Illuminate\Database\ConnectionInterface'), $grammar);
+        $grammar = new Database\Query\Grammars\Grammar;
+        return new Builder(m::mock('Database\ConnectionInterface'), $grammar);
     }
 
 

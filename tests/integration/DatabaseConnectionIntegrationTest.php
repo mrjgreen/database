@@ -3,7 +3,7 @@
 class DatabaseConnectionIntegrationTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Illuminate\Database\Connection
+     * @var \Database\Connection
      */
     protected $connection;
 
@@ -11,7 +11,7 @@ class DatabaseConnectionIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $factory = new \Illuminate\Database\Connectors\ConnectionFactory();
+        $factory = new \Database\Connectors\ConnectionFactory();
 
         $this->connection = $factory->make(array(
             'host'      => 'localhost',
@@ -42,7 +42,7 @@ class DatabaseConnectionIntegrationTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('mysql', $driverName);
 
         $grammar = $this->connection->getQueryGrammar();
-        $this->assertInstanceOf('Illuminate\Database\Query\Grammars\MySqlGrammar', $grammar);
+        $this->assertInstanceOf('Database\Query\Grammars\MySqlGrammar', $grammar);
     }
 
     public function testItPerformsTransactions()

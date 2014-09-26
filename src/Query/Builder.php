@@ -1,22 +1,22 @@
-<?php namespace Illuminate\Database\Query;
+<?php namespace Database\Query;
 
 use Closure;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Database\Query\Grammars\Grammar;
+use Database\ConnectionInterface;
+use Database\Query\Grammars\Grammar;
 
 class Builder {
 
 	/**
 	 * The database connection instance.
 	 *
-	 * @var \Illuminate\Database\Connection
+	 * @var \Database\Connection
 	 */
 	protected $connection;
 
 	/**
 	 * The database query grammar instance.
 	 *
-	 * @var \Illuminate\Database\Query\Grammars\Grammar
+	 * @var \Database\Query\Grammars\Grammar
 	 */
 	protected $grammar;
 
@@ -147,8 +147,8 @@ class Builder {
 	/**
 	 * Create a new query builder instance.
 	 *
-	 * @param  \Illuminate\Database\ConnectionInterface  $connection
-	 * @param  \Illuminate\Database\Query\Grammars\Grammar  $grammar
+	 * @param  \Database\ConnectionInterface  $connection
+	 * @param  \Database\Query\Grammars\Grammar  $grammar
 	 * @return void
 	 */
 	public function __construct(ConnectionInterface $connection,
@@ -176,7 +176,7 @@ class Builder {
 	 *
 	 * @param  string  $expression
 	 * @param  array   $bindings
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function selectRaw($expression, array $bindings = array())
 	{
@@ -193,9 +193,9 @@ class Builder {
 	/**
 	 * Add a subselect expression to the query.
 	 *
-	 * @param  \Closure|\Illuminate\Database\Query\Builder|string $query
+	 * @param  \Closure|\Database\Query\Builder|string $query
 	 * @param  string  $as
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function selectSub($query, $as)
 	{
@@ -306,7 +306,7 @@ class Builder {
 	 * @param  string  $operator
 	 * @param  string  $two
 	 * @param  string  $type
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function joinWhere($table, $one, $operator, $two, $type = 'inner')
 	{
@@ -320,7 +320,7 @@ class Builder {
 	 * @param  string  $first
 	 * @param  string  $operator
 	 * @param  string  $second
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function leftJoin($table, $first, $operator = null, $second = null)
 	{
@@ -334,7 +334,7 @@ class Builder {
 	 * @param  string  $one
 	 * @param  string  $operator
 	 * @param  string  $two
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function leftJoinWhere($table, $one, $operator, $two)
 	{
@@ -348,7 +348,7 @@ class Builder {
 	 * @param  string  $first
 	 * @param  string  $operator
 	 * @param  string  $second
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function rightJoin($table, $first, $operator = null, $second = null)
 	{
@@ -362,7 +362,7 @@ class Builder {
 	 * @param  string  $one
 	 * @param  string  $operator
 	 * @param  string  $two
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function rightJoinWhere($table, $one, $operator, $two)
 	{
@@ -457,7 +457,7 @@ class Builder {
 	 * @param  string  $column
 	 * @param  string  $operator
 	 * @param  mixed   $value
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhere($column, $operator = null, $value = null)
 	{
@@ -488,7 +488,7 @@ class Builder {
 	 *
 	 * @param  string  $sql
 	 * @param  array   $bindings
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhereRaw($sql, array $bindings = array())
 	{
@@ -520,7 +520,7 @@ class Builder {
 	 *
 	 * @param  string  $column
 	 * @param  array   $values
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhereBetween($column, array $values)
 	{
@@ -533,7 +533,7 @@ class Builder {
 	 * @param  string  $column
 	 * @param  array   $values
 	 * @param  string  $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function whereNotBetween($column, array $values, $boolean = 'and')
 	{
@@ -545,7 +545,7 @@ class Builder {
 	 *
 	 * @param  string  $column
 	 * @param  array   $values
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhereNotBetween($column, array $values)
 	{
@@ -557,7 +557,7 @@ class Builder {
 	 *
 	 * @param  \Closure $callback
 	 * @param  string   $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function whereNested(Closure $callback, $boolean = 'and')
 	{
@@ -576,7 +576,7 @@ class Builder {
 	/**
 	 * Add another query builder as a nested where to the query builder.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder|static $query
+	 * @param  \Database\Query\Builder|static $query
 	 * @param  string  $boolean
 	 * @return $this
 	 */
@@ -652,7 +652,7 @@ class Builder {
 	 *
 	 * @param  \Closure $callback
 	 * @param  bool     $not
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhereExists(Closure $callback, $not = false)
 	{
@@ -664,7 +664,7 @@ class Builder {
 	 *
 	 * @param  \Closure $callback
 	 * @param  string   $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function whereNotExists(Closure $callback, $boolean = 'and')
 	{
@@ -675,7 +675,7 @@ class Builder {
 	 * Add a where not exists clause to the query.
 	 *
 	 * @param  \Closure  $callback
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhereNotExists(Closure $callback)
 	{
@@ -715,7 +715,7 @@ class Builder {
 	 *
 	 * @param  string  $column
 	 * @param  mixed   $values
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhereIn($column, $values)
 	{
@@ -728,7 +728,7 @@ class Builder {
 	 * @param  string  $column
 	 * @param  mixed   $values
 	 * @param  string  $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function whereNotIn($column, $values, $boolean = 'and')
 	{
@@ -740,7 +740,7 @@ class Builder {
 	 *
 	 * @param  string  $column
 	 * @param  mixed   $values
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhereNotIn($column, $values)
 	{
@@ -793,7 +793,7 @@ class Builder {
 	 * Add an "or where null" clause to the query.
 	 *
 	 * @param  string  $column
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhereNull($column)
 	{
@@ -805,7 +805,7 @@ class Builder {
 	 *
 	 * @param  string  $column
 	 * @param  string  $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function whereNotNull($column, $boolean = 'and')
 	{
@@ -816,7 +816,7 @@ class Builder {
 	 * Add an "or where not null" clause to the query.
 	 *
 	 * @param  string  $column
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orWhereNotNull($column)
 	{
@@ -830,7 +830,7 @@ class Builder {
 	 * @param  string   $operator
 	 * @param  int   $value
 	 * @param  string   $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function whereDay($column, $operator, $value, $boolean = 'and')
 	{
@@ -844,7 +844,7 @@ class Builder {
 	 * @param  string   $operator
 	 * @param  int   $value
 	 * @param  string   $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function whereMonth($column, $operator, $value, $boolean = 'and')
 	{
@@ -858,7 +858,7 @@ class Builder {
 	 * @param  string   $operator
 	 * @param  int   $value
 	 * @param  string   $boolean
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function whereYear($column, $operator, $value, $boolean = 'and')
 	{
@@ -925,7 +925,7 @@ class Builder {
 	 * @param  string  $column
 	 * @param  string  $operator
 	 * @param  string  $value
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orHaving($column, $operator = null, $value = null)
 	{
@@ -956,7 +956,7 @@ class Builder {
 	 *
 	 * @param  string  $sql
 	 * @param  array   $bindings
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function orHavingRaw($sql, array $bindings = array())
 	{
@@ -1014,7 +1014,7 @@ class Builder {
 	 * Alias to set the "offset" value of the query.
 	 *
 	 * @param  int  $value
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function skip($value)
 	{
@@ -1038,7 +1038,7 @@ class Builder {
 	 * Alias to set the "limit" value of the query.
 	 *
 	 * @param  int  $value
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function take($value)
 	{
@@ -1050,7 +1050,7 @@ class Builder {
 	 *
 	 * @param  int  $page
 	 * @param  int  $perPage
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function forPage($page, $perPage = 15)
 	{
@@ -1060,9 +1060,9 @@ class Builder {
 	/**
 	 * Add a union statement to the query.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder|\Closure  $query
+	 * @param  \Database\Query\Builder|\Closure  $query
 	 * @param  bool $all
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @return \Database\Query\Builder|static
 	 */
 	public function union($query, $all = false)
 	{
@@ -1079,8 +1079,8 @@ class Builder {
 	/**
 	 * Add a union all statement to the query.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder|\Closure  $query
-	 * @return \Illuminate\Database\Query\Builder|static
+	 * @param  \Database\Query\Builder|\Closure  $query
+	 * @return \Database\Query\Builder|static
 	 */
 	public function unionAll($query)
 	{
@@ -1103,7 +1103,7 @@ class Builder {
 	/**
 	 * Lock the selected rows in the table for updating.
 	 *
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Database\Query\Builder
 	 */
 	public function lockForUpdate()
 	{
@@ -1113,7 +1113,7 @@ class Builder {
 	/**
 	 * Share lock the selected rows in the table.
 	 *
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Database\Query\Builder
 	 */
 	public function sharedLock()
 	{
@@ -1603,7 +1603,7 @@ class Builder {
 	/**
 	 * Get a new instance of the query builder.
 	 *
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Database\Query\Builder
 	 */
 	public function newQuery()
 	{
@@ -1642,7 +1642,7 @@ class Builder {
 	 * Create a raw database expression.
 	 *
 	 * @param  mixed  $value
-	 * @return \Illuminate\Database\Query\Expression
+	 * @return \Database\Query\Expression
 	 */
 	public function raw($value)
 	{
@@ -1726,7 +1726,7 @@ class Builder {
 	/**
 	 * Merge an array of bindings into our bindings.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  \Database\Query\Builder  $query
 	 * @return $this
 	 */
 	public function mergeBindings(Builder $query)
@@ -1739,7 +1739,7 @@ class Builder {
 	/**
 	 * Get the database connection instance.
 	 *
-	 * @return \Illuminate\Database\ConnectionInterface
+	 * @return \Database\ConnectionInterface
 	 */
 	public function getConnection()
 	{
@@ -1749,7 +1749,7 @@ class Builder {
 	/**
 	 * Get the query grammar instance.
 	 *
-	 * @return \Illuminate\Database\Grammar
+	 * @return \Database\Grammar
 	 */
 	public function getGrammar()
 	{

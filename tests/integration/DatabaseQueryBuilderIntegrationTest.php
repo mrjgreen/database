@@ -3,7 +3,7 @@
 class DatabaseQueryBuilderIntegrationTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Illuminate\Database\Connection
+     * @var \Database\Connection
      */
     protected $connection;
 
@@ -11,7 +11,7 @@ class DatabaseQueryBuilderIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $factory = new \Illuminate\Database\Connectors\ConnectionFactory();
+        $factory = new \Database\Connectors\ConnectionFactory();
 
         $this->connection = $factory->make(array(
             'host'      => 'localhost',

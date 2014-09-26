@@ -1,6 +1,6 @@
-<?php namespace Illuminate\Database\Query\Grammars;
+<?php namespace Database\Query\Grammars;
 
-use Illuminate\Database\Query\Builder;
+use Database\Query\Builder;
 
 class PostgresGrammar extends Grammar {
 
@@ -18,7 +18,7 @@ class PostgresGrammar extends Grammar {
 	/**
 	 * Compile the lock into SQL.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  \Database\Query\Builder  $query
 	 * @param  bool|string  $value
 	 * @return string
 	 */
@@ -32,7 +32,7 @@ class PostgresGrammar extends Grammar {
 	/**
 	 * Compile an update statement into SQL.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  \Database\Query\Builder  $query
 	 * @param  array  $values
 	 * @return string
 	 */
@@ -76,7 +76,7 @@ class PostgresGrammar extends Grammar {
 	/**
 	 * Compile the "from" clause for an update with a join.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  \Database\Query\Builder  $query
 	 * @return string
 	 */
 	protected function compileUpdateFrom(Builder $query)
@@ -99,7 +99,7 @@ class PostgresGrammar extends Grammar {
 	/**
 	 * Compile the additional where clauses for updates with joins.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  \Database\Query\Builder  $query
 	 * @return string
 	 */
 	protected function compileUpdateWheres(Builder $query)
@@ -124,7 +124,7 @@ class PostgresGrammar extends Grammar {
 	/**
 	 * Compile the "join" clauses for an update.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  \Database\Query\Builder  $query
 	 * @return string
 	 */
 	protected function compileUpdateJoinWheres(Builder $query)
@@ -148,7 +148,7 @@ class PostgresGrammar extends Grammar {
 	/**
 	 * Compile an insert and get ID statement into SQL.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  \Database\Query\Builder  $query
 	 * @param  array   $values
 	 * @param  string  $sequence
 	 * @return string
@@ -163,7 +163,7 @@ class PostgresGrammar extends Grammar {
 	/**
 	 * Compile a truncate table statement into SQL.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  \Database\Query\Builder  $query
 	 * @return array
 	 */
 	public function compileTruncate(Builder $query)

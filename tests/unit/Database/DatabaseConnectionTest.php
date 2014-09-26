@@ -99,7 +99,7 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 	{
 		$conn = $this->getMockConnection();
 		$builder = $conn->table('users');
-		$this->assertInstanceOf('Illuminate\Database\Query\Builder', $builder);
+		$this->assertInstanceOf('Database\Query\Builder', $builder);
 		$this->assertEquals('users', $builder->from);
 	}
 
@@ -110,7 +110,7 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 		$date->shouldReceive('format')->once()->with('foo')->andReturn('bar');
 		$bindings = array('test' => $date);
 		$conn = $this->getMockConnection();
-		$grammar = m::mock('Illuminate\Database\Query\Grammars\Grammar');
+		$grammar = m::mock('Database\Query\Grammars\Grammar');
 		$grammar->shouldReceive('getDateFormat')->once()->andReturn('foo');
 		$conn->setQueryGrammar($grammar);
 		$result = $conn->prepareBindings($bindings);
@@ -134,7 +134,7 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 	protected function getMockConnection($methods = array(), $pdo = null)
 	{
 		$pdo = $pdo ?: new DatabaseConnectionTestMockPDO;
-        return $this->getMock('Illuminate\Database\Connection', $methods ?: null, array($pdo));
+        return $this->getMock('Database\Connection', $methods ?: null, array($pdo));
 	}
 
 }

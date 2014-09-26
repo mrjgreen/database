@@ -12,7 +12,7 @@ class DatabaseConnectorTest extends PHPUnit_Framework_TestCase {
 
 	public function testOptionResolution()
 	{
-		$connector = new Illuminate\Database\Connectors\Connector;
+		$connector = new Database\Connectors\Connector;
 		$connector->setDefaultOptions(array(0 => 'foo', 1 => 'bar'));
 		$this->assertEquals(array(0 => 'baz', 1 => 'bar', 2 => 'boom'), $connector->getOptions(array('options' => array(0 => 'baz', 2 => 'boom'))));
 	}
@@ -23,7 +23,7 @@ class DatabaseConnectorTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testMySqlConnectCallsCreateConnectionWithProperArguments($dsn, $config)
 	{
-		$connector = $this->getMock('Illuminate\Database\Connectors\MySqlConnector', array('createConnection', 'getOptions'));
+		$connector = $this->getMock('Database\Connectors\MySqlConnector', array('createConnection', 'getOptions'));
 		$connection = m::mock('stdClass');
 		$connector->expects($this->once())->method('getOptions')->with($this->equalTo($config))->will($this->returnValue(array('options')));
 		$connector->expects($this->once())->method('createConnection')->with($this->equalTo($dsn), $this->equalTo($config), $this->equalTo(array('options')))->will($this->returnValue($connection));
@@ -50,7 +50,7 @@ class DatabaseConnectorTest extends PHPUnit_Framework_TestCase {
 	{
 		$dsn = 'pgsql:host=foo;dbname=bar;port=111';
 		$config = array('host' => 'foo', 'database' => 'bar', 'port' => 111, 'charset' => 'utf8');
-		$connector = $this->getMock('Illuminate\Database\Connectors\PostgresConnector', array('createConnection', 'getOptions'));
+		$connector = $this->getMock('Database\Connectors\PostgresConnector', array('createConnection', 'getOptions'));
 		$connection = m::mock('stdClass');
 		$connector->expects($this->once())->method('getOptions')->with($this->equalTo($config))->will($this->returnValue(array('options')));
 		$connector->expects($this->once())->method('createConnection')->with($this->equalTo($dsn), $this->equalTo($config), $this->equalTo(array('options')))->will($this->returnValue($connection));
@@ -66,7 +66,7 @@ class DatabaseConnectorTest extends PHPUnit_Framework_TestCase {
 	{
 		$dsn = 'pgsql:host=foo;dbname=bar';
 		$config = array('host' => 'foo', 'database' => 'bar', 'schema' => 'public', 'charset' => 'utf8');
-		$connector = $this->getMock('Illuminate\Database\Connectors\PostgresConnector', array('createConnection', 'getOptions'));
+		$connector = $this->getMock('Database\Connectors\PostgresConnector', array('createConnection', 'getOptions'));
 		$connection = m::mock('stdClass');
 		$connector->expects($this->once())->method('getOptions')->with($this->equalTo($config))->will($this->returnValue(array('options')));
 		$connector->expects($this->once())->method('createConnection')->with($this->equalTo($dsn), $this->equalTo($config), $this->equalTo(array('options')))->will($this->returnValue($connection));
@@ -83,7 +83,7 @@ class DatabaseConnectorTest extends PHPUnit_Framework_TestCase {
 	{
 		$dsn = 'sqlite::memory:';
 		$config = array('database' => ':memory:');
-		$connector = $this->getMock('Illuminate\Database\Connectors\SQLiteConnector', array('createConnection', 'getOptions'));
+		$connector = $this->getMock('Database\Connectors\SQLiteConnector', array('createConnection', 'getOptions'));
 		$connection = m::mock('stdClass');
 		$connector->expects($this->once())->method('getOptions')->with($this->equalTo($config))->will($this->returnValue(array('options')));
 		$connector->expects($this->once())->method('createConnection')->with($this->equalTo($dsn), $this->equalTo($config), $this->equalTo(array('options')))->will($this->returnValue($connection));
@@ -97,7 +97,7 @@ class DatabaseConnectorTest extends PHPUnit_Framework_TestCase {
 	{
 		$dsn = 'sqlite:'.__DIR__;
 		$config = array('database' => __DIR__);
-		$connector = $this->getMock('Illuminate\Database\Connectors\SQLiteConnector', array('createConnection', 'getOptions'));
+		$connector = $this->getMock('Database\Connectors\SQLiteConnector', array('createConnection', 'getOptions'));
 		$connection = m::mock('stdClass');
 		$connector->expects($this->once())->method('getOptions')->with($this->equalTo($config))->will($this->returnValue(array('options')));
 		$connector->expects($this->once())->method('createConnection')->with($this->equalTo($dsn), $this->equalTo($config), $this->equalTo(array('options')))->will($this->returnValue($connection));
@@ -111,7 +111,7 @@ class DatabaseConnectorTest extends PHPUnit_Framework_TestCase {
 	{
 		$config = array('host' => 'foo', 'database' => 'bar', 'port' => 111);
 		$dsn = $this->getDsn($config);
-		$connector = $this->getMock('Illuminate\Database\Connectors\SqlServerConnector', array('createConnection', 'getOptions'));
+		$connector = $this->getMock('Database\Connectors\SqlServerConnector', array('createConnection', 'getOptions'));
 		$connection = m::mock('stdClass');
 		$connector->expects($this->once())->method('getOptions')->with($this->equalTo($config))->will($this->returnValue(array('options')));
 		$connector->expects($this->once())->method('createConnection')->with($this->equalTo($dsn), $this->equalTo($config), $this->equalTo(array('options')))->will($this->returnValue($connection));

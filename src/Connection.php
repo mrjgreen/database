@@ -1,6 +1,6 @@
-<?php namespace Illuminate\Database;
+<?php namespace Database;
 
-use Illuminate\Database\Query\Grammars\Grammar;
+use Database\Query\Grammars\Grammar;
 use PDO;
 use Closure;
 use DateTime;
@@ -31,7 +31,7 @@ class Connection implements ConnectionInterface {
 	/**
 	 * The query grammar implementation.
 	 *
-	 * @var \Illuminate\Database\Query\Grammars\Grammar
+	 * @var \Database\Query\Grammars\Grammar
 	 */
 	protected $queryGrammar;
 
@@ -98,7 +98,7 @@ class Connection implements ConnectionInterface {
 	 * Begin a fluent query against a database table.
 	 *
 	 * @param  string  $table
-	 * @return \Illuminate\Database\Query\Builder
+	 * @return \Database\Query\Builder
 	 */
 	public function table($table)
 	{
@@ -161,7 +161,7 @@ class Connection implements ConnectionInterface {
 	 * Get a new raw query expression.
 	 *
 	 * @param  mixed  $value
-	 * @return \Illuminate\Database\Query\Expression
+	 * @return \Database\Query\Expression
 	 */
 	public function raw($value)
 	{
@@ -273,7 +273,7 @@ class Connection implements ConnectionInterface {
 	 * @param  bool      $useReadPdo
 	 * @return \PDOStatement|int
 	 *
-	 * @throws \Illuminate\Database\QueryException
+	 * @throws \Database\QueryException
 	 */
 	protected function run($query, $bindings, $useReadPdo = false)
 	{
@@ -583,7 +583,7 @@ class Connection implements ConnectionInterface {
 	/**
 	 * Get the query grammar used by the connection.
 	 *
-	 * @return \Illuminate\Database\Query\Grammars\Grammar
+	 * @return \Database\Query\Grammars\Grammar
 	 */
 	public function getQueryGrammar()
 	{
@@ -593,7 +593,7 @@ class Connection implements ConnectionInterface {
 	/**
 	 * Set the query grammar used by the connection.
 	 *
-	 * @param  \Illuminate\Database\Query\Grammars\Grammar
+	 * @param  \Database\Query\Grammars\Grammar
 	 * @return void
 	 */
 	public function setQueryGrammar(Query\Grammars\Grammar $grammar)

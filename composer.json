@@ -1,5 +1,5 @@
 {
-    "name": "illuminate/database",
+    "name": "joegreen0991/database",
     "license": "MIT",
     "keywords": ["laravel", "database", "sql", "orm"],
     "authors": [
@@ -16,8 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Illuminate\\Database\\": "src"
+            "Database\\": "src"
         }
-    },
-    "minimum-stability": "stable"
+    }
 }

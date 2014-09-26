@@ -16,16 +16,16 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
             'test1' => array(
                 'foo' => 'bar'
             ),
-            'test2' => m::mock('Illuminate\Database\Connection')
+            'test2' => m::mock('Database\Connection')
         );
 
-        $factory = m::mock('Illuminate\Database\Connectors\ConnectionFactory');
+        $factory = m::mock('Database\Connectors\ConnectionFactory');
 
         $connectionMock = m::mock('stdClass');
 
         $factory->shouldReceive('make')->once()->with($configs['test1'])->andReturn($connectionMock);
 
-		$resolver = $this->getMock('Illuminate\Database\ConnectionResolver', null, array($configs, $factory));
+		$resolver = $this->getMock('Database\ConnectionResolver', null, array($configs, $factory));
 
 		$this->assertTrue($resolver->hasConnection('test1'));
 
@@ -43,10 +43,10 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
     public function testItReturnsADefaultConnection()
     {
         $configs = array(
-            'test' => m::mock('Illuminate\Database\Connection')
+            'test' => m::mock('Database\Connection')
         );
 
-        $resolver = $this->getMock('Illuminate\Database\ConnectionResolver', null, array($configs));
+        $resolver = $this->getMock('Database\ConnectionResolver', null, array($configs));
 
         $resolver->setDefaultConnection('test');
 

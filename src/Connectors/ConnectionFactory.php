@@ -1,15 +1,15 @@
-<?php namespace Illuminate\Database\Connectors;
+<?php namespace Database\Connectors;
 
 use PDO;
-use Illuminate\Database\Connection;
-use Illuminate\Database\Query\Grammars\MySqlGrammar;
-use Illuminate\Database\Query\Grammars\PostgresGrammar;
-use Illuminate\Database\Query\Grammars\SqlServerGrammar;
-use Illuminate\Database\Query\Grammars\SQLiteGrammar;
+use Database\Connection;
+use Database\Query\Grammars\MySqlGrammar;
+use Database\Query\Grammars\PostgresGrammar;
+use Database\Query\Grammars\SqlServerGrammar;
+use Database\Query\Grammars\SQLiteGrammar;
 
 /**
  * Class ConnectionFactory
- * @package Illuminate\Database\Connectors
+ * @package Database\Connectors
  *
  * Build a connection from a config with a format like:
  *
@@ -38,7 +38,7 @@ class ConnectionFactory {
 	 * Establish a PDO connection based on the configuration.
 	 *
 	 * @param  array   $config
-	 * @return \Illuminate\Database\Connection
+	 * @return \Database\Connection
 	 */
 	public function make(array $config)
 	{
@@ -70,7 +70,7 @@ class ConnectionFactory {
 	 * Create a single database connection instance.
 	 *
 	 * @param  array  $config
-	 * @return \Illuminate\Database\Connection
+	 * @return \Database\Connection
 	 */
 	protected function createSingleConnection(array $config)
 	{
@@ -83,7 +83,7 @@ class ConnectionFactory {
 	 * Create a single database connection instance.
 	 *
 	 * @param  array  $config
-	 * @return \Illuminate\Database\Connection
+	 * @return \Database\Connection
 	 */
 	protected function createReadWriteConnection(array $config)
 	{
@@ -164,7 +164,7 @@ class ConnectionFactory {
 	 * Create a connector instance based on the configuration.
 	 *
 	 * @param  array  $config
-	 * @return \Illuminate\Database\Connectors\ConnectorInterface
+	 * @return \Database\Connectors\ConnectorInterface
 	 *
 	 * @throws \InvalidArgumentException
 	 */
@@ -199,7 +199,7 @@ class ConnectionFactory {
 	 * @param  string   $driver
 	 * @param  \PDO     $connection
 	 * @param  string   $prefix
-	 * @return \Illuminate\Database\Connection
+	 * @return \Database\Connection
 	 *
 	 * @throws \InvalidArgumentException
 	 */

@@ -1,4 +1,4 @@
-<?php namespace Illuminate\Database\Query;
+<?php namespace Database\Query;
 
 class JoinClause {
 
@@ -31,7 +31,7 @@ class JoinClause {
 	/**
 	 * Create a new join clause instance.
 	 *
-	 * @param  \Illuminate\Database\Query\Builder  $query
+	 * @param  \Database\Query\Builder  $query
 	 * @param  string  $type
 	 * @param  string  $table
 	 * @return void
@@ -67,7 +67,7 @@ class JoinClause {
 	 * @param  string  $first
 	 * @param  string  $operator
 	 * @param  string  $second
-	 * @return \Illuminate\Database\Query\JoinClause
+	 * @return \Database\Query\JoinClause
 	 */
 	public function orOn($first, $operator, $second)
 	{
@@ -81,7 +81,7 @@ class JoinClause {
 	 * @param  string  $operator
 	 * @param  string  $second
 	 * @param  string  $boolean
-	 * @return \Illuminate\Database\Query\JoinClause
+	 * @return \Database\Query\JoinClause
 	 */
 	public function where($first, $operator, $second, $boolean = 'and')
 	{
@@ -94,7 +94,7 @@ class JoinClause {
 	 * @param  string  $first
 	 * @param  string  $operator
 	 * @param  string  $second
-	 * @return \Illuminate\Database\Query\JoinClause
+	 * @return \Database\Query\JoinClause
 	 */
 	public function orWhere($first, $operator, $second)
 	{
@@ -106,7 +106,7 @@ class JoinClause {
 	 *
 	 * @param  $column
 	 * @param  string $boolean
-	 * @return \Illuminate\Database\Query\JoinClause
+	 * @return \Database\Query\JoinClause
 	 */
 	public function whereNull($column, $boolean = 'and')
 	{
