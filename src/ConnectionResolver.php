@@ -68,7 +68,7 @@ class ConnectionResolver implements ConnectionResolverInterface {
      * Get a database connection instance.
      *
      * @param  string  $name
-     * @return \Database\Connection
+     * @return array
      */
     public function connectionConfig($name = null)
     {
