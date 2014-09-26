@@ -39,4 +39,19 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
 
         $this->assertSame($configs['test2'], $connection);
 	}
+
+    public function testItReturnsADefaultConnection()
+    {
+        $configs = array(
+            'test' => m::mock('Illuminate\Database\Connection')
+        );
+
+        $resolver = $this->getMock('Illuminate\Database\ConnectionResolver', null, array($configs));
+
+        $resolver->setDefaultConnection('test');
+
+        $connection = $resolver->connection();
+
+        $this->assertSame($configs['test'], $connection);
+    }
 }
