@@ -58,7 +58,7 @@ class ConnectionResolver implements ConnectionResolverInterface {
 
         if(!isset($this->connectionCache[$name]))
         {
-            $this->connectionCache[$name] = $this->makeConnection($this->connections[$name]);
+            $this->connectionCache[$name] = $this->makeConnection($this->connectionConfig($name));
         }
 
 		return $this->connectionCache[$name];
