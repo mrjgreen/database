@@ -173,17 +173,18 @@ class Connection implements ConnectionInterface {
 	 *
 	 * @param  string  $query
 	 * @param  array   $bindings
+     * @param  bool  $useReadPdo
 	 * @return mixed
 	 */
-	public function fetchOne($query, $bindings = array())
+	public function fetchOne($query, $bindings = array(), $useReadPdo = true)
 	{
-		$records = $this->fetch($query, $bindings);
+		$records = $this->fetch($query, $bindings, $useReadPdo);
 
 		return count($records) > 0 ? reset($records) : null;
 	}
 
 	/**
-	 * Run a select statement against the database.
+	 * Run a select statement against the database, and return the first row based on the current fetch mode
 	 *
 	 * @param  string  $query
 	 * @param  array  $bindings
@@ -192,11 +193,24 @@ class Connection implements ConnectionInterface {
 	 */
 	public function fetch($query, $bindings = array(), $useReadPdo = true)
 	{
-		return $this->run($query, $bindings, $useReadPdo)->fetchAll($this->getFetchMode());
+		return $this->run($query, $bindings, $useReadPdo)->fetch($this->getFetchMode());
 	}
 
     /**
-     * Run a select statement against the database.
+     * Run a select statement against the database, and return the first row as a numeric array
+     *
+     * @param  string  $query
+     * @param  array  $bindings
+     * @param  bool  $useReadPdo
+     * @return array
+     */
+    public function fetchNumeric($query, $bindings = array(), $useReadPdo = true)
+    {
+        return $this->run($query, $bindings, $useReadPdo)->fetch(PDO::FETCH_NUM);
+    }
+
+    /**
+     * Run a select statement against the database, and return an array containing all rows based on the current fetch mode
      *
      * @param  string  $query
      * @param  array  $bindings

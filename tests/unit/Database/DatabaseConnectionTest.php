@@ -23,9 +23,9 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 		$pdo = $this->getMock('DatabaseConnectionTestMockPDO', array('prepare'));
 		$writePdo = $this->getMock('DatabaseConnectionTestMockPDO', array('prepare'));
 		$writePdo->expects($this->never())->method('prepare');
-		$statement = $this->getMock('PDOStatement', array('execute', 'fetchAll'));
+		$statement = $this->getMock('PDOStatement', array('execute', 'fetch'));
 		$statement->expects($this->once())->method('execute')->with($this->equalTo(array('foo' => 'bar')));
-		$statement->expects($this->once())->method('fetchAll')->will($this->returnValue(array('boom')));
+		$statement->expects($this->once())->method('fetch')->will($this->returnValue(array('boom')));
 		$pdo->expects($this->once())->method('prepare')->with('foo')->will($this->returnValue($statement));
 		$mock = $this->getMockConnection(array('prepareBindings', 'query'), $writePdo);
         $mock->enableQueryLog();
