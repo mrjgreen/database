@@ -351,7 +351,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('users')->whereIn('id', function($q)
 		{
-			$q->select('id')->from('users')->where('age', '>', 25)->take(3);
+			$q->select('id')->from('users')->where('age', '>', 25)->limit(3);
 		});
 		$this->assertEquals('select * from "users" where "id" in (select "id" from "users" where "age" > ? limit 3)', $builder->toSql());
 		$this->assertEquals(array(25), $builder->getBindings());
@@ -359,7 +359,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder = $this->getBuilder();
 		$builder->select('*')->from('users')->whereNotIn('id', function($q)
 		{
-			$q->select('id')->from('users')->where('age', '>', 25)->take(3);
+			$q->select('id')->from('users')->where('age', '>', 25)->limit(3);
 		});
 		$this->assertEquals('select * from "users" where "id" not in (select "id" from "users" where "age" > ? limit 3)', $builder->toSql());
 		$this->assertEquals(array(25), $builder->getBindings());
@@ -454,11 +454,11 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('select * from "users" limit 10 offset 5', $builder->toSql());
 
 		$builder = $this->getBuilder();
-		$builder->select('*')->from('users')->skip(5)->take(10);
+		$builder->select('*')->from('users')->offset(5)->limit(10);
 		$this->assertEquals('select * from "users" limit 10 offset 5', $builder->toSql());
 
 		$builder = $this->getBuilder();
-		$builder->select('*')->from('users')->skip(-5)->take(10);
+		$builder->select('*')->from('users')->offset(-5)->limit(10);
 		$this->assertEquals('select * from "users" limit 10 offset 0', $builder->toSql());
 
 		$builder = $this->getBuilder();
@@ -882,19 +882,19 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testSqlServerLimitsAndOffsets()
 	{
 		$builder = $this->getSqlServerBuilder();
-		$builder->select('*')->from('users')->take(10);
+		$builder->select('*')->from('users')->limit(10);
 		$this->assertEquals('select top 10 * from [users]', $builder->toSql());
 
 		$builder = $this->getSqlServerBuilder();
-		$builder->select('*')->from('users')->skip(10);
+		$builder->select('*')->from('users')->offset(10);
 		$this->assertEquals('select * from (select *, row_number() over (order by (select 0)) as row_num from [users]) as temp_table where row_num >= 11', $builder->toSql());
 
 		$builder = $this->getSqlServerBuilder();
-		$builder->select('*')->from('users')->skip(10)->take(10);
+		$builder->select('*')->from('users')->offset(10)->limit(10);
 		$this->assertEquals('select * from (select *, row_number() over (order by (select 0)) as row_num from [users]) as temp_table where row_num between 11 and 20', $builder->toSql());
 
 		$builder = $this->getSqlServerBuilder();
-		$builder->select('*')->from('users')->skip(10)->take(10)->orderBy('email', 'desc');
+		$builder->select('*')->from('users')->offset(10)->limit(10)->orderBy('email', 'desc');
 		$this->assertEquals('select * from (select *, row_number() over (order by [email] desc) as row_num from [users]) as temp_table where row_num between 11 and 20', $builder->toSql());
 	}
 

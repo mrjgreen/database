@@ -1011,17 +1011,6 @@ class Builder {
 	}
 
 	/**
-	 * Alias to set the "offset" value of the query.
-	 *
-	 * @param  int  $value
-	 * @return \Database\Query\Builder|static
-	 */
-	public function skip($value)
-	{
-		return $this->offset($value);
-	}
-
-	/**
 	 * Set the "limit" value of the query.
 	 *
 	 * @param  int  $value
@@ -1035,17 +1024,6 @@ class Builder {
 	}
 
 	/**
-	 * Alias to set the "limit" value of the query.
-	 *
-	 * @param  int  $value
-	 * @return \Database\Query\Builder|static
-	 */
-	public function take($value)
-	{
-		return $this->limit($value);
-	}
-
-	/**
 	 * Set the limit and offset for a given page.
 	 *
 	 * @param  int  $page
@@ -1054,7 +1032,7 @@ class Builder {
 	 */
 	public function forPage($page, $perPage = 15)
 	{
-		return $this->skip(($page - 1) * $perPage)->take($perPage);
+		return $this->offset(($page - 1) * $perPage)->limit($perPage);
 	}
 
 	/**
@@ -1163,7 +1141,7 @@ class Builder {
 	 */
 	public function first($columns = array('*'))
 	{
-		$results = $this->take(1)->get($columns);
+		$results = $this->limit(1)->get($columns);
 
 		return count($results) > 0 ? reset($results) : null;
 	}
