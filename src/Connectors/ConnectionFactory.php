@@ -34,6 +34,24 @@ use Database\Query\Grammars\SQLiteGrammar;
  */
 class ConnectionFactory {
 
+    /**
+     * @var null|string
+     */
+    protected $connectionClassName = 'Database\Connection';
+
+    /**
+     * @var array
+     */
+    protected $customDrivers = array();
+
+    public function __construct($connectionClassName = null)
+    {
+        if($connectionClassName)
+        {
+            $this->connectionClassName = $connectionClassName;
+        }
+    }
+
 	/**
 	 * Establish a PDO connection based on the configuration.
 	 *
@@ -49,6 +67,15 @@ class ConnectionFactory {
             $connection->setPdo($fresh->getPdo())->setReadPdo($fresh->getReadPdo());
         });
 	}
+
+    /**
+     * @param $name
+     * @param ConnectorInterface $connector
+     */
+    public function addCustomDriver($name, ConnectorInterface $connector)
+    {
+        $this->customDrivers[$name] = $connector;
+    }
 
     /**
      * Establish a PDO connection based on the configuration, return wrapped in a Connection instance.
@@ -175,6 +202,11 @@ class ConnectionFactory {
 			throw new \InvalidArgumentException("A driver must be specified.");
 		}
 
+        if(isset($this->customDrivers[$config['driver']]))
+        {
+            return $this->customDrivers[$config['driver']];
+        }
+
 		switch ($config['driver'])
 		{
 			case 'mysql':
@@ -227,7 +259,7 @@ class ConnectionFactory {
                 throw new \InvalidArgumentException("Unsupported driver [$driver]");
 		}
 
-        return new Connection($connection, $queryGrammar, $prefix);
+        return new $this->connectionClassName($connection, $queryGrammar, $prefix);
 
 	}
 }
