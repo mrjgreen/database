@@ -4,6 +4,10 @@
     "keywords": ["laravel", "database", "sql", "orm"],
     "authors": [
         {
+            "name": "Joe Green",
+            "email": "joe.green0991@gmail.com"
+        },
+        {
             "name": "Taylor Otwell",
             "email": "taylorotwell@gmail.com"
         }
