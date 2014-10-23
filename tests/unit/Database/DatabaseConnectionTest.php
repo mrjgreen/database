@@ -12,9 +12,14 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 
 	public function testFetchOneCallsSelectAndReturnsSingleResult()
 	{
-		$connection = $this->getMockConnection(array('fetch'));
-		$connection->expects($this->once())->method('fetch')->with('foo', array('bar' => 'baz'))->will($this->returnValue(array('foo')));
-		$this->assertEquals('foo', $connection->fetchOne('foo', array('bar' => 'baz')));
+		$connection = $this->getMockConnection(array('run'));
+
+		$statement = $this->getMock('PDOStatement', array('fetchColumn'));
+		$connection->expects($this->once())->method('run')->with('foo', array('bar' => 'baz'))->will($this->returnValue($statement));
+		$statement->expects($this->once())->method('fetchColumn')->will($this->returnValue('boom'));
+
+		$result = $connection->fetchOne('foo', array('bar' => 'baz'));
+		$this->assertEquals('boom', $result);
 	}
 
 
