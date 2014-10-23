@@ -269,8 +269,8 @@ class Connection implements ConnectionInterface {
     /**
      * Escape a value ready to be inserted into the database
      *
-     * @param string $string The unquoted string
-     * @param string $quotedString The quoted string
+     * @param $string
+     * @return array|string
      */
     public function quote($string)
     {
@@ -280,6 +280,25 @@ class Connection implements ConnectionInterface {
         }
 
         return $this->pdo->quote($string);
+    }
+
+    /**
+     * Escape a value or array of values and bind them into an sql statement
+     *
+     * @param $sql
+     * @param array $bind
+     * @return mixed
+     */
+    public function quoteInto($sql, array $bind = array())
+    {
+        foreach ($bind as $key => $value)
+        {
+            $replace = (is_numeric($key) ? '?' : ':' . $key);
+
+            $sql = substr_replace($sql, $this->quote($value), strpos($sql, $replace), strlen($replace));
+        }
+
+        return $sql;
     }
 
 	/**
