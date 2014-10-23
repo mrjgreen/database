@@ -13,15 +13,7 @@ class DatabaseQueryBuilderIntegrationTest extends PHPUnit_Framework_TestCase
     {
         $factory = new \Database\Connectors\ConnectionFactory();
 
-        $this->connection = $factory->make(array(
-            'host'      => 'localhost',
-            'driver'    => 'mysql',
-            'username'  => 'root',
-            'password'  => '',
-            'charset'   => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix'    => '',
-        ));
+        $this->connection = $factory->make(include __DIR__ . '/config.php');
     }
 
     public function createTable()

@@ -1,7 +1,7 @@
 {
     "name": "mrjgreen/database",
     "license": "MIT",
-    "keywords": ["laravel", "database", "sql", "orm"],
+    "keywords": ["database", "sql", "dbal", "query builder"],
     "authors": [
         {
             "name": "Joe Green",

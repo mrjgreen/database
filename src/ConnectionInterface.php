@@ -27,7 +27,7 @@ interface ConnectionInterface {
 	 * @param  array   $bindings
 	 * @return mixed
 	 */
-	public function fetchOne($query, $bindings = array());
+	public function fetchOne($query, array $bindings = array());
 
 	/**
 	 * Run a select statement against the database.
@@ -36,7 +36,7 @@ interface ConnectionInterface {
 	 * @param  array   $bindings
 	 * @return array
 	 */
-	public function fetch($query, $bindings = array());
+	public function fetch($query, array $bindings = array());
 
     /**
      * Run a select statement against the database.
@@ -45,7 +45,7 @@ interface ConnectionInterface {
      * @param  array   $bindings
      * @return array
      */
-    public function fetchAll($query, $bindings = array());
+    public function fetchAll($query, array $bindings = array());
 
 	/**
 	 * Execute an SQL statement and return the boolean result.
@@ -54,7 +54,7 @@ interface ConnectionInterface {
 	 * @param  array   $bindings
 	 * @return bool
 	 */
-	public function query($query, $bindings = array());
+	public function query($query, array $bindings = array());
 
     /**
      * Return the auto-increment ID of the last inserted row

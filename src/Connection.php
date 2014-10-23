@@ -112,7 +112,7 @@ class Connection implements ConnectionInterface {
      * @param $values
      * @return bool
      */
-    public function insert($table, $values)
+    public function insert($table, array $values)
     {
         return $this->table($table)->insert($values);
     }
@@ -122,7 +122,7 @@ class Connection implements ConnectionInterface {
      * @param $values
      * @return bool
      */
-    public function insertIgnore($table, $values)
+    public function insertIgnore($table, array $values)
     {
         return $this->table($table)->insertIgnore($values);
     }
@@ -132,17 +132,18 @@ class Connection implements ConnectionInterface {
      * @param $values
      * @return bool
      */
-    public function replace($table, $values)
+    public function replace($table, array $values)
     {
         return $this->table($table)->replace($values);
     }
 
     /**
      * @param $table
-     * @param $values
+     * @param $where
+     * @param $bindings
      * @return bool
      */
-    public function delete($table, $where, $bindings = array())
+    public function delete($table, $where, array $bindings = array())
     {
         return $this->table($table)->whereRaw($where, $bindings)->delete();
     }
@@ -150,9 +151,11 @@ class Connection implements ConnectionInterface {
     /**
      * @param $table
      * @param $values
+     * @param $where
+     * @param $bindings
      * @return bool
      */
-    public function update($table, $values, $where, $bindings = array())
+    public function update($table, $values, $where, array $bindings = array())
     {
         return $this->table($table)->whereRaw($where, $bindings)->update($values);
     }
@@ -176,7 +179,7 @@ class Connection implements ConnectionInterface {
      * @param  bool  $useReadPdo
 	 * @return mixed
 	 */
-	public function fetchOne($query, $bindings = array(), $useReadPdo = true)
+	public function fetchOne($query, array $bindings = array(), $useReadPdo = true)
 	{
 		$records = $this->fetch($query, $bindings, $useReadPdo);
 
@@ -191,7 +194,7 @@ class Connection implements ConnectionInterface {
 	 * @param  bool  $useReadPdo
 	 * @return array
 	 */
-	public function fetch($query, $bindings = array(), $useReadPdo = true)
+	public function fetch($query, array $bindings = array(), $useReadPdo = true)
 	{
 		return $this->run($query, $bindings, $useReadPdo)->fetch($this->getFetchMode());
 	}
@@ -204,7 +207,7 @@ class Connection implements ConnectionInterface {
      * @param  bool  $useReadPdo
      * @return array
      */
-    public function fetchNumeric($query, $bindings = array(), $useReadPdo = true)
+    public function fetchNumeric($query, array $bindings = array(), $useReadPdo = true)
     {
         return $this->run($query, $bindings, $useReadPdo)->fetch(PDO::FETCH_NUM);
     }
@@ -217,7 +220,7 @@ class Connection implements ConnectionInterface {
      * @param  bool  $useReadPdo
      * @return array
      */
-    public function fetchAll($query, $bindings = array(), $useReadPdo = true)
+    public function fetchAll($query, array $bindings = array(), $useReadPdo = true)
     {
         return $this->run($query, $bindings, $useReadPdo)->fetchAll($this->getFetchMode());
     }
@@ -227,7 +230,7 @@ class Connection implements ConnectionInterface {
      * @param array $bindings
      * @return bool|int|\PDOStatement
      */
-    public function query($query, $bindings = array())
+    public function query($query, array $bindings = array())
     {
         return $this->run($query, $bindings);
     }
