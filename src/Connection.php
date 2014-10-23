@@ -181,9 +181,7 @@ class Connection implements ConnectionInterface {
 	 */
 	public function fetchOne($query, array $bindings = array(), $useReadPdo = true)
 	{
-		$records = $this->fetch($query, $bindings, $useReadPdo);
-
-		return count($records) > 0 ? reset($records) : null;
+        return $this->run($query, $bindings, $useReadPdo)->fetchColumn();
 	}
 
 	/**
