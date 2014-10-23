@@ -251,6 +251,15 @@ class Builder {
 		return $this;
 	}
 
+	public function table($table)
+	{
+		$query = $this->newQuery();
+
+		$query->from($table);
+
+		return $query;
+	}
+
 	/**
 	 * Set the table which the query is targeting.
 	 *
