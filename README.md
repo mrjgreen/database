@@ -6,6 +6,7 @@
 The Database component is a framework agnostic PHP database abstraction layer, providing an expressive query builder. It currently supports MySQL, Postgres, SQL Server, and SQLite.
 
 Features:
+
 	* Joins
 	* Sub Queries
 	* Nested Queries
