@@ -53,6 +53,7 @@ $connection->query("SELECT id, username FROM customers");
     - [Where](#where)
     - [Grouped Where](#grouped-where)
     - [Group By, Order By and Having](#group-by-order-by-and-having)
+    - [Joins](#joins)
     - [Sub Selects](#sub-selects)
  - [Insert](#insert)
     - [Insert Ignore](#insert-ignore)
@@ -209,7 +210,7 @@ $connection->table('users')
 */
 ```
 
-#### Multiple Join Criteria
+##### Multiple Join Criteria
 If you need more than one criterion to join a table then you can pass a closure as second parameter.
 
 ```PHP
