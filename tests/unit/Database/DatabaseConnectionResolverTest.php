@@ -55,4 +55,15 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
 
         $this->assertSame($connectionMock, $connection);
     }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Argument 2 must be an array containing a valid connection configuration
+     */
+    public function testItThrowsExceptionForWrongConfig()
+    {
+        $resolver = new \Database\ConnectionResolver();
+
+        $resolver->addConnection('name', 12345);
+    }
 }

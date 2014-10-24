@@ -35,11 +35,11 @@ class ConnectionResolver implements ConnectionResolverInterface
      * Create a new connection resolver instance.
      *
      * @param  array $connections
-     * @return void
+     * @param ConnectionFactory $connectionFactory
      */
-    public function __construct(array $connections = array(), ConnectionFactory $connectionFactory)
+    public function __construct(array $connections = array(), ConnectionFactory $connectionFactory = null)
     {
-        $this->connectionFactory = $connectionFactory;
+        $this->connectionFactory = $connectionFactory ?: new ConnectionFactory();
 
         foreach ($connections as $name => $connection) {
             $this->addConnection($name, $connection);

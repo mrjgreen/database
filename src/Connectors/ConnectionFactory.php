@@ -40,10 +40,6 @@ class ConnectionFactory
      */
     protected $connectionClassName = 'Database\Connection';
 
-    /**
-     * @var array
-     */
-    protected $customDrivers = array();
 
     public function __construct($connectionClassName = null)
     {
@@ -65,15 +61,6 @@ class ConnectionFactory
 
             $connection->setPdo($fresh->getPdo())->setReadPdo($fresh->getReadPdo());
         });
-    }
-
-    /**
-     * @param $name
-     * @param ConnectorInterface $connector
-     */
-    public function addCustomDriver($name, ConnectorInterface $connector)
-    {
-        $this->customDrivers[$name] = $connector;
     }
 
     /**
@@ -198,10 +185,6 @@ class ConnectionFactory
             throw new \InvalidArgumentException("A driver must be specified.");
         }
 
-        if (isset($this->customDrivers[$config['driver']])) {
-            return $this->customDrivers[$config['driver']];
-        }
-
         switch ($config['driver']) {
             case 'mysql':
                 return new MySqlConnector;
@@ -252,7 +235,9 @@ class ConnectionFactory
                 throw new \InvalidArgumentException("Unsupported driver [$driver]");
         }
 
-        return new $this->connectionClassName($connection, $queryGrammar, $prefix);
+        $className = $this->connectionClassName;
+
+        return new $className($connection, $queryGrammar, $prefix);
 
     }
 }

@@ -135,13 +135,167 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('baz'), $queries[0]['bindings']);
 	}
 
+    public function testItProxiesInsertToBuilder()
+    {
+        $this->doInsertTypeProxyCallsToBuilder('insert');
+    }
 
+    public function testItProxiesInsertIgnoreToBuilder()
+    {
+        $this->doInsertTypeProxyCallsToBuilder('insertIgnore');
+    }
+
+    public function testItProxiesReplaceToBuilder()
+    {
+        $this->doInsertTypeProxyCallsToBuilder('replace');
+    }
+
+    public function testItProxiesDeleteToBuilder()
+    {
+        $mock = m::mock('stdClass');
+        $mock->shouldReceive('delete')->andReturn('baz');
+
+        $mock2 = m::mock('stdClass');
+        $mock2->shouldReceive('whereRaw')->with('foo', array('bar'))->andReturn($mock);
+
+        $connection = $this->getMockConnection(array('table'));
+
+        $connection->expects($this->once())
+            ->method('table')
+            ->with('testTable')
+            ->willReturn($mock2);
+
+        $connection->delete('testTable', 'foo', array('bar'));
+    }
+
+    public function testItProxiesUpdateToBuilder()
+    {
+        $mock = m::mock('stdClass');
+        $mock->shouldReceive('update')->with(array('fuzz' => 'buzz'))->andReturn('baz');
+
+        $mock2 = m::mock('stdClass');
+        $mock2->shouldReceive('whereRaw')->with('foo', array('bar'))->andReturn($mock);
+
+        $connection = $this->getMockConnection(array('table'));
+
+        $connection->expects($this->once())
+            ->method('table')
+            ->with('testTable')
+            ->willReturn($mock2);
+
+        $connection->update('testTable', array('fuzz' => 'buzz'), 'foo', array('bar'));
+    }
+
+    public function testItProxiesInsertUpdateToBuilder()
+    {
+        $mock = m::mock('stdClass');
+        $mock->shouldReceive('insertUpdate')->with(array('foo'), array('bar'))->andReturn('baz');
+
+        $connection = $this->getMockConnection(array('table'));
+
+        $connection->expects($this->once())
+            ->method('table')
+            ->with('testTable')
+            ->willReturn($mock);
+
+        $this->assertEquals('baz',$connection->insertUpdate('testTable', array('foo'), array('bar')));
+    }
+
+    private function doInsertTypeProxyCallsToBuilder($type)
+    {
+        $mock = m::mock('stdClass');
+        $mock->shouldReceive($type)->with(array('foo'))->andReturn('baz');
+
+        $connection = $this->getMockConnection(array('table'));
+
+        $connection->expects($this->once())
+            ->method('table')
+            ->with('testTable')
+            ->willReturn($mock);
+
+        $this->assertEquals('baz',$connection->{$type}('testTable', array('foo')));
+    }
+
+    public function testQuoteInto()
+    {
+        $connection = $this->getMockConnection(array('quote'));
+
+        $connection->expects($this->at(0))->method('quote')->with('foo')->willReturn('`foo`');
+        $connection->expects($this->at(1))->method('quote')->with('bar')->willReturn('`bar`');
+
+        $string = $connection->quoteInto('col1 = ? AND col2 = ?', array('foo', 'bar'));
+
+        $this->assertEquals('col1 = `foo` AND col2 = `bar`', $string);
+    }
+
+    public function testQuote()
+    {
+        $pdo = $this->getMock('DatabaseConnectionTestMockPDO', array('quote'));
+        $connection = $this->getMockConnection(array(), $pdo);
+
+        $pdo->expects($this->once())->method('quote')->with('foo')->willReturn('`foo`');
+
+        $string = $connection->quote('foo');
+
+        $this->assertEquals('`foo`', $string);
+    }
+
+    public function testQuoteArray()
+    {
+        $pdo = $this->getMock('DatabaseConnectionTestMockPDO', array('quote'));
+        $connection = $this->getMockConnection(array(), $pdo);
+
+        $pdo->expects($this->at(0))->method('quote')->with('foo')->willReturn('`foo`');
+        $pdo->expects($this->at(1))->method('quote')->with('bar')->willReturn('`bar`');
+
+        $array = $connection->quote(array('foo', 'bar'));
+
+        $this->assertEquals(array('`foo`', '`bar`'), $array);
+    }
+
+    public function testSetAndGetPrefix()
+    {
+        $connection = $this->getMockConnection(array());
+
+        $connection->setTablePrefix('foo');
+        $this->assertEquals('foo', $connection->getTablePrefix());
+
+        $connection->setTablePrefix('bar');
+        $this->assertEquals('bar', $connection->getTablePrefix());
+    }
+
+    public function testItCorrectlyEnablesAndDisablesLogging()
+    {
+        $connection = $this->getMockConnection(array());
+
+        $connection->enableQueryLog();
+        $this->assertEquals(true, $connection->logging());
+
+        $connection->disableQueryLog();
+        $this->assertEquals(false, $connection->logging());
+    }
+
+    public function testItCorrectlySetsTheFetchMode()
+    {
+        $connection = $this->getMockConnection(array());
+
+        $connection->setFetchMode(10);
+        $this->assertEquals(10, $connection->getFetchMode());
+
+        $connection->setFetchMode(2);
+        $this->assertEquals(2, $connection->getFetchMode());
+    }
+
+    /**
+     * @param array $methods
+     * @param null $pdo
+     * @return Database\Connection
+     */
 	protected function getMockConnection($methods = array(), $pdo = null)
 	{
 		$pdo = $pdo ?: new DatabaseConnectionTestMockPDO;
         return $this->getMock('Database\Connection', $methods ?: null, array($pdo));
 	}
-
 }
 
 class DatabaseConnectionTestMockPDO extends PDO { public function __construct() {} }

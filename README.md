@@ -297,6 +297,26 @@ $data = array(
 $connection->table('users')->replace($data);
 ```
 
+####Batch Insert
+The query builder will intelligently handle multiple insert rows:
+```PHP
+$data = array(
+	array(
+	    'username' = 'jsmith',
+	    'name' = 'John Smith'
+	),
+	array(
+	    'username' = 'jbloggs',
+	    'name' = 'Joe Bloggs'
+	),
+);
+$connection->table('users')->insert($data);
+
+`insertGetId()` method returns the insert ids.
+```
+
+You can also pass bulk inserts to replace() and insertIgnore()
+
 ###On Duplicate Key Update
 ```PHP
 $data = array(
@@ -312,24 +332,6 @@ $connection->table('users')->insertUpdate(
 );
 
 //insertOnDuplicateKeyUpdate() is an alias of insertUpdate
-```
-
-####Batch Insert
-The query builder will intellegently handle multiple insert rows:
-```PHP
-$data = array(
-	array(
-	    'username' = 'jsmith',
-	    'name' = 'John Smith'
-	),
-	array(
-	    'username' = 'jbloggs',
-	    'name' = 'Joe Bloggs'
-	),
-);
-$connection->table('users')->insert($data);
-
-`insertGetId()` method returns the insert ids.
 ```
 
 ###Update

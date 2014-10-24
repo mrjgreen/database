@@ -140,6 +140,17 @@ class Connection implements ConnectionInterface
 
     /**
      * @param $table
+     * @param $values
+     * @param $updateValues
+     * @return bool
+     */
+    public function insertUpdate($table, array $values, array $updateValues)
+    {
+        return $this->table($table)->insertUpdate($values, $updateValues);
+    }
+
+    /**
+     * @param $table
      * @param $where
      * @param $bindings
      * @return bool

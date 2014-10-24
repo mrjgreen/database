@@ -72,6 +72,44 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('Database\Connectors\SqlServerConnector', $factory->createConnector(array('driver' => 'sqlsrv')));
 	}
 
+    /**
+     * @dataProvider driversGrammarProvider
+     */
+	public function testProperGrammarInstancesAreReturnedForProperDrivers($driver, $instance)
+	{
+        if(is_null($instance))
+        {
+            $this->setExpectedException('InvalidArgumentException');
+        }
+
+        $factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector'), array());
+
+        $mock = m::mock('stdClass');
+        $mock->shouldReceive('connect')->andReturn(m::mock('PDO'));
+
+        $factory->expects($this->once())->method('createConnector')->willReturn($mock);
+
+        $connection = $factory->make(array(
+            'driver' => $driver
+        ));
+
+		if(!is_null($instance))
+        {
+            $this->assertInstanceOf($instance, $connection->getQueryGrammar());
+        }
+	}
+
+    public function driversGrammarProvider()
+    {
+        return array(
+            array('mysql', 'Database\Query\Grammars\MySqlGrammar'),
+            array('pgsql', 'Database\Query\Grammars\PostgresGrammar'),
+            array('sqlite', 'Database\Query\Grammars\SQLiteGrammar'),
+            array('sqlsrv', 'Database\Query\Grammars\SqlServerGrammar'),
+            array('blahblah', null)
+        );
+    }
+
 
 	/**
 	 * @expectedException InvalidArgumentException
