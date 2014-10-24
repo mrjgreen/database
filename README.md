@@ -124,6 +124,12 @@ $firstColumnFirstRow = $connection->fetchOne('SELECT COUNT(*) FROM users WHERE n
 
 ###Selects
 
+####Get PDOStatement
+If you intend to iterate through the rows, it may be more efficient to get the PDOStatement
+```PHP
+$rows = $connection->table('users')->query();
+```
+
 ####Get All
 ```PHP
 $rows = $connection->table('users')->get();
