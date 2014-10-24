@@ -299,8 +299,6 @@ $query->getBindings();
    
 
 ###Raw PDO Instance
-You can access the PDO object in use on any connection:
-
 ```PHP
 $connection->getPdo();
-``
+```
