@@ -12,7 +12,7 @@ Features:
 * Joins
 * Sub Queries
 * Nested Queries
-* Bulk Insersts
+* Bulk Inserts
 * Database Connection Resolver
 
 The component is based on Laravel's Illuminate\Database and has very familiar syntax. The core Query Builder is mostly compatible. The main alterations are to the composition of the objects, and most significantly the creation and resolution of connections within the ConnectionFactory and ConnectionResolver classes.
@@ -55,6 +55,8 @@ $connection->query("SELECT id, username FROM customers");
     - [Group By, Order By and Having](#group-by-order-by-and-having)
     - [Sub Selects](#sub-selects)
  - [Insert](#insert)
+    - [Insert Ignore](#insert-ignore)
+    - [Replace](#replace)
     - [Batch Insert](#batch-insert)
  - [Update](#update)
  - [Delete](#delete)
@@ -245,6 +247,26 @@ $data = array(
     'name' = 'John Smith'
 );
 $insertIds = $connection->table('users')->insert($data);
+```
+
+###Insert Ignore
+Ignore errors from any rows inserted with a duplicate unique key
+```PHP
+$data = array(
+    'username' = 'jsmith',
+    'name' = 'John Smith'
+);
+$insertIds = $connection->table('users')->insertIgnore($data);
+```
+
+###Replace
+Replace existing rows with a matching unique key
+```PHP
+$data = array(
+    'username' = 'jsmith',
+    'name' = 'John Smith'
+);
+$insertIds = $connection->table('users')->replace($data);
 ```
 
 `insert()` method returns the insert id.
