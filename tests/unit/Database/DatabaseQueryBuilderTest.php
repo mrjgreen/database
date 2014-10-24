@@ -836,11 +836,11 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
     {
         $builder = $this->getBuilder();
         $builder->getConnection()->shouldReceive('query')->once()
-            ->with('insert into "users" ("email") values (?), (?) on duplicate key update "total" = "total" + 1, "email" = VALUES("email")', array('foo', 'bar'))->andReturn(true);
+            ->with('insert into "users" ("email", "name") values (?, ?), (?, ?) on duplicate key update "total" = "total" + 1, "email" = VALUES("email")', array('foo', 'John', 'bar', 'Smith'))->andReturn(true);
         $result = $builder
             ->from('users')
             ->insertOnDuplicateKeyUpdate(
-                array(array('email' => 'foo'), array('email' => 'bar')),
+                array(array('email' => 'foo', 'name' => 'John') , array('email' => 'bar', 'name' => 'Smith')),
                 array('total' => new \Database\Query\Expression('"total" + 1'), 'email' => new \Database\Query\Expression('VALUES("email")'))
             );
 

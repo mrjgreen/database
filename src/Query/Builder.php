@@ -1426,7 +1426,7 @@ class Builder
      *
      * @param array $values
      * @param array $updateValues an array of column => bindings pairs to update
-     * @return bool|int|\PDOStatement
+     * @return \PDOStatement
      */
     public function insertOnDuplicateKeyUpdate(array $values, array $updateValues)
     {
@@ -1449,6 +1449,22 @@ class Builder
         return $this->connection->query($sql, $bindings);
     }
 
+    /**
+     * Alias for insertOnDuplicateKeyUpdate
+     *
+     * @param array $values
+     * @param array $updateValues
+     * @return \PDOStatement
+     */
+    public function insertUpdate(array $values, array $updateValues)
+    {
+        return $this->insertOnDuplicateKeyUpdate($values, $updateValues);
+    }
+
+    /**
+     * @param $values
+     * @return array
+     */
     private function buildBulkInsertBindings($values)
     {
         // We'll treat every insert like a batch insert so we can easily insert each
@@ -1489,7 +1505,7 @@ class Builder
      * Update a record in the database.
      *
      * @param  array $values
-     * @return int
+     * @return \PDOStatement
      */
     public function update(array $values)
     {
@@ -1506,7 +1522,7 @@ class Builder
      * @param  string $column
      * @param  int $amount
      * @param  array $extra
-     * @return int
+     * @return \PDOStatement
      */
     public function increment($column, $amount = 1, array $extra = array())
     {
@@ -1523,7 +1539,7 @@ class Builder
      * @param  string $column
      * @param  int $amount
      * @param  array $extra
-     * @return int
+     * @return \PDOStatement
      */
     public function decrement($column, $amount = 1, array $extra = array())
     {
@@ -1538,7 +1554,7 @@ class Builder
      * Delete a record from the database.
      *
      * @param  mixed $id
-     * @return int
+     * @return \PDOStatement
      */
     public function delete($id = null)
     {

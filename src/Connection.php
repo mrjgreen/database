@@ -227,7 +227,7 @@ class Connection implements ConnectionInterface
     /**
      * @param string $query
      * @param array $bindings
-     * @return bool|int|\PDOStatement
+     * @return \PDOStatement
      */
     public function query($query, array $bindings = array())
     {
@@ -304,7 +304,7 @@ class Connection implements ConnectionInterface
      * @param  string $query
      * @param  array $bindings
      * @param  bool $useReadPdo
-     * @return \PDOStatement|int
+     * @return \PDOStatement
      *
      * @throws \Database\QueryException
      */
