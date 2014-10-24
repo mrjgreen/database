@@ -7,13 +7,13 @@ The Database component is a framework agnostic PHP database abstraction layer, p
 
 Features:
 
-	* Joins
-	* Sub Queries
-	* Nested Queries
-	* Support for Insert Ignore / Replace
-	* Bulk Insersts
-	* Simple CRUD functions
-	* Database Connection Resolver
+* Simple CRUD functions
+* Support for Insert Ignore / Replace
+* Joins
+* Sub Queries
+* Nested Queries
+* Bulk Insersts
+* Database Connection Resolver
 
 The component is based on Laravel's Illuminate\Database and has very familiar syntax. The core Query Builder is mostly compatible. The main alterations are to the composition of the objects, and most significantly the creation and resolution of connections within the ConnectionFactory and ConnectionResolver classes.
 
