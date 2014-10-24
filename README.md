@@ -197,6 +197,29 @@ $users = $connection->table('users')
                     ->get();
 ```
 
+
+#### Joins
+```PHP
+$connection->table('users')
+    ->join('products', 'user_id', '=', 'users.id')
+    ->get();
+/*
+    ->leftJoin()
+    ->rightJoin()
+*/
+```
+
+#### Multiple Join Criteria
+If you need more than one criterion to join a table then you can pass a closure as second parameter.
+
+```PHP
+->join('products', function($table)
+    {
+        $table->on('users.id', '=', 'products.user_id');
+        $table->on('products.price', '>', 'users.max_price');
+    })
+```
+
 ####Sub Selects
 
 ```PHP
