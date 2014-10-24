@@ -1416,16 +1416,41 @@ class Builder
             $values = array($values);
         }
 
+        $sql = $this->grammar->{'compile' . ucfirst($type)}($this, $values);
+
+        return $this->connection->query($sql, $this->buildBulkInsertBindings($values));
+    }
+
+    /**
+     * Insert a new record into the database, with an update if it exists
+     *
+     * @param array $values
+     * @param array $updateValues an array of column => bindings pairs to update
+     * @return bool|int|\PDOStatement
+     */
+    public function insertOnDuplicateKeyUpdate(array $values, array $updateValues)
+    {
         // Since every insert gets treated like a batch insert, we will make sure the
         // bindings are structured in a way that is convenient for building these
         // inserts statements by verifying the elements are actually an array.
-        else {
-            foreach ($values as $key => $value) {
-                ksort($value);
-                $values[$key] = $value;
-            }
+        if (!is_array(reset($values))) {
+            $values = array($values);
         }
 
+        $bindings = $this->buildBulkInsertBindings($values);
+
+        foreach($updateValues as $value)
+        {
+            if(!$value instanceof Expression) $bindings[] = $value;
+        }
+
+        $sql = $this->grammar->{'compileInsertOnDuplicateKeyUpdate'}($this, $values, $updateValues);
+
+        return $this->connection->query($sql, $bindings);
+    }
+
+    private function buildBulkInsertBindings($values)
+    {
         // We'll treat every insert like a batch insert so we can easily insert each
         // of the records into the database consistently. This will make it much
         // easier on the grammars to just handle one type of record insertion.
@@ -1433,18 +1458,11 @@ class Builder
 
         foreach ($values as $record) {
             foreach ($record as $value) {
-                $bindings[] = $value;
+                if(!$value instanceof Expression) $bindings[] = $value;
             }
         }
 
-        $sql = $this->grammar->{'compile' . ucfirst($type)}($this, $values);
-
-        // Once we have compiled the insert statement's SQL we can execute it on the
-        // connection and return a result as a boolean success indicator as that
-        // is the same type of result returned by the raw connection instance.
-        $bindings = $this->cleanBindings($bindings);
-
-        return $this->connection->query($sql, $bindings);
+        return $bindings;
     }
 
     /**

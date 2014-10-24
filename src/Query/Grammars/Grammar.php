@@ -738,6 +738,22 @@ class Grammar
      * @param  array $values
      * @return string
      */
+    public function compileInsertOnDuplicateKeyUpdate(Builder $query, array $values, array $updateValues)
+    {
+        $insert = $this->compileInsert($query, $values);
+
+        $update = $this->getUpdateColumns($updateValues);
+
+        return "$insert on duplicate key update $update";
+    }
+
+    /**
+     * Compile an insert statement into SQL.
+     *
+     * @param  \Database\Query\Builder $query
+     * @param  array $values
+     * @return string
+     */
     protected function doCompileInsert(Builder $query, array $values, $type)
     {
         // Essentially we will force every insert to be treated as a batch insert which
@@ -823,16 +839,7 @@ class Grammar
     {
         $table = $this->wrapTable($query->from);
 
-        // Each one of the columns in the update statements needs to be wrapped in the
-        // keyword identifiers, also a place-holder needs to be created for each of
-        // the values in the list of bindings so we can make the sets statements.
-        $columns = array();
-
-        foreach ($values as $key => $value) {
-            $columns[] = $this->wrap($key) . ' = ' . $this->parameter($value);
-        }
-
-        $columns = implode(', ', $columns);
+        $columns = $this->getUpdateColumns($values);
 
         // If the query has any "join" clauses, we will setup the joins on the builder
         // and compile them so we can attach them to this update, as update queries
@@ -849,6 +856,28 @@ class Grammar
         $where = $this->compileWheres($query);
 
         return trim("update {$table}{$joins} set $columns $where");
+    }
+
+    /**
+     * Build an update spec from an array.
+     *
+     * E.G.: `col1` = ?, `col2` = ?, `col3` = `col3` + 1
+     *
+     * @param $values
+     * @return string
+     */
+    protected function getUpdateColumns($values)
+    {
+        // Each one of the columns in the update statements needs to be wrapped in the
+        // keyword identifiers, also a place-holder needs to be created for each of
+        // the values in the list of bindings so we can make the sets statements.
+        $columns = array();
+
+        foreach ($values as $key => $value) {
+            $columns[] = $this->wrap($key) . ' = ' . $this->parameter($value);
+        }
+
+        return implode(', ', $columns);
     }
 
     /**

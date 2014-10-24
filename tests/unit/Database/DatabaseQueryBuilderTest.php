@@ -819,6 +819,33 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $result);
 	}
 
+    public function testInsertOnDuplicateKeyMethod()
+    {
+        $builder = $this->getBuilder();
+        $builder->getConnection()->shouldReceive('query')->once()
+            ->with('insert into "users" ("email") values (?) on duplicate key update "total" = ?', array('foo', 'blah'))->andReturn(true);
+
+        $result = $builder
+            ->from('users')
+            ->insertOnDuplicateKeyUpdate(array('email' => 'foo'), array('total' => 'blah'));
+
+        $this->assertTrue($result);
+    }
+
+    public function testInsertOnDuplicateKeyRawMethod()
+    {
+        $builder = $this->getBuilder();
+        $builder->getConnection()->shouldReceive('query')->once()
+            ->with('insert into "users" ("email") values (?), (?) on duplicate key update "total" = "total" + 1, "email" = VALUES("email")', array('foo', 'bar'))->andReturn(true);
+        $result = $builder
+            ->from('users')
+            ->insertOnDuplicateKeyUpdate(
+                array(array('email' => 'foo'), array('email' => 'bar')),
+                array('total' => new \Database\Query\Expression('"total" + 1'), 'email' => new \Database\Query\Expression('VALUES("email")'))
+            );
+
+        $this->assertTrue($result);
+    }
 
 	public function testDeleteMethod()
 	{
