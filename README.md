@@ -18,9 +18,9 @@ Features:
 
 The component is based on Laravel's Illuminate\Database and has very familiar syntax. The core Query Builder is mostly compatible. The main alterations are to the composition of the objects, and most significantly the creation and resolution of connections within the ConnectionFactory and ConnectionResolver classes.
 
-### Usage Instructions
+### Basic Example
 
-First, create a new "Factory" instance.
+First, create a new "ConnectionFactory" instance.
 
 ```PHP
 $factory = new \Database\Connectors\ConnectionFactory();
