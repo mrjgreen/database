@@ -50,40 +50,20 @@ $connection->table('customers')
 ### Table of Contents
 
  - [Connection](#connection)
-    - [Alias](#alias)
-    - [Multiple Connection](#alias)
-    - [SQLite and PostgreSQL Config Sample](sqlite-and-postgresql-config-sample)
+    - [SQLite](sqlite)
  - [Query](#query)
- - [**Select**](#select)
-    - [Get Easily](#get-easily)
-    - [Multiple Selects](#multiple-selects)
-    - [Get All](#get-all)
-    - [Get First Row](#get-first-row)
-    - [Get Rows Count](#get-rows-count)
- - [**Where**](#where)
-    - [Where In](#where-in)
-    - [Grouped Where](#grouped-where)
- - [Group By and Order By](#group-by-and-order-by)
- - [Having](#having)
+ - [**Selects**](#selects)
+    - [Find By ID](#find-by-id)
  - [Limit and Offset](#limit-and-offset)
- - [Join](#join)
-    - [Multiple Join Criteria](#multiple-join-criteria)
  - [Raw Query](#raw-query)
     - [Raw Expressions](#raw-expressions)
  - [**Insert**](#insert)
     - [Batch Insert](#batch-insert)
  - [**Update**](#update)
  - [**Delete**](#delete)
- - [Get Built Query](#get-built-query)
- - [Sub Queries and Nested Queries](#sub-queries-and-nested-queries)
- - [Get PDO Instance](#get-pdo-instance)
- - [Query Events](#query-events)
-    - [Available Events](#available-events)
-    - [Registering Events](#registering-events)
-    - [Removing Events](#removing-events)
-    - [Some Use Cases](#some-use-cases)
-    - [Notes](#notes)
-
+ - [Get SQL](#get-sql-query-and-bindings)
+ - [Sub Queries](#sub-queries)
+ - [Raw PDO Instance](#raw-pdo-instance)
 ___
 
 ## Connection
@@ -121,8 +101,9 @@ $connection = $factory->make(array(
     'database' => '/path/to/sqlite.db',
 ));
 ```
+## Selects
 
-### Find By Id
+### Find By ID
 ```PHP
 $row = $connection->table('users')->find(6);
 ```
