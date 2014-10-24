@@ -1428,7 +1428,7 @@ class Builder
      * @param array $updateValues an array of column => bindings pairs to update
      * @return \PDOStatement
      */
-    public function insertOnDuplicateKeyUpdate(array $values, array $updateValues)
+    public function insertUpdate(array $values, array $updateValues)
     {
         // Since every insert gets treated like a batch insert, we will make sure the
         // bindings are structured in a way that is convenient for building these
@@ -1456,9 +1456,9 @@ class Builder
      * @param array $updateValues
      * @return \PDOStatement
      */
-    public function insertUpdate(array $values, array $updateValues)
+    public function insertOnDuplicateKeyUpdate(array $values, array $updateValues)
     {
-        return $this->insertOnDuplicateKeyUpdate($values, $updateValues);
+        return $this->insertUpdate($values, $updateValues);
     }
 
     /**

@@ -9,6 +9,7 @@ Features:
 
 * Simple CRUD functions
 * Support for Insert Ignore / Replace
+* Support for Insert On Duplicate Key Update
 * Joins
 * Sub Queries
 * Nested Queries
@@ -58,6 +59,7 @@ $connection->query("SELECT id, username FROM customers");
  - [Insert](#insert)
     - [Insert Ignore](#insert-ignore)
     - [Replace](#replace)
+    - [On Duplicate Key Update](#on-duplicate-key-update)
     - [Batch Insert](#batch-insert)
  - [Update](#update)
  - [Delete](#delete)
@@ -270,7 +272,9 @@ $data = array(
     'username' = 'jsmith',
     'name' = 'John Smith'
 );
-$insertIds = $connection->table('users')->insert($data);
+$connection->table('users')->insert($data);
+
+`insertGetId()` method returns the insert id.
 ```
 
 ###Insert Ignore
@@ -280,7 +284,7 @@ $data = array(
     'username' = 'jsmith',
     'name' = 'John Smith'
 );
-$insertIds = $connection->table('users')->insertIgnore($data);
+$connection->table('users')->insertIgnore($data);
 ```
 
 ###Replace
@@ -290,10 +294,25 @@ $data = array(
     'username' = 'jsmith',
     'name' = 'John Smith'
 );
-$insertIds = $connection->table('users')->replace($data);
+$connection->table('users')->replace($data);
 ```
 
-`insert()` method returns the insert id.
+###On Duplicate Key Update
+```PHP
+$data = array(
+    'username' = 'jsmith',
+    'name' = 'John Smith'
+);
+
+$now = $connection->raw('NOW()');
+
+$connection->table('users')->insertUpdate(
+    array('username' => 'jsmith', 'active' => $now), // Insert this data
+    array('active' => $now)                          // Or partially update the row if it exists
+);
+
+//insertOnDuplicateKeyUpdate() is an alias of insertUpdate
+```
 
 ####Batch Insert
 The query builder will intellegently handle multiple insert rows:
@@ -308,7 +327,9 @@ $data = array(
 	    'name' = 'Joe Bloggs'
 	),
 );
-$insertIds = $connection->table('users')->insert($data);
+$connection->table('users')->insert($data);
+
+`insertGetId()` method returns the insert ids.
 ```
 
 ###Update
