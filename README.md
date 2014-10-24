@@ -45,32 +45,37 @@ $connection->table('customers')
 	   ->where('price','>', 100)
 	   ->get();
 ```
-## Full Usage API
+## Documentation
 
 ### Table of Contents
 
- - [Connection](#connection)
-    - [SQLite](sqlite)
- - [Query](#query)
- - [**Selects**](#selects)
+ - [**Connection**](#connection)
+    - [SQLite](#sqlite)
+ - [**Raw Queries**](#raw-queries)
+    - [Query Shortcuts](#query-shortcuts)
+ - [**Query Builder**](#query-builder)
+ - [Selects](#selects)
     - [Find By ID](#find-by-id)
- - [Limit and Offset](#limit-and-offset)
- - [Raw Query](#raw-query)
-    - [Raw Expressions](#raw-expressions)
- - [**Insert**](#insert)
+    - [Select Columns](#select-columns)
+    - [Limit and Offset](#limit-and-offset)
+    - [Sub Selects](#sub-selects)
+ - [Insert](#insert)
     - [Batch Insert](#batch-insert)
- - [**Update**](#update)
- - [**Delete**](#delete)
+ - [Update](#update)
+ - [Delete](#delete)
+ - [Raw Expressions](#raw-expressions)
  - [Get SQL](#get-sql-query-and-bindings)
- - [Sub Queries](#sub-queries)
  - [Raw PDO Instance](#raw-pdo-instance)
 ___
 
 ## Connection
-Pixie supports three database drivers, MySQL, SQLite and PostgreSQL. You can specify the driver during connection and the associated configuration when creating a new connection. You can also create multiple connections, but you can use alias for only one connection at a time.;
+The Database component supports MySQL, SQLite, SqlServer and PostgreSQL drivers. You can specify the driver during connection and the associated configuration when creating a new connection. You can also create multiple connections, but you can use alias for only one connection at a time.;
 ```PHP
 $factory = new \Database\Connectors\ConnectionFactory();
+```
 
+### MySQL
+```PHP
 $connection = $factory->make(array(
     'driver'    => 'mysql',
     'host'      => 'localhost',
@@ -82,14 +87,12 @@ $connection = $factory->make(array(
 
 $connection->fetchAll("SELECT id, username FROM customers"); 
 
-
 $connection->table('customers')
 	   ->find(12);
 	   
 $connection->table('customers')
 	   ->join('products', 'customer.id', '=', 'customer_id')
 	   ->where('favourites', '=', 1)
-	   ->where('price','>', 100)
 	   ->get();
 ```
 
@@ -101,29 +104,8 @@ $connection = $factory->make(array(
     'database' => '/path/to/sqlite.db',
 ));
 ```
-## Selects
 
-### Find By ID
-```PHP
-$row = $connection->table('users')->find(6);
-```
-
-The query above assumes your table's primary key is `'id'`. You can specify your primary key:
-```PHP
-$connection->table('users')->find(3, 'user_id');
-```
-
-### Select
-```PHP
-$rows = $connection->table('users')->select('name')->addSelect('age', 'dob')->get();
-```
-
-### Limit and Offset
-```PHP
-$connection->table('users')->offset(100)->limit(10);
-```
-
-### Queries
+##Raw Queries
 Perform a query, with bindings and return the PDOStatement object
 ```PHP
 $statement = $connection->query('SELECT * FROM users WHERE name = ?', array('John Smith'));
@@ -133,7 +115,7 @@ $statement->rowCount();
 $statement->fetchAll();
 ```
 
-####Statement Shortcuts
+###Query Shortcuts
 ```PHP
 $firstRow = $connection->fetch('SELECT * FROM users WHERE name = ?', array('John Smith'));
 
@@ -142,22 +124,50 @@ $allRows = $connection->fetchAll('SELECT * FROM users WHERE name = ?', array('Jo
 $firstColumnFirstRow = $connection->fetchOne('SELECT COUNT(*) FROM users WHERE name = ?', array('John Smith'));
 ```
 
-#### Raw Expressions
 
-Wrap raw queries with `$connection->raw()` to bypass query parameter binding. NB use with caution - no sanitisation will take place.
+##Query Builder
+
+###Selects
+
+#### Find By ID
 ```PHP
-$connection->table('users')
-            ->select($connection->raw('DATE(activity_time) as activity_date'))
-            ->where('user', '=', 123)
-            ->get();
+$row = $connection->table('users')->find(6);
 ```
 
+The query above assumes your table's primary key is `'id'`. You can specify your primary key:
+```PHP
+$connection->table('users')->find(3, 'user_id');
+```
 
-___
+#### Select Columns
+```PHP
+$rows = $connection->table('users')->select('name')->addSelect('age', 'dob')->get();
+```
+
+#### Limit and Offset
+```PHP
+$connection->table('users')->offset(100)->limit(10);
+```
+
+#### Sub Selects
+
+```PHP
+$query = $connection->table('users')
+            ->selectSub(function($subQuery){
+            	$subQuery
+            	->table('customer')
+            	->select('name')
+            	->where('id', '=', 'users.id');
+            }, 'tmp');
+```
+
+This will produce a query like this:
+
+    SELECT (SELECT `name` FROM `customer` WHERE `id` = users.id) as `tmp` FROM `users`
 
 ### Insert
 ```PHP
-$data = aarray(
+$data = array(
     'username' = 'jsmith',
     'name' = 'John Smith'
 );
@@ -198,6 +208,16 @@ $connection->table('users')->where('last_active', '>', 12)->delete();
 ```
 Will delete all the rows where id is greater than 5.
 
+### Raw Expressions
+
+Wrap raw queries with `$connection->raw()` to bypass query parameter binding. NB use with caution - no sanitisation will take place.
+```PHP
+$connection->table('users')
+            ->select($connection->raw('DATE(activity_time) as activity_date'))
+            ->where('user', '=', 123)
+            ->get();
+```
+
 ### Get SQL Query and Bindings
 Sometimes you may need to get the query string, its possible.
 ```PHP
@@ -208,22 +228,6 @@ $query->toSql();
 $queryObj->getBindings();
 // array(1)
 ```
-
-### Sub Selects
-
-```PHP
-$query = $connection->table('users')
-            ->select(function($subQuery){
-            	$subQuery
-            	->table('customer')
-            	->select('name')
-            	->where('id', '=', 'users.id');
-            });
-```
-
-This will produce a query like this:
-
-    SELECT (SELECT `name` FROM `customer` WHERE `id` = users.id) FROM `users`
    
 
 ### Raw PDO Instance
