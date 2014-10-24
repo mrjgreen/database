@@ -33,7 +33,7 @@ class QueryException extends PDOException
 
         $this->sql = $sql;
         $this->bindings = $bindings;
-        $this->previous = $previous;
+        //$this->previous = $previous;
         $this->code = $previous->getCode();
         $this->message = $this->formatMessage($sql, $bindings, $previous);
 
