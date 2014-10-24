@@ -16,7 +16,8 @@
         "php": ">=5.4.0"
     },
     "require-dev": {
-        "mockery/mockery": "*"
+        "mockery/mockery": "*",
+        "satooshi/php-coveralls": "dev-master"
     },
     "autoload": {
         "psr-4": {
