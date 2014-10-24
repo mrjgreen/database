@@ -33,17 +33,7 @@ $connection = $factory->make(array(
     'collation' => 'utf8_unicode_ci',
 ));
 
-$connection->fetchAll("SELECT id, username FROM customers"); 
-
-
-$connection->table('customers')
-	   ->find(12);
-	   
-$connection->table('customers')
-	   ->join('products', 'customer.id', '=', 'customer_id')
-	   ->where('favourites', '=', 1)
-	   ->where('price','>', 100)
-	   ->get();
+$connection->query("SELECT id, username FROM customers");
 ```
 ## Documentation
 
