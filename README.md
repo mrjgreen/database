@@ -55,9 +55,14 @@ $connection->table('customers')
     - [Query Shortcuts](#query-shortcuts)
  - [**Query Builder**](#query-builder)
  - [Selects](#selects)
+    - [Get All](#get-all)
+    - [Get First Row](#get-first-row)
     - [Find By ID](#find-by-id)
     - [Select Columns](#select-columns)
     - [Limit and Offset](#limit-and-offset)
+    - [Where](#where)
+    - [Grouped Where](#grouped-where)
+    - [Group By, Order By and Having](#group-by-order-by-and-having)
     - [Sub Selects](#sub-selects)
  - [Insert](#insert)
     - [Batch Insert](#batch-insert)
@@ -129,7 +134,17 @@ $firstColumnFirstRow = $connection->fetchOne('SELECT COUNT(*) FROM users WHERE n
 
 ###Selects
 
-#### Find By ID
+####Get All
+```PHP
+$rows = $connection->table('users')->get();
+```
+
+####Get First Row
+```PHP
+$row = $connection->table('users')->first();
+```
+
+####Find By ID
 ```PHP
 $row = $connection->table('users')->find(6);
 ```
@@ -139,17 +154,52 @@ The query above assumes your table's primary key is `'id'`. You can specify your
 $connection->table('users')->find(3, 'user_id');
 ```
 
-#### Select Columns
+####Select Columns
 ```PHP
 $rows = $connection->table('users')->select('name')->addSelect('age', 'dob')->get();
 ```
 
-#### Limit and Offset
+####Limit and Offset
 ```PHP
 $connection->table('users')->offset(100)->limit(10);
 ```
 
-#### Sub Selects
+####Where
+
+```PHP
+$connection->table('user')
+    ->where('username', '=', 'jsmith')
+    ->whereNotIn('age', array(10,20,30))
+    ->orWhere('type', '=', 'admin')
+    ->orWhereNot('name', 'LIKE', '%Smith%')
+    ->get();
+```
+
+#####Grouped Where
+
+```PHP
+$connection->table('users')
+            ->where('age', '>', 10)
+            ->orWhere(function($subWhere)
+                {
+                    $subWhere
+                        ->where('animal', '=', 'dog')
+                        ->where('age', '>', 1)
+                });
+
+SELECT * FROM `users` WHERE `age` > 10 or (`age` > 1 and `animal` = 'dog')`.
+```
+
+####Group By, Order By and Having
+```PHP
+$users = $connection->table('users')
+                    ->orderBy('name', 'desc')
+                    ->groupBy('count')
+                    ->having('count', '>', 100)
+                    ->get();
+```
+
+####Sub Selects
 
 ```PHP
 $query = $connection->table('users')
@@ -165,7 +215,34 @@ This will produce a query like this:
 
     SELECT (SELECT `name` FROM `customer` WHERE `id` = users.id) as `tmp` FROM `users`
 
-### Insert
+####Aggregates
+
+#####Count
+```PHP
+$count = $connection->table('users')->count();
+```
+
+#####Min
+```PHP
+$count = $connection->table('users')->min('age');
+```
+
+#####Max
+```PHP
+$count = $connection->table('users')->max('age');
+```
+
+#####Average
+```PHP
+$count = $connection->table('users')->avg('age');
+```
+
+#####Sum
+```PHP
+$count = $connection->table('users')->sum('age');
+```
+
+###Insert
 ```PHP
 $data = array(
     'username' = 'jsmith',
@@ -176,7 +253,7 @@ $insertIds = $connection->table('users')->insert($data);
 
 `insert()` method returns the insert id.
 
-#### Batch Insert
+####Batch Insert
 The query builder will intellegently handle multiple insert rows:
 ```PHP
 $data = array(
@@ -192,7 +269,7 @@ $data = array(
 $insertIds = $connection->table('users')->insert($data);
 ```
 
-### Update
+###Update
 ```PHP
 $data = array(
     'username' = 'jsmith123',
@@ -202,13 +279,14 @@ $data = array(
 $connection->table('users')->where('id', 123)->update($data);
 ```
 
-### Delete
+###Delete
 ```PHP
 $connection->table('users')->where('last_active', '>', 12)->delete();
 ```
+
 Will delete all the rows where id is greater than 5.
 
-### Raw Expressions
+###Raw Expressions
 
 Wrap raw queries with `$connection->raw()` to bypass query parameter binding. NB use with caution - no sanitisation will take place.
 ```PHP
@@ -218,19 +296,19 @@ $connection->table('users')
             ->get();
 ```
 
-### Get SQL Query and Bindings
-Sometimes you may need to get the query string, its possible.
+###Get SQL Query and Bindings
+
 ```PHP
-$query = $connection->table('users')->find(1);
+$query = $connection->table('users')->find(1)->toSql();
 $query->toSql();
 // SELECT * FROM users where `id` = ?
 
-$queryObj->getBindings();
+$query->getBindings();
 // array(1)
 ```
    
 
-### Raw PDO Instance
+###Raw PDO Instance
 You can access the PDO object in use on any connection:
 
 ```PHP
