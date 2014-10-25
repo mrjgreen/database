@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mrjgreen/database.svg?branch=master)](https://travis-ci.org/mrjgreen/database)
 [![Coverage Status](https://img.shields.io/coveralls/mrjgreen/database.svg)](https://coveralls.io/r/mrjgreen/database)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/4a157949-f3dd-46a4-958c-b4c02ec836b3/mini.png)](https://insight.sensiolabs.com/projects/4a157949-f3dd-46a4-958c-b4c02ec836b3)
 
 The Database component is a framework agnostic PHP database abstraction layer, providing an expressive query builder. It currently supports MySQL, Postgres, SQL Server, and SQLite.
 
