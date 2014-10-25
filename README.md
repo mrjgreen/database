@@ -274,8 +274,9 @@ $data = array(
     'name' = 'John Smith'
 );
 $connection->table('users')->insert($data);
+// Returns PDOStatement
 
-`insertGetId()` method returns the insert id.
+`->insertGetId($data)` method returns the insert id instead of a PDOStatement
 ```
 
 ###Insert Ignore
@@ -312,8 +313,6 @@ $data = array(
 	),
 );
 $connection->table('users')->insert($data);
-
-`insertGetId()` method returns the insert ids.
 ```
 
 You can also pass bulk inserts to replace() and insertIgnore()
