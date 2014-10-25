@@ -378,7 +378,7 @@ class Builder
         // and can add them each as a where clause. We will maintain the boolean we
         // received when the method was called and pass it into the nested where.
         if (is_array($column)) {
-            return $this->whereNested(function ($query) use ($column) {
+            return $this->whereNested(function (Builder $query) use ($column) {
                 foreach ($column as $key => $value) {
                     $query->where($key, '=', $value);
                 }
@@ -563,7 +563,7 @@ class Builder
      * @param  string $boolean
      * @return $this
      */
-    public function addNestedWhereQuery($query, $boolean = 'and')
+    public function addNestedWhereQuery(Builder $query, $boolean = 'and')
     {
         if (count($query->wheres)) {
             $type = 'Nested';
