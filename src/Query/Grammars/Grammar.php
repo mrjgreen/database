@@ -147,7 +147,7 @@ class Grammar
      * @param  \Database\Query\Expression $expression
      * @return string
      */
-    public function getValue($expression)
+    public function getValue(Expression $expression)
     {
         return $expression->getValue();
     }

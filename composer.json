@@ -1,5 +1,6 @@
 {
     "name": "mrjgreen/database",
+    "description" : "Expressive Database Layer for PHP - Based on Illuminate/Database",
     "license": "MIT",
     "keywords": ["database", "sql", "dbal", "query builder"],
     "authors": [
