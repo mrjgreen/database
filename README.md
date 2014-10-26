@@ -42,6 +42,7 @@ $connection->query("SELECT id, username FROM customers");
 ### Table of Contents
 
  - [**Connection**](#connection)
+    - [MySQL](#mysql)
     - [SQLite](#sqlite)
  - [**Raw Queries**](#raw-queries)
     - [Query Shortcuts](#query-shortcuts)
