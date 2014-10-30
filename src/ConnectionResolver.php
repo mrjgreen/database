@@ -87,7 +87,7 @@ class ConnectionResolver implements ConnectionResolverInterface
     {
         if (is_null($name)) $name = $this->getDefaultConnection();
 
-        return $this->connections[$name];
+        return $this->value($this->connections[$name]);
     }
 
     /**
@@ -101,10 +101,6 @@ class ConnectionResolver implements ConnectionResolverInterface
      */
     public function addConnection($name, $connection)
     {
-        if (!is_array($connection)) {
-            throw new \InvalidArgumentException('Argument 2 must be an array containing a valid connection configuration. Type "' . gettype($connection) . '" given.');
-        }
-
         $this->connections[$name] = $connection;
     }
 
@@ -138,5 +134,14 @@ class ConnectionResolver implements ConnectionResolverInterface
     public function setDefaultConnection($name)
     {
         $this->default = $name;
+    }
+
+    /**
+     * @param $value
+     * @return mixed
+     */
+    protected function value($value)
+    {
+        return $value instanceof \Closure ? $value() : $value;
     }
 }
