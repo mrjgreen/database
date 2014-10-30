@@ -56,11 +56,25 @@ class ConnectionResolver implements ConnectionResolverInterface
     {
         if (is_null($name)) $name = $this->getDefaultConnection();
 
-        if (!isset($this->connectionCache[$name])) {
-            $this->connectionCache[$name] = $this->connectionFactory->make($this->connectionConfig($name));
+        if (!isset($this->connectionCache[$name]))
+        {
+            $this->connectionCache[$name] = $this->newConnection($name);
         }
 
         return $this->connectionCache[$name];
+    }
+
+    /**
+     * Get a new database connection, without the
+     *
+     * @param $name
+     * @return mixed
+     */
+    public function newConnection($name = null)
+    {
+        if (is_null($name)) $name = $this->getDefaultConnection();
+
+        return $this->connectionFactory->make($this->connectionConfig($name));
     }
 
     /**
