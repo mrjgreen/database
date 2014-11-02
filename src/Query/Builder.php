@@ -1421,6 +1421,69 @@ class Builder
         return $this->connection->query($sql, $this->buildBulkInsertBindings($values));
     }
 
+
+    /**
+     * @param $select \Closure|static
+     * @param array $columns
+     * @return bool|\PDOStatement
+     * @throws \Exception
+     */
+    protected function doInsertSelect($select, array $columns, $type)
+    {
+        if($select instanceof Closure)
+        {
+            $callback = $select;
+
+            $select = $this->newQuery();
+
+            call_user_func($callback, $select);
+        }
+
+        if(!$select instanceof Builder)
+        {
+            throw new \Exception("Argument 1 must be a closure or an instance of Database\\Query\\Builder");
+        }
+
+        $sql = $this->grammar->{'compile' . ucfirst($type) . 'Select'}($this, $columns, $select, $type);
+
+        $bindings = $select->getBindings();
+
+        return $this->connection->query($sql, $bindings);
+    }
+
+    /**
+     * @param $select \Closure|static
+     * @param array $columns
+     * @return bool|\PDOStatement
+     * @throws \Exception
+     */
+    public function insertSelect($select, array $columns)
+    {
+        return $this->doInsertSelect($select, $columns, 'insert');
+    }
+
+    /**
+     * @param $select \Closure|static
+     * @param array $columns
+     * @return bool|\PDOStatement
+     * @throws \Exception
+     */
+    public function insertIgnoreSelect($select, array $columns)
+    {
+        return $this->doInsertSelect($select, $columns, 'insertIgnore');
+    }
+
+    /**
+     * @param $select \Closure|static
+     * @param array $columns
+     * @return bool|\PDOStatement
+     * @throws \Exception
+     */
+    public function replaceSelect($select, array $columns)
+    {
+        return $this->doInsertSelect($select, $columns, 'replace');
+    }
+
     /**
      * Insert a new record into the database, with an update if it exists
      *

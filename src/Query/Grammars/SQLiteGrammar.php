@@ -23,7 +23,7 @@ class SQLiteGrammar extends Grammar
      * @param  array $values
      * @return string
      */
-    public function compileInsert(Builder $query, array $values)
+    public function doCompileInsert(Builder $query, array $values, $type)
     {
         // Essentially we will force every insert to be treated as a batch insert which
         // simply makes creating the SQL easier for us since we can utilize the same
@@ -38,7 +38,7 @@ class SQLiteGrammar extends Grammar
         // grammar insert builder because no special syntax is needed for the single
         // row inserts in SQLite. However, if there are multiples, we'll continue.
         if (count($values) == 1) {
-            return parent::compileInsert($query, reset($values));
+            return parent::doCompileInsert($query, reset($values), $type);
         }
 
         $names = $this->columnize(array_keys(reset($values)));
@@ -54,7 +54,19 @@ class SQLiteGrammar extends Grammar
 
         $columns = array_fill(0, count($values), implode(', ', $columns));
 
-        return "insert into $table ($names) select " . implode(' union select ', $columns);
+        return "$type into $table ($names) select " . implode(' union select ', $columns);
+    }
+
+    /**
+     * Compile an insert statement into SQL.
+     *
+     * @param  \Database\Query\Builder $query
+     * @param  array $values
+     * @return string
+     */
+    public function compileInsertIgnore(Builder $query, array $values)
+    {
+        return $this->doCompileInsert($query, $values, 'insert or ignore');
     }
 
     /**
