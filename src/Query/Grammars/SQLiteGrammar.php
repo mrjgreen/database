@@ -70,6 +70,18 @@ class SQLiteGrammar extends Grammar
     }
 
     /**
+     * Compile a replace statement into SQL.
+     *
+     * @param  \Database\Query\Builder $query
+     * @param  array $values
+     * @return string
+     */
+    public function compileReplace(Builder $query, array $values)
+    {
+        return $this->doCompileInsert($query, $values, 'insert or replace');
+    }
+
+    /**
      * Compile a truncate table statement into SQL.
      *
      * @param  \Database\Query\Builder $query
