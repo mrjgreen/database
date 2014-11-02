@@ -1,5 +1,6 @@
 <?php namespace Database\Query\Grammars;
 
+use Traversable;
 use Database\Query\Builder;
 
 class MySqlGrammar extends Grammar
@@ -66,6 +67,69 @@ class MySqlGrammar extends Grammar
         if (is_string($value)) return $value;
 
         return $value ? 'for update' : 'lock in share mode';
+    }
+
+    /**
+     * Compile an insert statement into SQL.
+     *
+     * @param  \Database\Query\Builder $query
+     * @param  array $values
+     * @return string
+     */
+    public function compileInsertIgnore(Builder $query, Traversable $values)
+    {
+        return $this->doCompileInsert($query, $values, 'insert ignore');
+    }
+
+    /**
+     * Compile an insert statement into SQL.
+     *
+     * @param  \Database\Query\Builder $query
+     * @param  array $values
+     * @param  array $updateValues
+     * @return string
+     */
+    public function compileInsertOnDuplicateKeyUpdate(Builder $query, Traversable $values, array $updateValues)
+    {
+        $insert = $this->compileInsert($query, $values);
+
+        $update = $this->getUpdateColumns($updateValues);
+
+        return "$insert on duplicate key update $update";
+    }
+
+    /**
+     * Compile a replace statement into SQL.
+     *
+     * @param  \Database\Query\Builder $query
+     * @param  array $values
+     * @return string
+     */
+    public function compileReplace(Builder $query, Traversable $values)
+    {
+        return $this->doCompileInsert($query, $values, 'replace');
+    }
+
+    /**
+     * @param Builder $insert
+     * @param array $columns
+     * @param Builder $query
+     * @return string
+     */
+    public function compileInsertIgnoreSelect(Builder $insert, array $columns, Builder $query)
+    {
+        return $this->doCompileInsertSelect($insert, $columns, $query, 'insert ignore');
+    }
+
+    /**
+     * @param Builder $insert
+     * @param array $columns
+     * @param Builder $query
+     * @return string
+     */
+    public function compileReplaceSelect(Builder $insert, array $columns, Builder $query)
+    {
+        return $this->doCompileInsertSelect($insert, $columns, $query, 'replace');
     }
 
     /**

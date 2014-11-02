@@ -718,6 +718,57 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array(array('column2' => 'foo', 'column3' => 'bar')), $result);
 	}
 
+    public function doTestInsertSelectMethod($query, $method)
+    {
+        $builder = $this->getMySqlBuilder();
+        $builder->getConnection()->shouldReceive('query')->once()
+            ->with($query . ' into `users` (`email`) select `email` from `admin` where `name` = ?', array('foo'))
+            ->andReturn(true);
+
+        $select = $builder->newQuery()
+            ->from('admin')
+            ->select('email')
+            ->where('name','foo');
+
+        $result = $builder
+            ->from('users')
+            ->{$method}($select, array('email'));
+
+        $this->assertTrue($result);
+    }
+
+    public function testInsertSelectMethodClosure()
+    {
+        $builder = $this->getBuilder();
+        $builder->getConnection()->shouldReceive('query')->once()
+            ->with('insert into "users" ("email") select "email" from "admin" where "name" = ?', array('foo'))
+            ->andReturn(true);
+
+        $result = $builder
+            ->from('users')
+            ->insertSelect(function($select){
+                $select->from('admin')
+                        ->select('email')
+                        ->where('name','foo');
+            }, array('email'));
+
+        $this->assertTrue($result);
+    }
+
+    public function testInsertSelectMethod()
+    {
+        $this->doTestInsertSelectMethod("insert", "insertSelect");
+    }
+
+    public function testInsertIgnoreSelectMethod()
+    {
+        $this->doTestInsertSelectMethod("insert ignore", "insertIgnoreSelect");
+    }
+
+    public function testReplaceSelectMethod()
+    {
+        $this->doTestInsertSelectMethod("replace", "replaceSelect");
+    }
 
 	public function testInsertMethod()
 	{
@@ -727,18 +778,26 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue($result);
 	}
 
-    public function testInsertIgnoreMethod()
+    public function testReplaceMethod()
     {
-        $builder = $this->getBuilder();
-        $builder->getConnection()->shouldReceive('query')->once()->with('replace into "users" ("email") values (?)', array('foo'))->andReturn(true);
+        $builder = $this->getMySqlBuilder();
+        $builder->getConnection()->shouldReceive('query')->once()->with('replace into `users` (`email`) values (?)', array('foo'))->andReturn(true);
         $result = $builder->from('users')->replace(array('email' => 'foo'));
         $this->assertTrue($result);
     }
 
-    public function testReplaceMethod()
+    public function testInsertIgnoreMethodMySql()
     {
-        $builder = $this->getBuilder();
-        $builder->getConnection()->shouldReceive('query')->once()->with('insert ignore into "users" ("email") values (?)', array('foo'))->andReturn(true);
+        $builder = $this->getMySqlBuilder();
+        $builder->getConnection()->shouldReceive('query')->once()->with('insert ignore into `users` (`email`) values (?)', array('foo'))->andReturn(true);
+        $result = $builder->from('users')->insertIgnore(array('email' => 'foo'));
+        $this->assertTrue($result);
+    }
+
+    public function testInsertIgnoreMethodSqlite()
+    {
+        $builder = $this->getSQLiteBuilder();
+        $builder->getConnection()->shouldReceive('query')->once()->with('insert or ignore into "users" ("email") values (?)', array('foo'))->andReturn(true);
         $result = $builder->from('users')->insertIgnore(array('email' => 'foo'));
         $this->assertTrue($result);
     }
@@ -821,9 +880,9 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 
     public function testInsertOnDuplicateKeyMethod()
     {
-        $builder = $this->getBuilder();
+        $builder = $this->getMySqlBuilder();
         $builder->getConnection()->shouldReceive('query')->once()
-            ->with('insert into "users" ("email") values (?) on duplicate key update "total" = ?', array('foo', 'blah'))->andReturn(true);
+            ->with('insert into `users` (`email`) values (?) on duplicate key update `total` = ?', array('foo', 'blah'))->andReturn(true);
 
         $result = $builder
             ->from('users')
@@ -834,14 +893,14 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 
     public function testInsertOnDuplicateKeyRawMethod()
     {
-        $builder = $this->getBuilder();
+        $builder = $this->getMySqlBuilder();
         $builder->getConnection()->shouldReceive('query')->once()
-            ->with('insert into "users" ("email", "name") values (?, ?), (?, ?) on duplicate key update "total" = "total" + 1, "email" = VALUES("email")', array('foo', 'John', 'bar', 'Smith'))->andReturn(true);
+            ->with('insert into `users` (`email`, `name`) values (?, ?), (?, ?) on duplicate key update `total` = `total` + 1, `email` = VALUES(email)', array('foo', 'John', 'bar', 'Smith'))->andReturn(true);
         $result = $builder
             ->from('users')
             ->insertOnDuplicateKeyUpdate(
                 array(array('email' => 'foo', 'name' => 'John') , array('email' => 'bar', 'name' => 'Smith')),
-                array('total' => new \Database\Query\Expression('"total" + 1'), 'email' => new \Database\Query\Expression('VALUES("email")'))
+                array('total' => new \Database\Query\Expression('`total` + 1'), 'email' => new \Database\Query\Expression('VALUES(email)'))
             );
 
         $this->assertTrue($result);

@@ -737,23 +737,6 @@ class Grammar
      *
      * @param  \Database\Query\Builder $query
      * @param  Traversable $values
-     * @param  array $updateValues
-     * @return string
-     */
-    public function compileInsertOnDuplicateKeyUpdate(Builder $query, Traversable $values, array $updateValues)
-    {
-        $insert = $this->compileInsert($query, $values);
-
-        $update = $this->getUpdateColumns($updateValues);
-
-        return "$insert on duplicate key update $update";
-    }
-
-    /**
-     * Compile an insert statement into SQL.
-     *
-     * @param  \Database\Query\Builder $query
-     * @param  Traversable $values
      * @return string
      */
     protected function doCompileInsert(Builder $query, Traversable $values, $type)
@@ -778,6 +761,56 @@ class Grammar
     }
 
     /**
+     * @param Builder $insert
+     * @param array $columns
+     * @param Builder $query
+     * @return string
+     */
+    public function doCompileInsertSelect(Builder $insert, array $columns, Builder $query, $type)
+    {
+        $table = $this->wrapTable($insert->from);
+
+        $columns = $this->columnize($columns);
+
+        $select = $this->compileSelect($query);
+
+        return "$type into $table ($columns) $select";
+    }
+
+    /**
+     * @param Builder $insert
+     * @param array $columns
+     * @param Builder $query
+     * @return string
+     */
+    public function compileInsertSelect(Builder $insert, array $columns, Builder $query)
+    {
+        return $this->doCompileInsertSelect($insert, $columns, $query, 'insert');
+    }
+
+    /**
+     * @param Builder $insert
+     * @param array $columns
+     * @param Builder $query
+     * @return string
+     */
+    public function compileInsertIgnoreSelect(Builder $insert, array $columns, Builder $query)
+    {
+        $this->throwUnsupportedGrammarException("Insert ignore");
+    }
+
+    /**
+     * @param Builder $insert
+     * @param array $columns
+     * @param Builder $query
+     * @return string
+     */
+    public function compileReplaceSelect(Builder $insert, array $columns, Builder $query)
+    {
+        $this->throwUnsupportedGrammarException("Replace");
+    }
+
+    /**
      * Compile an insert statement into SQL.
      *
      * @param  \Database\Query\Builder $query
@@ -798,7 +831,7 @@ class Grammar
      */
     public function compileInsertIgnore(Builder $query, Traversable $values)
     {
-        return $this->doCompileInsert($query, $values, 'insert ignore');
+        $this->throwUnsupportedGrammarException("Insert ignore");
     }
 
     /**
@@ -806,11 +839,24 @@ class Grammar
      *
      * @param  \Database\Query\Builder $query
      * @param  Traversable $values
-     * @return string
+     * @param array $updateValues
+     * @throws UnsupportedGrammarException
+     */
+    public function compileInsertOnDuplicateKeyUpdate(Builder $query, Traversable $values, array $updateValues)
+    {
+        $this->throwUnsupportedGrammarException("Insert on duplicate key update");
+    }
+
+    /**
+     * Compile a replace statement into SQL.
+     *
+     * @param Builder $query
+     * @param Traversable $values
+     * @throws UnsupportedGrammarException
      */
     public function compileReplace(Builder $query, Traversable $values)
     {
-        return $this->doCompileInsert($query, $values, 'replace');
+        $this->throwUnsupportedGrammarException("Replace");
     }
 
     /**
@@ -940,6 +986,15 @@ class Grammar
     protected function removeLeadingBoolean($value)
     {
         return preg_replace('/and |or /', '', $value, 1);
+    }
+
+    /**
+     * @param $grammarDescription
+     * @throws UnsupportedGrammarException
+     */
+    private function throwUnsupportedGrammarException($grammarDescription)
+    {
+        throw new UnsupportedGrammarException("$grammarDescription is not supported by the " . get_called_class() . " grammar driver");
     }
 
 }

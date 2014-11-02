@@ -335,6 +335,16 @@ $connection->table('users')->insertUpdate(
 //insertOnDuplicateKeyUpdate() is an alias of insertUpdate
 ```
 
+####Insert Select
+$connection->table('users')->insertSelect(function($select){
+    $select->from('admin')
+            ->select('name', 'email')
+            ->where('status', '=', 1);
+
+}, array('name','email'));
+
+`insertIgnoreSelect` and `replaceSelect` methods are supported for the MySQL grammar driver.
+
 ###Update
 ```PHP
 $data = array(
