@@ -1,5 +1,6 @@
 <?php namespace Database\Query\Grammars;
 
+use Traversable;
 use Database\Query\Builder;
 use Database\Query\Expression;
 
@@ -735,10 +736,11 @@ class Grammar
      * Compile an insert statement into SQL.
      *
      * @param  \Database\Query\Builder $query
-     * @param  array $values
+     * @param  Traversable $values
+     * @param  array $updateValues
      * @return string
      */
-    public function compileInsertOnDuplicateKeyUpdate(Builder $query, array $values, array $updateValues)
+    public function compileInsertOnDuplicateKeyUpdate(Builder $query, Traversable $values, array $updateValues)
     {
         $insert = $this->compileInsert($query, $values);
 
@@ -751,19 +753,15 @@ class Grammar
      * Compile an insert statement into SQL.
      *
      * @param  \Database\Query\Builder $query
-     * @param  array $values
+     * @param  Traversable $values
      * @return string
      */
-    protected function doCompileInsert(Builder $query, array $values, $type)
+    protected function doCompileInsert(Builder $query, Traversable $values, $type)
     {
         // Essentially we will force every insert to be treated as a batch insert which
         // simply makes creating the SQL easier for us since we can utilize the same
         // basic routine regardless of an amount of records given to us to insert.
         $table = $this->wrapTable($query->from);
-
-        if (!is_array(reset($values))) {
-            $values = array($values);
-        }
 
         $columns = $this->columnize(array_keys(reset($values)));
 
@@ -783,10 +781,10 @@ class Grammar
      * Compile an insert statement into SQL.
      *
      * @param  \Database\Query\Builder $query
-     * @param  array $values
+     * @param  Traversable $values
      * @return string
      */
-    public function compileInsert(Builder $query, array $values)
+    public function compileInsert(Builder $query, Traversable $values)
     {
         return $this->doCompileInsert($query, $values, 'insert');
     }
@@ -795,10 +793,10 @@ class Grammar
      * Compile an insert statement into SQL.
      *
      * @param  \Database\Query\Builder $query
-     * @param  array $values
+     * @param  Traversable $values
      * @return string
      */
-    public function compileInsertIgnore(Builder $query, array $values)
+    public function compileInsertIgnore(Builder $query, Traversable $values)
     {
         return $this->doCompileInsert($query, $values, 'insert ignore');
     }
@@ -807,10 +805,10 @@ class Grammar
      * Compile an insert statement into SQL.
      *
      * @param  \Database\Query\Builder $query
-     * @param  array $values
+     * @param  Traversable $values
      * @return string
      */
-    public function compileReplace(Builder $query, array $values)
+    public function compileReplace(Builder $query, Traversable $values)
     {
         return $this->doCompileInsert($query, $values, 'replace');
     }
@@ -823,8 +821,10 @@ class Grammar
      * @param  string $sequence
      * @return string
      */
-    public function compileInsertGetId(Builder $query, $values, $sequence)
+    public function compileInsertGetId(Builder $query, array $values, $sequence)
     {
+        $values = new \ArrayIterator(array($values));
+
         return $this->compileInsert($query, $values);
     }
 
@@ -835,7 +835,7 @@ class Grammar
      * @param  array $values
      * @return string
      */
-    public function compileUpdate(Builder $query, $values)
+    public function compileUpdate(Builder $query, array $values)
     {
         $table = $this->wrapTable($query->from);
 

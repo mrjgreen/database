@@ -1,5 +1,6 @@
 <?php namespace Database\Query\Grammars;
 
+use Traversable;
 use Database\Query\Builder;
 
 class SQLiteGrammar extends Grammar
@@ -20,19 +21,15 @@ class SQLiteGrammar extends Grammar
      * Compile an insert statement into SQL.
      *
      * @param  \Database\Query\Builder $query
-     * @param  array $values
+     * @param  Traversable $values
      * @return string
      */
-    public function compileInsert(Builder $query, array $values)
+    public function compileInsert(Builder $query, Traversable $values)
     {
         // Essentially we will force every insert to be treated as a batch insert which
         // simply makes creating the SQL easier for us since we can utilize the same
         // basic routine regardless of an amount of records given to us to insert.
         $table = $this->wrapTable($query->from);
-
-        if (!is_array(reset($values))) {
-            $values = array($values);
-        }
 
         // If there is only one record being inserted, we will just use the usual query
         // grammar insert builder because no special syntax is needed for the single

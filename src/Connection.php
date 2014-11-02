@@ -113,7 +113,7 @@ class Connection implements ConnectionInterface
      * @param $values
      * @return bool
      */
-    public function insert($table, array $values)
+    public function insert($table, $values)
     {
         return $this->table($table)->insert($values);
     }
@@ -123,7 +123,7 @@ class Connection implements ConnectionInterface
      * @param $values
      * @return bool
      */
-    public function insertIgnore($table, array $values)
+    public function insertIgnore($table, $values)
     {
         return $this->table($table)->insertIgnore($values);
     }
@@ -133,7 +133,7 @@ class Connection implements ConnectionInterface
      * @param $values
      * @return bool
      */
-    public function replace($table, array $values)
+    public function replace($table, $values)
     {
         return $this->table($table)->replace($values);
     }
@@ -144,7 +144,7 @@ class Connection implements ConnectionInterface
      * @param $updateValues
      * @return bool
      */
-    public function insertUpdate($table, array $values, array $updateValues)
+    public function insertUpdate($table, $values, array $updateValues)
     {
         return $this->table($table)->insertUpdate($values, $updateValues);
     }

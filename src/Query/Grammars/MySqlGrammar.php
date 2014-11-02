@@ -75,7 +75,7 @@ class MySqlGrammar extends Grammar
      * @param  array $values
      * @return string
      */
-    public function compileUpdate(Builder $query, $values)
+    public function compileUpdate(Builder $query, array $values)
     {
         $sql = parent::compileUpdate($query, $values);
 

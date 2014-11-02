@@ -1,6 +1,8 @@
 <?php namespace Database\Query;
 
 use Closure;
+use Traversable;
+use ArrayIterator;
 use Database\ConnectionInterface;
 use Database\Query\Grammars\Grammar;
 
@@ -132,6 +134,13 @@ class Builder
      */
     protected $backups = array();
 
+
+    /**
+     * Chunk inserts into blocks no bigger than this size
+     *
+     * @var int
+     */
+    protected $chunk = 0;
 
     /**
      * All of the available clause operators.
@@ -1369,12 +1378,23 @@ class Builder
     }
 
     /**
+     * @param $size
+     * @return $this
+     */
+    public function chunk($size)
+    {
+        $this->chunk = $size;
+
+        return $this;
+    }
+
+    /**
      * Insert a new record into the database.
      *
      * @param  array $values
      * @return bool
      */
-    public function insert(array $values)
+    public function insert($values)
     {
         return $this->doInsert($values, 'insert');
     }
@@ -1385,7 +1405,7 @@ class Builder
      * @param  array $values
      * @return bool
      */
-    public function insertIgnore(array $values)
+    public function insertIgnore($values)
     {
         return $this->doInsert($values, 'insertIgnore');
     }
@@ -1396,7 +1416,7 @@ class Builder
      * @param  array $values
      * @return bool
      */
-    public function replace(array $values)
+    public function replace($values)
     {
         return $this->doInsert($values, 'replace');
     }
@@ -1404,21 +1424,63 @@ class Builder
     /**
      * Insert a new record into the database.
      *
-     * @param  array $values
+     * @param  array|Traversable $values
+     * @param  string $type
      * @return bool
      */
-    protected function doInsert(array $values, $type)
+    protected function doInsert($values, $type)
     {
-        // Since every insert gets treated like a batch insert, we will make sure the
-        // bindings are structured in a way that is convenient for building these
-        // inserts statements by verifying the elements are actually an array.
-        if (!is_array(reset($values))) {
-            $values = array($values);
+        $values = $this->wrapValues($values);
+
+        if(!$this->chunk)
+        {
+            $sql = $this->grammar->{'compile' . ucfirst($type)}($this, $values);
+
+            return $this->connection->query($sql, $this->buildBulkInsertBindings($values));
         }
 
-        $sql = $this->grammar->{'compile' . ucfirst($type)}($this, $values);
+        $position = 0;
 
-        return $this->connection->query($sql, $this->buildBulkInsertBindings($values));
+        $inserts = 0;
+
+        while($buffer = array_slice($values, $position, $this->chunk))
+        {
+            $sql = $this->grammar->{'compile' . ucfirst($type)}($this, $values);
+
+            $inserts += $this->connection->query($sql, $this->buildBulkInsertBindings($values))->rowCount();
+
+            $position += $this->chunk;
+        }
+
+        return $inserts;
+    }
+
+
+    /**
+     * @param $values
+     * @return array|Traversable
+     * @throws \Exception
+     */
+    private function wrapValues($values)
+    {
+        if(is_array($values))
+        {
+            // Since every insert gets treated like a batch insert, we will make sure the
+            // bindings are structured in a way that is convenient for building these
+            // inserts statements by verifying the elements are actually an array.
+            if (!is_array(reset($values)))
+            {
+                $values = array($values);
+            }
+
+            $values = new ArrayIterator($values);
+        }
+        elseif(!$values instanceof Traversable)
+        {
+            throw new \Exception('$values must be an array or bulk array, or implement a Traversable interface');
+        }
+
+        return $values;
     }
 
     /**
@@ -1430,12 +1492,7 @@ class Builder
      */
     public function insertUpdate(array $values, array $updateValues)
     {
-        // Since every insert gets treated like a batch insert, we will make sure the
-        // bindings are structured in a way that is convenient for building these
-        // inserts statements by verifying the elements are actually an array.
-        if (!is_array(reset($values))) {
-            $values = array($values);
-        }
+        $values = $this->wrapValues($values);
 
         $bindings = $this->buildBulkInsertBindings($values);
 
@@ -1452,20 +1509,20 @@ class Builder
     /**
      * Alias for insertOnDuplicateKeyUpdate
      *
-     * @param array $values
+     * @param array|Traversable $values
      * @param array $updateValues
      * @return \PDOStatement
      */
-    public function insertOnDuplicateKeyUpdate(array $values, array $updateValues)
+    public function insertOnDuplicateKeyUpdate($values, array $updateValues)
     {
         return $this->insertUpdate($values, $updateValues);
     }
 
     /**
-     * @param $values
+     * @param Traversable $values
      * @return array
      */
-    private function buildBulkInsertBindings($values)
+    private function buildBulkInsertBindings(Traversable $values)
     {
         // We'll treat every insert like a batch insert so we can easily insert each
         // of the records into the database consistently. This will make it much

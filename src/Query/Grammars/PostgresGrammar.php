@@ -37,7 +37,7 @@ class PostgresGrammar extends Grammar
      * @param  array $values
      * @return string
      */
-    public function compileUpdate(Builder $query, $values)
+    public function compileUpdate(Builder $query, array $values)
     {
         $table = $this->wrapTable($query->from);
 
@@ -59,7 +59,7 @@ class PostgresGrammar extends Grammar
      * @param  array $values
      * @return string
      */
-    protected function compileUpdateColumns($values)
+    protected function compileUpdateColumns(array $values)
     {
         $columns = array();
 
@@ -149,8 +149,10 @@ class PostgresGrammar extends Grammar
      * @param  string $sequence
      * @return string
      */
-    public function compileInsertGetId(Builder $query, $values, $sequence)
+    public function compileInsertGetId(Builder $query, array $values, $sequence)
     {
+        $values = new \ArrayIterator(array($values));
+
         if (is_null($sequence)) $sequence = 'id';
 
         return $this->compileInsert($query, $values) . ' returning ' . $this->wrap($sequence);
