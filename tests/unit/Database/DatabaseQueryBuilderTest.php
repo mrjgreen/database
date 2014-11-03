@@ -770,6 +770,35 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->doTestInsertSelectMethod("replace", "replaceSelect");
     }
 
+    public function testChunkedInsert()
+    {
+        $statement = $this->getMock('PDOStatement', array('fetchColumn'));
+
+        $statement->expects($this->exactly(2))
+            ->method('rowCount')
+            ->will($this->returnValue(2));
+
+        $builder = $this->getBuilder();
+        $builder->getConnection()->shouldReceive('query')
+            ->with('insert into "users" ("email") values (?), (?)', array('foo','bar'))
+            ->andReturn($statement);
+
+        $builder->getConnection()->shouldReceive('query')
+            ->with('insert into "users" ("email") values (?), (?)', array('fizz','buzz'))
+            ->andReturn($statement);
+
+        $result = $builder->from('users')
+            ->chunk(2)
+            ->insert(array(
+                array('email' => 'foo'),
+                array('email' => 'bar'),
+                array('email' => 'fizz'),
+                array('email' => 'buzz'),
+            ));
+
+        $this->assertEquals(4, $result);
+    }
+
 	public function testInsertMethod()
 	{
 		$builder = $this->getBuilder();

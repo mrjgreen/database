@@ -1439,17 +1439,32 @@ class Builder
             return $this->connection->query($sql, $this->buildBulkInsertBindings($values));
         }
 
-        $position = 0;
+        $size = 0;
+        $buffer = new \ArrayObject();
 
         $inserts = 0;
 
-        while($buffer = array_slice($values, $position, $this->chunk))
+        foreach($values as $row)
         {
-            $sql = $this->grammar->{'compile' . ucfirst($type)}($this, $values);
+            $buffer[] = $row;
 
-            $inserts += $this->connection->query($sql, $this->buildBulkInsertBindings($values))->rowCount();
+            if(++$size >= $this->chunk)
+            {
+                $sql = $this->grammar->{'compile' . ucfirst($type)}($this, $buffer);
 
-            $position += $this->chunk;
+                $inserts += $this->connection->query($sql, $this->buildBulkInsertBindings($buffer))->rowCount();
+
+                $size = 0;
+
+                $buffer = new \ArrayObject();
+            }
+        }
+
+        if($size)
+        {
+            $sql = $this->grammar->{'compile' . ucfirst($type)}($this, $buffer);
+
+            $inserts += $this->connection->query($sql, $this->buildBulkInsertBindings($buffer))->rowCount();
         }
 
         return $inserts;
