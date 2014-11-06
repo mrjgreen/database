@@ -20,10 +20,6 @@ class MySqlConnector extends Connector implements ConnectorInterface
         // connection's behavior, and some might be specified by the developers.
         $connection = $this->createConnection($dsn, $config, $options);
 
-        if (isset($config['unix_socket'])) {
-            $connection->exec("use {$config['database']};");
-        }
-
         $collation = $config['collation'];
 
         // Next we will set the "names" and "collation" on the clients connections so
@@ -55,7 +51,11 @@ class MySqlConnector extends Connector implements ConnectorInterface
      */
     protected function getDsn(array $config)
     {
-        return $this->configHasSocket($config) ? $this->getSocketDsn($config) : $this->getHostDsn($config);
+        $dsn = $this->configHasSocket($config) ? $this->getSocketDsn($config) : $this->getHostDsn($config);
+
+        isset($config['database']) and $dsn .= ";dbname={$config['database']}";
+
+        return $dsn;
     }
 
     /**
@@ -79,7 +79,9 @@ class MySqlConnector extends Connector implements ConnectorInterface
     {
         extract($config);
 
-        return "mysql:unix_socket={$config['unix_socket']};dbname={$database}";
+        $dsn = "mysql:unix_socket={$config['unix_socket']}";
+
+        return $dsn;
     }
 
     /**
@@ -93,8 +95,6 @@ class MySqlConnector extends Connector implements ConnectorInterface
         $dsn = "mysql:host={$config['host']}";
 
         isset($config['port']) and $dsn .= ";port={$config['port']}";
-
-        isset($config['database']) and $dsn .= ";dbname={$config['database']}";
 
         return $dsn;
     }
