@@ -62,7 +62,7 @@ class ConnectionFactory
         return $this->makeConnection($config, $lazy)->setReconnector(function (Connection $connection) use ($config) {
             $fresh = $this->makeConnection($config, false);
 
-            $connection->setPdo($fresh->getPdo())->setReadPdo($fresh->getReadPdo());
+            return $connection->setPdo($fresh->getPdo())->setReadPdo($fresh->getReadPdo());
         });
     }
 

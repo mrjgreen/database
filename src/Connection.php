@@ -495,6 +495,16 @@ class Connection implements ConnectionInterface
     }
 
     /**
+     *
+     */
+    public function connect()
+    {
+        $this->reconnectIfMissingConnection();
+
+        return $this;
+    }
+
+    /**
      * Reconnect to the database.
      *
      * @return void
