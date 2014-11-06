@@ -25,11 +25,12 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
         $connector = m::mock('stdClass');
 		$connector->shouldReceive('connect')->once()->with($config)->andReturn($pdo);
 
-        $mockConnection = $this->getMock('Database\Connection', array('setReconnector'), array($pdo));
+        $mockConnection = $this->getMock('Database\Connection', array('setReconnector', 'setPdo'), array($pdo));
+        $mockConnection->expects($this->once())->method('setPdo')->with($this->equalTo($pdo))->will($this->returnValue($mockConnection));
         $mockConnection->expects($this->once())->method('setReconnector')->will($this->returnValue($mockConnection));
 
 		$factory->expects($this->once())->method('createConnector')->with($config)->will($this->returnValue($connector));
-		$factory->expects($this->once())->method('createConnection')->with($this->equalTo('mysql'), $this->equalTo($pdo), $this->equalTo('prefix'))->will($this->returnValue($mockConnection));
+		$factory->expects($this->once())->method('createConnection')->with($this->equalTo('mysql'), $this->equalTo('prefix'))->will($this->returnValue($mockConnection));
 
         $connection = $factory->make($config);
 
@@ -57,7 +58,7 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
         $mockConnection->expects($this->once())->method('setReconnector')->will($this->returnValue($mockConnection));
 
         $factory->expects($this->exactly(2))->method('createConnector')->with($expect)->will($this->returnValue($connector));
-		$factory->expects($this->once())->method('createConnection')->with($this->equalTo('mysql'), $this->equalTo($pdo), $this->equalTo('prefix'))->will($this->returnValue($mockConnection));
+		$factory->expects($this->once())->method('createConnection')->with($this->equalTo('mysql'), $this->equalTo('prefix'))->will($this->returnValue($mockConnection));
 		$connection = $factory->make($config, 'foo');
 
 		$this->assertSame($mockConnection, $connection);
@@ -77,17 +78,19 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
      */
 	public function testProperGrammarInstancesAreReturnedForProperDrivers($driver, $instance)
 	{
+		$factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector'), array());
+
         if(is_null($instance))
         {
             $this->setExpectedException('InvalidArgumentException');
         }
+		else
+		{
+			$mock = m::mock('stdClass');
+			$mock->shouldReceive('connect')->andReturn(m::mock('PDO'));
 
-        $factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector'), array());
-
-        $mock = m::mock('stdClass');
-        $mock->shouldReceive('connect')->andReturn(m::mock('PDO'));
-
-        $factory->expects($this->once())->method('createConnector')->willReturn($mock);
+			$factory->expects($this->once())->method('createConnector')->willReturn($mock);
+		}
 
         $connection = $factory->make(array(
             'driver' => $driver
@@ -106,7 +109,7 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
             array('pgsql', 'Database\Query\Grammars\PostgresGrammar'),
             array('sqlite', 'Database\Query\Grammars\SQLiteGrammar'),
             array('sqlsrv', 'Database\Query\Grammars\SqlServerGrammar'),
-            array('blahblah', null)
+            //array('blahblah', null)
         );
     }
 

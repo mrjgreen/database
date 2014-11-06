@@ -29,6 +29,7 @@ use Database\Query\Grammars\SQLiteGrammar;
  *      'charset'   => 'utf8',
  *      'collation' => 'utf8_unicode_ci',
  *      'prefix'    => '',
+ *      'lazy'      => true/false
  *  )
  * </code>
  */
@@ -56,8 +57,10 @@ class ConnectionFactory
      */
     public function make(array $config)
     {
-        return $this->makeConnection($config)->setReconnector(function (Connection $connection) use ($config) {
-            $fresh = $this->makeConnection($config);
+        $lazy = !empty($config['lazy']);
+
+        return $this->makeConnection($config, $lazy)->setReconnector(function (Connection $connection) use ($config) {
+            $fresh = $this->makeConnection($config, false);
 
             $connection->setPdo($fresh->getPdo())->setReadPdo($fresh->getReadPdo());
         });
@@ -66,16 +69,36 @@ class ConnectionFactory
     /**
      * Establish a PDO connection based on the configuration, return wrapped in a Connection instance.
      *
-     * @param $config
-     * @return Connection
+     * @param array $config
+     * @param bool $lazy
+     * @return \Database\Connection
      */
-    protected function makeConnection($config)
+    protected function makeConnection(array $config, $lazy)
     {
         if (isset($config['read'])) {
-            return $this->createReadWriteConnection($config);
+            return $this->createReadWriteConnection($config, $lazy);
         }
 
-        return $this->createSingleConnection($config);
+        return $this->createSingleConnection($config, $lazy);
+    }
+
+    /**
+     * Create a single database connection instance.
+     *
+     * @param  array $config
+     * @param  bool $lazy
+     * @return \Database\Connection
+     */
+    protected function createSingleConnection(array $config, $lazy)
+    {
+        $connection = $this->createConnection($config['driver'], isset($config['prefix']) ? $config['prefix'] : '');
+
+        if(!$lazy)
+        {
+            $connection->setPdo($this->createConnector($config)->connect($config));
+        }
+
+        return $connection;
     }
 
     /**
@@ -84,24 +107,16 @@ class ConnectionFactory
      * @param  array $config
      * @return \Database\Connection
      */
-    protected function createSingleConnection(array $config)
+    protected function createReadWriteConnection(array $config, $lazy)
     {
-        $pdo = $this->createConnector($config)->connect($config);
+        $connection = $this->createSingleConnection($this->getWriteConfig($config), $lazy);
 
-        return $this->createConnection($config['driver'], $pdo, isset($config['prefix']) ? $config['prefix'] : '');
-    }
+        if(!$lazy)
+        {
+            $connection->setReadPdo($this->createReadPdo($config));
+        }
 
-    /**
-     * Create a single database connection instance.
-     *
-     * @param  array $config
-     * @return \Database\Connection
-     */
-    protected function createReadWriteConnection(array $config)
-    {
-        $connection = $this->createSingleConnection($this->getWriteConfig($config));
-
-        return $connection->setReadPdo($this->createReadPdo($config));
+        return $connection;
     }
 
     /**
@@ -212,7 +227,7 @@ class ConnectionFactory
      *
      * @throws \InvalidArgumentException
      */
-    protected function createConnection($driver, PDO $connection, $prefix = '')
+    protected function createConnection($driver, $prefix = '')
     {
         switch ($driver) {
             case 'mysql':
@@ -237,7 +252,9 @@ class ConnectionFactory
 
         $className = $this->connectionClassName;
 
-        return new $className($connection, $queryGrammar, $prefix);
+        $object = new $className();
+
+        return $object->setQueryGrammar($queryGrammar)->setTablePrefix($prefix);
 
     }
 }

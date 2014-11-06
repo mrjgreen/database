@@ -82,11 +82,11 @@ class Connection implements ConnectionInterface
     /**
      * Create a new database connection instance.
      *
-     * @param  \PDO $pdo
-     * @param  string $tablePrefix
-     * @return void
+     * @param PDO $pdo
+     * @param Grammar $queryGrammar
+     * @param string $tablePrefix
      */
-    public function __construct(PDO $pdo, Grammar $queryGrammar = null, $tablePrefix = '')
+    public function __construct(PDO $pdo = null, Grammar $queryGrammar = null, $tablePrefix = '')
     {
         $this->pdo = $pdo;
 
