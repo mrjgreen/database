@@ -33,6 +33,15 @@ $connection = $factory->make(array(
     'password'  => 'password',
     'charset'   => 'utf8',
     'collation' => 'utf8_unicode_ci',
+
+    // Don't connect until we execute our first query
+    'lazy'      => true,
+
+    // Set PDO attributes after connection
+    'options' => array(
+        PDO::MYSQL_ATTR_LOCAL_INFILE    => true,
+        PDO::ATTR_EMULATE_PREPARES      => true,
+    )
 ));
 
 $connection->query("SELECT id, username FROM customers");
@@ -44,6 +53,8 @@ $connection->query("SELECT id, username FROM customers");
  - [**Connection**](#connection)
     - [MySQL](#mysql)
     - [SQLite](#sqlite)
+    - [Default Connection Options](#default-connection-options)
+ - [**Connection Resolver**](#connection-resolver)
  - [**Raw Queries**](#raw-queries)
     - [Query Shortcuts](#query-shortcuts)
  - [**Query Builder**](#query-builder)
@@ -105,6 +116,64 @@ $connection = $factory->make(array(
     'driver'    => 'sqlite',
     'database' => '/path/to/sqlite.db',
 ));
+```
+
+###Default Connection Options
+By default the following PDO attributes will be set on connection. You can override these or add to them in the
+`options` array parameter in the connection config.
+
+```PHP
+PDO::ATTR_CASE              => PDO::CASE_NATURAL,
+PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
+PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
+PDO::ATTR_STRINGIFY_FETCHES => false,
+PDO::ATTR_EMULATE_PREPARES  => false,
+```
+
+## Connection Resolver
+Many complex applications may need more than one database connection. You can create a set of named connections inside the connection
+resolver, and reference them by name within in your application.
+
+```PHP
+
+$resolver = new Database\ConnectionResolver(array(
+    'local' => array(
+        'driver'    => 'mysql',
+        'host'      => 'localhost',
+        'username'  => 'root',
+        'password'  => 'password',
+        'charset'   => 'utf8',
+        'collation' => 'utf8_unicode_ci',
+    ),
+    'archive' => array(
+        'driver'    => 'mysql',
+        'host'      => '1.2.3.456',
+        'username'  => 'root',
+        'password'  => 'password',
+        'charset'   => 'utf8',
+        'collation' => 'utf8_unicode_ci',
+    ),
+));
+
+$dbLocal = $resolver->connection('local');
+
+// Use it
+$dbLocal->table('users')->get();
+
+
+$dbArchive = $resolver->connection('archive');
+// Etc...
+```
+
+If you request a connection that you have used previously in your application, the connection resolver will return the same connection, rather than create a new one.
+
+
+You can set a default connection after creating the resolver, so you don't have to specify the connection name throughout your application.
+```PHP
+$resolver->setDefaultConnection('local');
+
+// Returns the `local` connection
+$resolver->connection();
 ```
 
 ##Raw Queries
