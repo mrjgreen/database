@@ -31,7 +31,7 @@ class InsertBuffer
      * Insert a new record into the database.
      *
      * @param  Traversable $values
-     * @return bool
+     * @return int
      */
     public function insert(Traversable $values)
     {
@@ -42,7 +42,7 @@ class InsertBuffer
      * Insert a new record into the database.
      *
      * @param  Traversable $values
-     * @return bool
+     * @return int
      */
     public function insertIgnore(Traversable $values)
     {
@@ -53,7 +53,7 @@ class InsertBuffer
      * Insert a new record into the database.
      *
      * @param  Traversable $values
-     * @return bool
+     * @return int
      */
     public function replace(Traversable $values)
     {

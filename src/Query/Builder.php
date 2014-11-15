@@ -1412,7 +1412,7 @@ class Builder
      * Insert a new record into the database.
      *
      * @param  array $values
-     * @return bool
+     * @return \PDOStatement
      */
     public function insertIgnore(array $values)
     {
@@ -1423,7 +1423,7 @@ class Builder
      * Insert a new record into the database.
      *
      * @param  array $values
-     * @return bool
+     * @return \PDOStatement
      */
     public function replace(array $values)
     {
@@ -1433,7 +1433,7 @@ class Builder
     /**
      * @param array $values
      * @param $type
-     * @return bool|\PDOStatement
+     * @return \PDOStatement
      */
     public function doInsert(array $values, $type)
     {
@@ -1453,7 +1453,7 @@ class Builder
     /**
      * @param $select \Closure|static
      * @param array $columns
-     * @return bool|\PDOStatement
+     * @return \PDOStatement
      * @throws \Exception
      */
     protected function doInsertSelect($select, array $columns, $type)
@@ -1482,7 +1482,7 @@ class Builder
     /**
      * @param $select \Closure|static
      * @param array $columns
-     * @return bool|\PDOStatement
+     * @return \PDOStatement
      * @throws \Exception
      */
     public function insertSelect($select, array $columns)
@@ -1493,7 +1493,7 @@ class Builder
     /**
      * @param $select \Closure|static
      * @param array $columns
-     * @return bool|\PDOStatement
+     * @return \PDOStatement
      * @throws \Exception
      */
     public function insertIgnoreSelect($select, array $columns)
@@ -1504,7 +1504,7 @@ class Builder
     /**
      * @param $select \Closure|static
      * @param array $columns
-     * @return bool|\PDOStatement
+     * @return \PDOStatement
      * @throws \Exception
      */
     public function replaceSelect($select, array $columns)
