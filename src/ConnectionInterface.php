@@ -53,7 +53,7 @@ interface ConnectionInterface
      *
      * @param  string $query
      * @param  array $bindings
-     * @return bool
+     * @return \PDOStatement
      */
     public function query($query, array $bindings = array());
 

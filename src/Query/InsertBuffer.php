@@ -1,6 +1,7 @@
 <?php namespace Database\Query;
 
 use Traversable;
+use Closure;
 
 class InsertBuffer
 {
@@ -62,21 +63,19 @@ class InsertBuffer
     /**
      * Insert a new record into the database.
      *
-     * @param  Traversable $values
-     * @return bool
+     * @param Traversable $values
+     * @param $type
+     * @return int
      */
     protected function doInsert(Traversable $values, $type)
     {
-        // Since every insert gets treated like a batch insert, we will make sure the
-        // bindings are structured in a way that is convenient for building these
-        // inserts statements by verifying the elements are actually an array.
-        if (!is_array(reset($values))) {
-            $values = array($values);
-        }
+        $inserts = 0;
 
-        $sql = $this->grammar->{'compile' . ucfirst($type)}($this, $values);
+        $this->buffer($values, function(array $buffer) use($type, &$inserts){
+            $inserts += $this->builder->doInsert($buffer, $type)->rowCount();
+        });
 
-        return $this->connection->query($sql, $this->buildBulkInsertBindings($values));
+        return $inserts;
     }
 
     /**
@@ -88,23 +87,13 @@ class InsertBuffer
      */
     public function insertUpdate(Traversable $values, array $updateValues)
     {
-        // Since every insert gets treated like a batch insert, we will make sure the
-        // bindings are structured in a way that is convenient for building these
-        // inserts statements by verifying the elements are actually an array.
-        if (!is_array(reset($values))) {
-            $values = array($values);
-        }
+        $upserts = 0;
 
-        $bindings = $this->buildBulkInsertBindings($values);
+        $this->buffer($values, function(array $buffer) use($updateValues, &$upserts){
+            $upserts += $this->builder->insertUpdate($buffer, $updateValues)->rowCount();
+        });
 
-        foreach($updateValues as $value)
-        {
-            if(!$value instanceof Expression) $bindings[] = $value;
-        }
-
-        $sql = $this->grammar->{'compileInsertOnDuplicateKeyUpdate'}($this, $values, $updateValues);
-
-        return $this->connection->query($sql, $bindings);
+        return $upserts;
     }
 
     /**
@@ -117,5 +106,37 @@ class InsertBuffer
     public function insertOnDuplicateKeyUpdate(Traversable $values, array $updateValues)
     {
         return $this->insertUpdate($values, $updateValues);
+    }
+
+    /**
+     * Loop through a traversable collection and call a closure after every X elements have been buffered
+     *
+     * @param Traversable $values
+     * @param callable $callback
+     */
+    private function buffer(Traversable $values, Closure $callback)
+    {
+        // Keeping count the number of items is an order of magnitude quicker than calling count($buffer)
+        $size = 0;
+        $buffer = array();
+
+        foreach($values as $row)
+        {
+            $buffer[] = $row;
+
+            if(++$size >= $this->chunkSize)
+            {
+                $callback($buffer);
+
+                $buffer = array();
+                $size = 0;
+            }
+        }
+
+        // Insert the remainder
+        if($size)
+        {
+            $callback($buffer);
+        }
     }
 }

@@ -1149,7 +1149,7 @@ class Builder
      * Execute the query as a "select" statement.
      *
      * @param  array $columns
-     * @return array|static[]
+     * @return \PDOStatement
      */
     public function query($columns = array('*'))
     {
@@ -1431,12 +1431,11 @@ class Builder
     }
 
     /**
-     * Insert a new record into the database.
-     *
-     * @param  array $values
-     * @return bool
+     * @param array $values
+     * @param $type
+     * @return bool|\PDOStatement
      */
-    protected function doInsert(array $values, $type)
+    public function doInsert(array $values, $type)
     {
         // Since every insert gets treated like a batch insert, we will make sure the
         // bindings are structured in a way that is convenient for building these
