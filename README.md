@@ -11,6 +11,8 @@ Features:
 * Simple CRUD functions
 * Support for Insert Ignore / Replace
 * Support for Insert On Duplicate Key Update
+* Support for direct `INSERT INTO ... SELECT * FROM` queries
+* Buffered inserts from Traversable/Iterator interfaces
 * Joins
 * Sub Queries
 * Nested Queries
@@ -72,8 +74,10 @@ $connection->query("SELECT id, username FROM customers");
  - [Insert](#insert)
     - [Insert Ignore](#insert-ignore)
     - [Replace](#replace)
-    - [On Duplicate Key Update](#on-duplicate-key-update)
     - [Batch Insert](#batch-insert)
+    - [On Duplicate Key Update](#on-duplicate-key-update)
+    - [Insert Select](#insert-select)
+    - [Buffered Iterator Insert](#buffered-iterator-insert)
  - [Update](#update)
  - [Delete](#delete)
  - [Raw Expressions](#raw-expressions)
@@ -413,6 +417,18 @@ $connection->table('users')->insertSelect(function($select){
 }, array('name','email'));
 
 `insertIgnoreSelect` and `replaceSelect` methods are supported for the MySQL grammar driver.
+
+####Buffered Iterator Insert
+If you have a large data set you can insert in batches of a chosen size (insert ignore/replace/on duplicate key update supported).
+
+This is especially useful if you want to select large data-sets from one server and insert into another.
+
+~~~PHP
+$pdoStatement = $mainServer->table('users')->query(); // Returns a PDOStatement (which implements the `Traversable` interface)
+
+// Will be inserted in batches of 1000 as it reads from the rowset iterator.
+$backupServer->table('users')->buffer(1000)->insertIgnore($pdoStatement);
+~~~
 
 ###Update
 ```PHP
