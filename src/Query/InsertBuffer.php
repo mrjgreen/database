@@ -83,7 +83,7 @@ class InsertBuffer
      *
      * @param Traversable $values
      * @param array $updateValues an array of column => bindings pairs to update
-     * @return \PDOStatement
+     * @return int
      */
     public function insertUpdate(Traversable $values, array $updateValues)
     {
@@ -101,7 +101,7 @@ class InsertBuffer
      *
      * @param Traversable $values
      * @param array $updateValues
-     * @return \PDOStatement
+     * @return int
      */
     public function insertOnDuplicateKeyUpdate(Traversable $values, array $updateValues)
     {
