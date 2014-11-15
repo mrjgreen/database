@@ -1,6 +1,5 @@
 <?php namespace Database\Connectors;
 
-use PDO;
 use Database\Connection;
 use Database\Query\Grammars\MySqlGrammar;
 use Database\Query\Grammars\PostgresGrammar;
