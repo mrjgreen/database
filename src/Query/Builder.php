@@ -132,6 +132,13 @@ class Builder
      */
     protected $backups = array();
 
+    /**
+     * When creating an insert buffer, use this as the default chunk size
+     *
+     * @var int
+     */
+    protected $defaultChunkSize = 1000;
+
 
     /**
      * All of the available clause operators.
@@ -1366,6 +1373,28 @@ class Builder
 
             return $result['aggregate'];
         }
+    }
+
+    /**
+     * @param $chunkSize
+     */
+    public function setDefaultChunkSize($chunkSize)
+    {
+        $this->defaultChunkSize = $chunkSize;
+    }
+
+    /**
+     * @param null $chunkSize
+     * @return InsertBuffer
+     */
+    public function buffer($chunkSize = null)
+    {
+        if(is_null($chunkSize))
+        {
+            $chunkSize = $this->defaultChunkSize;
+        }
+
+        return new InsertBuffer($this, $chunkSize);
     }
 
     /**
