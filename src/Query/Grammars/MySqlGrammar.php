@@ -132,6 +132,24 @@ class MySqlGrammar extends Grammar
     }
 
     /**
+     * Compile an insert select on duplicate key update statement into SQL.
+     *
+     * @param Builder $insert
+     * @param array $columns
+     * @param Builder $query
+     * @param array $updateValues
+     * @return string
+     */
+    public function compileInsertSelectOnDuplicateKeyUpdate(Builder $insert, array $columns, Builder $query, array $updateValues)
+    {
+        $insert = $this->doCompileInsertSelect($insert, $columns, $query, 'insert');
+
+        $update = $this->getUpdateColumns($updateValues);
+
+        return "$insert on duplicate key update $update";
+    }
+
+    /**
      * Compile an update statement into SQL.
      *
      * @param  \Database\Query\Builder $query

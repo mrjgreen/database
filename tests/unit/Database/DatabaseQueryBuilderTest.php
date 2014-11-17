@@ -718,6 +718,30 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array(array('column2' => 'foo', 'column3' => 'bar')), $result);
 	}
 
+	public function testInsertSelectOnDuplicateKeyRawMethod()
+	{
+		$builder = $this->getMySqlBuilder();
+
+		$builder->getConnection()->shouldReceive('query')->once()
+			->with('insert into `users` (`email`, `name`) select `email`, `name` from `admin` where `name` = ? on duplicate key update `total` = ?, `email` = VALUES(email)', array('John', 1))
+			->andReturn(true);
+
+		$select = $builder->newQuery()
+			->from('admin')
+			->select('email', 'name')
+			->where('name','John');
+
+		$result = $builder
+			->from('users')
+			->insertSelectOnDuplicateKeyUpdate(
+				$select,
+				array('email', 'name'),
+				array('total' => 1, 'email' => new \Database\Query\Expression('VALUES(email)'))
+			);
+
+		$this->assertTrue($result);
+	}
+
     public function doTestInsertSelectMethod($query, $method)
     {
         $builder = $this->getMySqlBuilder();

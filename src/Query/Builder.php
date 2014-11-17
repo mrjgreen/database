@@ -1458,6 +1458,22 @@ class Builder
      */
     protected function doInsertSelect($select, array $columns, $type)
     {
+        $select = $this->prepareInsertSelect($select);
+
+        $sql = $this->grammar->{'compile' . ucfirst($type) . 'Select'}($this, $columns, $select);
+
+        $bindings = $select->getBindings();
+
+        return $this->connection->query($sql, $bindings);
+    }
+
+    /**
+     * @param $select
+     * @return Builder
+     * @throws \Exception
+     */
+    private function prepareInsertSelect($select)
+    {
         if($select instanceof Closure)
         {
             $callback = $select;
@@ -1472,11 +1488,7 @@ class Builder
             throw new \Exception("Argument 1 must be a closure or an instance of Database\\Query\\Builder");
         }
 
-        $sql = $this->grammar->{'compile' . ucfirst($type) . 'Select'}($this, $columns, $select, $type);
-
-        $bindings = $select->getBindings();
-
-        return $this->connection->query($sql, $bindings);
+        return $select;
     }
 
     /**
@@ -1515,6 +1527,44 @@ class Builder
     /**
      * Insert a new record into the database, with an update if it exists
      *
+     * @param $select
+     * @param array $columns
+     * @param array $updateValues
+     * @return bool|\PDOStatement
+     * @throws \Exception
+     */
+    public function insertSelectUpdate($select, array $columns, array $updateValues)
+    {
+        $select = $this->prepareInsertSelect($select);
+
+        $sql = $this->grammar->compileInsertSelectOnDuplicateKeyUpdate($this, $columns, $select, $updateValues);
+
+        $bindings = $select->getBindings();
+
+        foreach($updateValues as $value)
+        {
+            if(!$value instanceof Expression) $bindings[] = $value;
+        }
+
+        return $this->connection->query($sql, $bindings);
+    }
+
+    /**
+     * Alias for insertSelectOnDuplicateKeyUpdate
+     *
+     * @param $select
+     * @param array $columns
+     * @param array $updateValues
+     * @return bool|\PDOStatement
+     */
+    public function insertSelectOnDuplicateKeyUpdate($select, array $columns, array $updateValues)
+    {
+        return $this->insertSelectUpdate($select, $columns, $updateValues);
+    }
+
+    /**
+     * Insert a new record into the database, with an update if it exists
+     *
      * @param array $values
      * @param array $updateValues an array of column => bindings pairs to update
      * @return \PDOStatement
@@ -1535,7 +1585,7 @@ class Builder
             if(!$value instanceof Expression) $bindings[] = $value;
         }
 
-        $sql = $this->grammar->{'compileInsertOnDuplicateKeyUpdate'}($this, $values, $updateValues);
+        $sql = $this->grammar->compileInsertOnDuplicateKeyUpdate($this, $values, $updateValues);
 
         return $this->connection->query($sql, $bindings);
     }

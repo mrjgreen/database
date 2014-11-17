@@ -814,6 +814,18 @@ class Grammar
     }
 
     /**
+     * @param Builder $insert
+     * @param array $columns
+     * @param Builder $query
+     * @param array $updateValues
+     * @return string
+     */
+    public function compileInsertSelectOnDuplicateKeyUpdate(Builder $insert, array $columns, Builder $query, array $updateValues)
+    {
+        $this->throwUnsupportedGrammarException("On duplicate key update");
+    }
+
+    /**
      * Compile an insert statement into SQL.
      *
      * @param  \Database\Query\Builder $query
