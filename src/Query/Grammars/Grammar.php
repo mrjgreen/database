@@ -15,6 +15,7 @@ class Grammar
     protected $selectComponents = array(
         'aggregate',
         'columns',
+        'outfile',
         'from',
         'joins',
         'wheres',
@@ -196,6 +197,7 @@ class Grammar
         return $this;
     }
 
+
     /**
      * Compile a select query into SQL.
      *
@@ -234,24 +236,29 @@ class Grammar
     }
 
     /**
-     * Compile an aggregated select clause.
+     * Compile a select into outfile clause.
      *
-     * @param  \Database\Query\Builder $query
-     * @param  array $aggregate
+     * @param Builder $query
+     * @param $file
+     * @param $fieldsTerminatedBy
+     * @param $linesTerminatedBy
      * @return string
      */
-    protected function compileAggregate(Builder $query, $aggregate)
+    protected function compileOutfile(Builder $query, $file, $fieldsTerminatedBy, $linesTerminatedBy)
     {
-        $column = $this->columnize($aggregate['columns']);
+        $sql = 'into ' . $file;
 
-        // If the query has a "distinct" constraint and we're not asking for all columns
-        // we need to prepend "distinct" onto the column name so that the query takes
-        // it into account when it performs the aggregating operations on the data.
-        if ($query->distinct && $column !== '*') {
-            $column = 'distinct ' . $column;
+        if($fieldsTerminatedBy)
+        {
+            $sql .= ' fields terminated by ' . $fieldsTerminatedBy;
         }
 
-        return 'select ' . $aggregate['function'] . '(' . $column . ') as aggregate';
+        if($linesTerminatedBy)
+        {
+            $sql .= ' lines terminated by ' . $linesTerminatedBy;
+        }
+
+        return $sql;
     }
 
     /**

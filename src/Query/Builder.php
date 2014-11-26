@@ -1146,6 +1146,18 @@ class Builder
     }
 
     /**
+     * @param $file
+     * @param null $fieldsTerminatedBy
+     * @param null $linesTerminatedBy
+     */
+    public function intoOutfile($file, $fieldsTerminatedBy = null, $linesTerminatedBy = null)
+    {
+        $sql = $this->grammar->compileSelectIntoOutfile($this, $file, $fieldsTerminatedBy, $linesTerminatedBy);
+
+        return $this->connection->query($this->toSql(), $this->getBindings());
+    }
+
+    /**
      * Execute the query as a "select" statement.
      *
      * @param  array $columns

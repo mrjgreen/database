@@ -1081,7 +1081,6 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		return $builder->select('*')->from('users')->where('email', 'foo@bar.com');
 	}
 
-
 	public function testMySqlLock()
 	{
 		$builder = $this->getMySqlBuilder();
@@ -1093,6 +1092,28 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->lock(false);
 		$this->assertEquals('select * from `foo` where `bar` = ? lock in share mode', $builder->toSql());
 		$this->assertEquals(array('baz'), $builder->getBindings());
+	}
+
+
+	public function testMySqlOutfile()
+	{
+		$builder = $this->getMySqlBuilder();
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename');
+		$this->assertEquals('select * into outfile ? from `foo` where `bar` = ?', $builder->toSql());
+		$this->assertEquals(array('filename','baz'), $builder->getBindings());
+
+		$builder = $this->getMySqlBuilder();
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename', ',', "\n");
+		$this->assertEquals('select * into outfile ? fields terminated by ? lines terminated by ? from `foo` where `bar` = ?', $builder->toSql());
+		$this->assertEquals(array('filename',',', "\n",'baz'), $builder->getBindings());
+	}
+
+	public function testMySqlDumpfile()
+	{
+		$builder = $this->getMySqlBuilder();
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoDumpfile('filename');
+		$this->assertEquals('select * into dumpfile ? from `foo` where `bar` = ?', $builder->toSql());
+		$this->assertEquals(array('filename','baz'), $builder->getBindings());
 	}
 
 
