@@ -990,7 +990,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	public function testTruncateMethod()
 	{
 		$builder = $this->getBuilder();
-		$builder->getConnection()->shouldReceive('statement')->once()->with('truncate "users"', array());
+		$builder->getConnection()->shouldReceive('query')->once()->with('truncate "users"', array());
 		$builder->from('users')->truncate();
 
 		$sqlite = new Database\Query\Grammars\SQLiteGrammar;
