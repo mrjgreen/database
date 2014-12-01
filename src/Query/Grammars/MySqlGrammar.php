@@ -1,6 +1,7 @@
 <?php namespace Database\Query\Grammars;
 
 use Database\Query\Builder;
+use Database\Query\OutfileClause;
 
 class MySqlGrammar extends Grammar
 {
@@ -13,6 +14,7 @@ class MySqlGrammar extends Grammar
     protected $selectComponents = array(
         'aggregate',
         'columns',
+        'outfile',
         'from',
         'joins',
         'wheres',
@@ -203,6 +205,37 @@ class MySqlGrammar extends Grammar
         if ($value === '*') return $value;
 
         return '`' . str_replace('`', '``', $value) . '`';
+    }
+
+    /**
+     * @param Builder $query
+     * @return string
+     */
+    protected function compileOutfile(Builder $query, OutfileClause $outfileClause)
+    {
+        $sqlParts = array("into $outfileClause->type ?");
+
+        $query->addBinding($outfileClause->file, 'outfile');
+
+        $optionally = $outfileClause->enclosedBy ? 'optionally ' : '';
+
+        $parts = array(
+            'fieldsTerminatedBy'    => 'fields terminated by ?',
+            'enclosedBy'            => $optionally . 'enclosed by ?',
+            'escapedBy'             => 'escaped by ?',
+            'linesTerminatedBy'     => 'lines terminated by ?',
+        );
+
+        foreach ($parts as $property => $sql) {
+            if(!is_null($outfileClause->$property))
+            {
+                $sqlParts[] = $sql;
+                $query->addBinding($outfileClause->$property, 'outfile');
+            }
+        }
+
+
+        return implode(' ', $sqlParts);
     }
 
 }

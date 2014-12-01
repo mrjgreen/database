@@ -2,17 +2,40 @@
 
 class OutfileClause
 {
-    protected $type;
+    /**
+     * @var string
+     */
+    public $type;
 
-    protected $file;
+    /**
+     * @var string
+     */
+    public $file;
 
-    protected $escapedBy;
+    /**
+     * @var string
+     */
+    public $escapedBy;
 
-    protected $optionallyEnclosedBy;
+    /**
+     * @var string
+     */
+    public $enclosedBy;
 
-    protected $fieldsTerminatedBy;
+    /**
+     * @var bool
+     */
+    public $optionallyEnclosedBy;
 
-    protected $linesTerminatedBy;
+    /**
+     * @var string
+     */
+    public $fieldsTerminatedBy;
+
+    /**
+     * @var string
+     */
+    public $linesTerminatedBy;
 
     /**
      * Create a new outfile clause instance.
@@ -28,11 +51,13 @@ class OutfileClause
 
     /**
      * @param $character
-     * @return mixed
+     * @return $this
      */
     public function escapedBy($character)
     {
-        return $this->escapedBy = $character;
+        $this->escapedBy = $character;
+
+        return $this;
     }
 
     /**

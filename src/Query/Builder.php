@@ -1158,18 +1158,39 @@ class Builder
      * @param callable $builder
      * @return \PDOStatement
      */
-    public function intoOutfile($file, Closure $builder = false)
+    public function intoOutfile($file, Closure $builder = null)
     {
-        $outfileCopy = clone $this;
+        return $this->outfile('outfile', $file, $builder);
+    }
 
-        $outfileCopy->outfile = new OutfileClause($file, 'outfile');
+    /**
+     * @param $file
+     * @param callable $builder
+     * @return \PDOStatement
+     */
+    public function intoDumpfile($file, Closure $builder = null)
+    {
+        return $this->outfile('dumpfile', $file, $builder);
+    }
+
+    /**
+     * @param $type
+     * @param $file
+     * @param callable $builder
+     * @return \PDOStatement
+     */
+    private function outfile($type, $file, $builder)
+    {
+        $clone = clone $this;
+
+        $clone->outfile = $clause = new OutfileClause($file, $type);
 
         if($builder)
         {
-            $builder($outfileCopy);
+            $builder($clause);
         }
 
-        return $this->connection->query($outfileCopy->toSql(), $outfileCopy->getBindings());
+        return $this->connection->query($clone->toSql(), $clone->getBindings());
     }
 
     /**

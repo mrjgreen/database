@@ -1099,28 +1099,35 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	{
 		$builder = $this->getMySqlBuilder();
 		$builder->getConnection()->shouldReceive('query')->once()->with(
-			'select * into outfile ? fields terminated by ? lines terminated by ? from `foo` where `bar` = ?',
-			array('filename',"\t", "\n", 'baz')
+			'select * into outfile ? from `foo` where `bar` = ?',
+			array('filename', 'baz')
 		);
 		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename');
 
 		$builder = $this->getMySqlBuilder();
 		$builder->getConnection()->shouldReceive('query')->once()->with(
-			'select * into outfile ? fields terminated by ? lines terminated by ? from `foo` where `bar` = ?',
-			array('filename','|', "\n\r",'baz')
+			'select * into outfile ? fields terminated by ? optionally enclosed by ? escaped by ? lines terminated by ? from `foo` where `bar` = ?',
+			array('filename',',', '.', '\\', "\n\r", 'baz')
 		);
-		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename', '|', "\n\r");
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename', function(\Database\Query\OutfileClause $of){
+            $of->enclosedBy(".", true)
+                ->escapedBy("\\")
+                ->linesTerminatedBy("\n\r")
+                ->fieldsTerminatedBy(',');
+        });
 
 	}
-/*
+
 	public function testMySqlDumpfile()
 	{
 		$builder = $this->getMySqlBuilder();
+		$builder->getConnection()->shouldReceive('query')->once()->with(
+			'select * into dumpfile ? from `foo` where `bar` = ?',
+			array('filename', 'baz')
+		);
 		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoDumpfile('filename');
-		$this->assertEquals('select * into dumpfile ? from `foo` where `bar` = ?', $builder->toSql());
-		$this->assertEquals(array('filename','baz'), $builder->getBindings());
 	}
-*/
+
 
 	public function testPostgresLock()
 	{

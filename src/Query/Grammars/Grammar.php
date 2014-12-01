@@ -2,7 +2,6 @@
 
 use Database\Query\Builder;
 use Database\Query\Expression;
-use Database\Query\OutfileClause;
 
 class Grammar
 {
@@ -16,7 +15,6 @@ class Grammar
     protected $selectComponents = array(
         'aggregate',
         'columns',
-        'outfile',
         'from',
         'joins',
         'wheres',
@@ -196,15 +194,6 @@ class Grammar
         $this->tablePrefix = $prefix;
 
         return $this;
-    }
-
-    /**
-     * @param Builder $query
-     * @return string
-     */
-    protected function compileOutfile(Builder $query, OutfileClause $outfileClause)
-    {
-        return "into $outfileClause->type ? fields terminated by ? lines terminated by ?";
     }
 
     /**
