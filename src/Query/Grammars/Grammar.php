@@ -2,6 +2,7 @@
 
 use Database\Query\Builder;
 use Database\Query\Expression;
+use Database\Query\OutfileClause;
 
 class Grammar
 {
@@ -15,6 +16,7 @@ class Grammar
     protected $selectComponents = array(
         'aggregate',
         'columns',
+        'outfile',
         'from',
         'joins',
         'wheres',
@@ -197,25 +199,12 @@ class Grammar
     }
 
     /**
-     * Compile a select into outfile clause.
-     *
      * @param Builder $query
-     * @param $file
-     * @param $fieldsTerminatedBy
-     * @param $linesTerminatedBy
      * @return string
      */
-    public function compileSelectIntoOutfile(Builder $query)
+    protected function compileOutfile(Builder $query, OutfileClause $outfileClause)
     {
-        $intoOutfile = 'into outfile ?';
-
-        if (is_null($query->columns)) $query->columns = array('*');
-
-        $components = $this->compileComponents($query);
-
-        $components['columns'] = $components['columns'] . ' ' . $intoOutfile;
-
-        return trim($this->concatenate($this->compileComponents($query)));
+        return "into $outfileClause->type ? fields terminated by ? lines terminated by ?";
     }
 
     /**

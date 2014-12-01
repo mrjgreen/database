@@ -28,6 +28,7 @@ class Builder
      */
     protected $bindings = array(
         'select' => [],
+        'outfile' => [],
         'join' => [],
         'where' => [],
         'having' => [],
@@ -124,6 +125,13 @@ class Builder
      * @var string|bool
      */
     public $lock;
+
+    /**
+     * Should the query select into an outfile
+     *
+     * @var
+     */
+    public $outfile;
 
     /**
      * The backups of fields while doing a pagination count.
@@ -1147,15 +1155,21 @@ class Builder
 
     /**
      * @param $file
-     * @param null $fieldsTerminatedBy
-     * @param null $linesTerminatedBy
+     * @param callable $builder
      * @return \PDOStatement
      */
-    public function intoOutfile($file, $fieldsTerminatedBy = null, $linesTerminatedBy = null)
+    public function intoOutfile($file, Closure $builder = false)
     {
-        $sql = $this->grammar->compileSelectIntoOutfile($this, $file, $fieldsTerminatedBy, $linesTerminatedBy);
+        $outfileCopy = clone $this;
 
-        return $this->connection->query($sql, $this->getBindings());
+        $outfileCopy->outfile = new OutfileClause($file, 'outfile');
+
+        if($builder)
+        {
+            $builder($outfileCopy);
+        }
+
+        return $this->connection->query($outfileCopy->toSql(), $outfileCopy->getBindings());
     }
 
     /**

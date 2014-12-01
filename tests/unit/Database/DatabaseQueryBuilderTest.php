@@ -1095,6 +1095,32 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('baz'), $builder->getBindings());
 	}
 
+	public function testMySqlOutfile()
+	{
+		$builder = $this->getMySqlBuilder();
+		$builder->getConnection()->shouldReceive('query')->once()->with(
+			'select * into outfile ? fields terminated by ? lines terminated by ? from `foo` where `bar` = ?',
+			array('filename',"\t", "\n", 'baz')
+		);
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename');
+
+		$builder = $this->getMySqlBuilder();
+		$builder->getConnection()->shouldReceive('query')->once()->with(
+			'select * into outfile ? fields terminated by ? lines terminated by ? from `foo` where `bar` = ?',
+			array('filename','|', "\n\r",'baz')
+		);
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename', '|', "\n\r");
+
+	}
+/*
+	public function testMySqlDumpfile()
+	{
+		$builder = $this->getMySqlBuilder();
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoDumpfile('filename');
+		$this->assertEquals('select * into dumpfile ? from `foo` where `bar` = ?', $builder->toSql());
+		$this->assertEquals(array('filename','baz'), $builder->getBindings());
+	}
+*/
 
 	public function testPostgresLock()
 	{
