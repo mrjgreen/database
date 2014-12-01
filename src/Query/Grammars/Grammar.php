@@ -197,6 +197,28 @@ class Grammar
     }
 
     /**
+     * Compile a select into outfile clause.
+     *
+     * @param Builder $query
+     * @param $file
+     * @param $fieldsTerminatedBy
+     * @param $linesTerminatedBy
+     * @return string
+     */
+    public function compileSelectIntoOutfile(Builder $query)
+    {
+        $intoOutfile = 'into outfile ?';
+
+        if (is_null($query->columns)) $query->columns = array('*');
+
+        $components = $this->compileComponents($query);
+
+        $components['columns'] = $components['columns'] . ' ' . $intoOutfile;
+
+        return trim($this->concatenate($this->compileComponents($query)));
+    }
+
+    /**
      * Compile a select query into SQL.
      *
      * @param  \Database\Query\Builder
