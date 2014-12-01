@@ -1717,7 +1717,7 @@ class Builder
     public function truncate()
     {
         foreach ($this->grammar->compileTruncate($this) as $sql => $bindings) {
-            $this->connection->statement($sql, $bindings);
+            $this->connection->query($sql, $bindings);
         }
     }
 
