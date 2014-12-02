@@ -44,6 +44,11 @@ class OutfileClause
      */
     public function __construct($file, $type)
     {
+        if($file instanceof \SplFileInfo)
+        {
+            $file = $file->getPathname();
+        }
+
         $this->file = $file;
 
         $this->type = $type;
