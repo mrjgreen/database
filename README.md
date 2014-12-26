@@ -225,9 +225,9 @@ $row = $connection->table('users')->first();
 $row = $connection->table('users')->find(6);
 ```
 
-The query above assumes your table's primary key is `'id'`. You can specify your primary key:
+The query above assumes your table's primary key is `'id'` and you want to retreive all columns. You can specify the columns you want to fetch, and your primary key:
 ```PHP
-$connection->table('users')->find(3, 'user_id');
+$connection->table('users')->find(3, array('user_id', 'name', 'email'), 'user_id');
 ```
 
 ####Select Columns
