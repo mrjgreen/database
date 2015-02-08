@@ -360,9 +360,8 @@ class Connection implements ConnectionInterface
 
             $statement->execute($this->prepareBindings($bindings));
         }
-            // If an exception occurs when attempting to run a query, we'll format the error
-            // message to include the bindings with SQL, which will make this exception a
-            // lot more helpful to the developer instead of just the database's errors.
+            // If an exception occurs when attempting to run a query, we'll call the exception handler
+            // if there is one, or throw the exception if not
         catch (\Exception $e) {
 
             if($this->exceptionHandler)
