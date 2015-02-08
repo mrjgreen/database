@@ -321,7 +321,7 @@ class Connection implements ConnectionInterface
      * @param  bool $useReadPdo
      * @return \PDOStatement
      *
-     * @throws \Database\QueryException
+     * @throws \Exception
      */
     protected function run($query, $bindings, $useReadPdo = false)
     {
