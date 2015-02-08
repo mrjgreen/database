@@ -1,6 +1,7 @@
 <?php namespace Database;
 
 use Database\Connectors\ConnectionFactory;
+use Database\Connectors\ConnectionFactoryInterface;
 
 class ConnectionResolver implements ConnectionResolverInterface
 {
@@ -35,9 +36,9 @@ class ConnectionResolver implements ConnectionResolverInterface
      * Create a new connection resolver instance.
      *
      * @param  array $connections
-     * @param ConnectionFactory $connectionFactory
+     * @param ConnectionFactoryInterface $connectionFactory
      */
-    public function __construct(array $connections = array(), ConnectionFactory $connectionFactory = null)
+    public function __construct(array $connections = array(), ConnectionFactoryInterface $connectionFactory = null)
     {
         $this->connectionFactory = $connectionFactory ?: new ConnectionFactory();
 

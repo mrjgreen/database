@@ -1,6 +1,7 @@
 <?php namespace Database\Connectors;
 
 use Database\Connection;
+use Database\Exception\ExceptionHandler;
 use Database\Query\Grammars\MySqlGrammar;
 use Database\Query\Grammars\PostgresGrammar;
 use Database\Query\Grammars\SqlServerGrammar;
@@ -32,7 +33,7 @@ use Database\Query\Grammars\SQLiteGrammar;
  *  )
  * </code>
  */
-class ConnectionFactory
+class ConnectionFactory implements ConnectionFactoryInterface
 {
 
     /**
@@ -56,9 +57,11 @@ class ConnectionFactory
      */
     public function make(array $config)
     {
-        $lazy = !empty($config['lazy']);
+        if (!isset($config['driver'])) {
+            throw new \InvalidArgumentException("A driver must be specified.");
+        }
 
-        return $this->makeConnection($config, $lazy)->setReconnector(function (Connection $connection) use ($config) {
+        return $this->makeConnection($config, !empty($config['lazy']))->setReconnector(function (Connection $connection) use ($config) {
             $fresh = $this->makeConnection($config, false);
 
             return $connection->setPdo($fresh->getPdo())->setReadPdo($fresh->getReadPdo());
@@ -90,14 +93,30 @@ class ConnectionFactory
      */
     protected function createSingleConnection(array $config, $lazy)
     {
-        $connection = $this->createConnection($config['driver'], isset($config['prefix']) ? $config['prefix'] : '');
+        $connection = $this->createConnection();
+
+        $logSafeParams = array_diff_key($config, array('password'));
+
+        $connection
+            ->setExceptionHandler(new ExceptionHandler($logSafeParams))
+            ->setQueryGrammar($this->createQueryGrammar($config['driver']))
+            ->setTablePrefix(isset($config['prefix']) ? $config['prefix'] : '');
 
         if(!$lazy)
         {
-            $connection->setPdo($this->createConnector($config)->connect($config));
+            $connection->setPdo($this->createConnector($config['driver'])->connect($config));
         }
 
         return $connection;
+    }
+
+
+    /**
+     * @return \Database\Connection
+     */
+    protected function createConnection()
+    {
+        return new $this->connectionClassName;
     }
 
     /**
@@ -128,7 +147,7 @@ class ConnectionFactory
     {
         $readConfig = $this->getReadConfig($config);
 
-        return $this->createConnector($readConfig)->connect($readConfig);
+        return $this->createConnector($readConfig['driver'])->connect($readConfig);
     }
 
     /**
@@ -188,18 +207,14 @@ class ConnectionFactory
     /**
      * Create a connector instance based on the configuration.
      *
-     * @param  array $config
+     * @param  string $driver
      * @return \Database\Connectors\ConnectorInterface
      *
      * @throws \InvalidArgumentException
      */
-    public function createConnector(array $config)
+    public function createConnector($driver)
     {
-        if (!isset($config['driver'])) {
-            throw new \InvalidArgumentException("A driver must be specified.");
-        }
-
-        switch ($config['driver']) {
+        switch ($driver) {
             case 'mysql':
                 return new MySqlConnector;
 
@@ -213,47 +228,37 @@ class ConnectionFactory
                 return new SqlServerConnector;
         }
 
-        throw new \InvalidArgumentException("Unsupported driver [{$config['driver']}]");
+        throw new \InvalidArgumentException("Unsupported driver [$driver]");
     }
 
     /**
      * Create a new connection instance.
      *
-     * @param  string $driver
-     * @param  \PDO $connection
-     * @param  string $prefix
-     * @return \Database\Connection
+     * @param $driver
+     * @return MySqlGrammar|PostgresGrammar|SQLiteGrammar|SqlServerGrammar
      *
      * @throws \InvalidArgumentException
      */
-    protected function createConnection($driver, $prefix = '')
+    protected function createQueryGrammar($driver)
     {
         switch ($driver) {
             case 'mysql':
-                $queryGrammar = new MySqlGrammar();
+                return new MySqlGrammar();
                 break;
 
             case 'pgsql':
-                $queryGrammar = new PostgresGrammar();
+                return new PostgresGrammar();
                 break;
 
             case 'sqlite':
-                $queryGrammar = new SQLiteGrammar();
+                return new SQLiteGrammar();
                 break;
 
             case 'sqlsrv':
-                $queryGrammar = new SqlServerGrammar();
+                return new SqlServerGrammar();
                 break;
-
-            default:
-                throw new \InvalidArgumentException("Unsupported driver [$driver]");
         }
 
-        $className = $this->connectionClassName;
-
-        $object = new $className();
-
-        return $object->setQueryGrammar($queryGrammar)->setTablePrefix($prefix);
-
+        throw new \InvalidArgumentException("Unsupported driver [$driver]");
     }
 }

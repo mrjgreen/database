@@ -1,16 +1,17 @@
 <?php namespace Database;
 
+use Database\Exception\ExceptionHandler;
+use Database\Exception\ExceptionHandlerInterface;
 use Database\Query\Grammars\Grammar;
 use PDO;
 use Closure;
 use DateTime;
+use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 
 class Connection implements ConnectionInterface
 {
-
-    /** @var LoggerInterface */
-    protected $logger;
+    use LoggerAwareTrait;
 
     /**
      * The active PDO connection.
@@ -77,17 +78,25 @@ class Connection implements ConnectionInterface
     protected $tablePrefix = '';
 
     /**
+     * @var \Database\Exception\ExceptionHandlerInterface
+     */
+    protected $exceptionHandler;
+
+    /**
      * Create a new database connection instance.
      *
      * @param PDO $pdo
      * @param Grammar $queryGrammar
+     * @param ExceptionHandlerInterface $exceptionHandler
      * @param string $tablePrefix
      */
-    public function __construct(PDO $pdo = null, Grammar $queryGrammar = null, $tablePrefix = '')
+    public function __construct(PDO $pdo = null, Grammar $queryGrammar = null, ExceptionHandlerInterface $exceptionHandler = null, $tablePrefix = '')
     {
         $this->pdo = $pdo;
 
         $this->queryGrammar = $queryGrammar ?: new Grammar();
+
+        $this->exceptionHandler = $exceptionHandler ?: new ExceptionHandler();
 
         $this->tablePrefix = $tablePrefix;
     }
@@ -332,6 +341,7 @@ class Connection implements ConnectionInterface
      * @param $bindings
      * @param $useReadPdo
      * @return \PDOStatement
+     * @throws \Exception
      */
     private function execute($query, $bindings, $useReadPdo)
     {
@@ -354,9 +364,13 @@ class Connection implements ConnectionInterface
             // message to include the bindings with SQL, which will make this exception a
             // lot more helpful to the developer instead of just the database's errors.
         catch (\Exception $e) {
-            throw new QueryException(
-                $query, $this->prepareBindings($bindings), $e
-            );
+
+            if($this->exceptionHandler)
+            {
+                $this->exceptionHandler->handle($query, $this->prepareBindings($bindings), $e);
+            }
+
+            throw $e;
         }
 
         return $statement;
@@ -632,7 +646,7 @@ class Connection implements ConnectionInterface
      * Set the query grammar used by the connection.
      *
      * @param  \Database\Query\Grammars\Grammar
-     * @return void
+     * @return $this
      */
     public function setQueryGrammar(Query\Grammars\Grammar $grammar)
     {
@@ -677,7 +691,7 @@ class Connection implements ConnectionInterface
     /**
      * Enable the query log on the connection.
      *
-     * @return void
+     * @return $this
      */
     public function enableQueryLog()
     {
@@ -685,7 +699,7 @@ class Connection implements ConnectionInterface
 
         if(!$this->logger)
         {
-            $this->logger = new LogArray();
+            $this->logger = new QueryLogger();
         }
 
         return $this;
@@ -694,7 +708,7 @@ class Connection implements ConnectionInterface
     /**
      * Disable the query log on the connection.
      *
-     * @return void
+     * @return $this
      */
     public function disableQueryLog()
     {
@@ -727,7 +741,7 @@ class Connection implements ConnectionInterface
      * Set the table prefix in use by the connection.
      *
      * @param  string $prefix
-     * @return void
+     * @return $this
      */
     public function setTablePrefix($prefix)
     {
@@ -739,16 +753,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * Sets a logger.
-     *
-     * @param LoggerInterface $logger
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    /**
      * Get the logger.
      *
      * @return LoggerInterface $logger
@@ -756,5 +760,16 @@ class Connection implements ConnectionInterface
     public function getLogger()
     {
         return $this->logger;
+    }
+
+    /**
+     * @param ExceptionHandlerInterface $exceptionHandler
+     * @return $this
+     */
+    public function setExceptionHandler(ExceptionHandlerInterface $exceptionHandler)
+    {
+        $this->exceptionHandler = $exceptionHandler;
+
+        return $this;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-class LogArrayTest extends PHPUnit_Framework_TestCase {
+class QueryLoggerTest extends PHPUnit_Framework_TestCase {
 
     private $logMessages = array(
         array('message', array('foo' => 'bar')),
@@ -9,7 +9,7 @@ class LogArrayTest extends PHPUnit_Framework_TestCase {
 
 	public function testItStoresAndLogsQueries()
 	{
-		$log = new \Database\LogArray();
+		$log = new \Database\QueryLogger();
 
         foreach($this->logMessages as $messages)
         {
@@ -24,7 +24,7 @@ class LogArrayTest extends PHPUnit_Framework_TestCase {
 
     public function testItFlushesQueries()
 	{
-		$log = new \Database\LogArray();
+		$log = new \Database\QueryLogger();
 
         foreach($this->logMessages as $messages)
         {

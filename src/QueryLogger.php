@@ -2,7 +2,7 @@
 
 use Psr\Log\AbstractLogger;
 
-class LogArray extends AbstractLogger
+class QueryLogger extends AbstractLogger
 {
     private $queryLog = array();
 
