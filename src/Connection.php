@@ -327,6 +327,7 @@ class Connection implements ConnectionInterface
     {
         $this->reconnectIfMissingConnection();
 
+        // We can calculate the time it takes to execute the query and log the SQL, bindings and time in our memory.
         $start = microtime(true);
 
         $statement = $this->execute($query, $bindings, $useReadPdo);
@@ -349,9 +350,6 @@ class Connection implements ConnectionInterface
 
         $pdo = $useReadPdo ? $this->getReadPdo() : $this->getPdo();
 
-        // To execute the statement, we'll simply call the callback, which will actually
-        // run the SQL against the PDO connection. Then we can calculate the time it
-        // took to execute and log the query SQL, bindings and time in our memory.
         try {
             // For update or delete statements, we want to get the number of rows affected
             // by the statement and return that back to the developer. We'll first need
