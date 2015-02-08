@@ -327,7 +327,7 @@ class Connection implements ConnectionInterface
     {
         $this->reconnectIfMissingConnection();
 
-        // We can calculate the time it takes to execute the query and log the SQL, bindings and time in our memory.
+        // We can calculate the time it takes to execute the query and log the SQL, bindings and time against our logger.
         $start = microtime(true);
 
         $statement = $this->execute($query, $bindings, $useReadPdo);
