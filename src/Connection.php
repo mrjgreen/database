@@ -4,9 +4,13 @@ use Database\Query\Grammars\Grammar;
 use PDO;
 use Closure;
 use DateTime;
+use Psr\Log\LoggerInterface;
 
 class Connection implements ConnectionInterface
 {
+
+    /** @var LoggerInterface */
+    protected $logger;
 
     /**
      * The active PDO connection.
@@ -49,13 +53,6 @@ class Connection implements ConnectionInterface
      * @var int
      */
     protected $transactions = 0;
-
-    /**
-     * All of the queries run against the connection.
-     *
-     * @var array
-     */
-    protected $queryLog = array();
 
     /**
      * Indicates whether queries are being logged.
@@ -254,8 +251,6 @@ class Connection implements ConnectionInterface
     public function pretend(Closure $callback)
     {
         $this->pretending = true;
-
-        $this->queryLog = array();
 
         // Basically to make the database connection "pretend", we will just return
         // the default values for all the query methods, then we will return an
@@ -542,11 +537,14 @@ class Connection implements ConnectionInterface
      */
     protected function logQuery($query, $bindings, $start = null)
     {
-        if (!$this->loggingQueries) return;
+        if (!$this->loggingQueries || !$this->logger) return;
 
         $time = $start ? round((microtime(true) - $start) * 1000, 2) : null;
 
-        $this->queryLog[] = compact('query', 'bindings', 'time');
+        $this->logger->debug($query, array(
+            'bindings' => $bindings,
+            'time' => $time
+        ));
     }
 
     /**
@@ -677,28 +675,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * Get the connection query log.
-     *
-     * @return array
-     */
-    public function getQueryLog()
-    {
-        return $this->queryLog;
-    }
-
-    /**
-     * Clear the query log.
-     *
-     * @return void
-     */
-    public function flushQueryLog()
-    {
-        $this->queryLog = array();
-
-        return $this;
-    }
-
-    /**
      * Enable the query log on the connection.
      *
      * @return void
@@ -706,6 +682,11 @@ class Connection implements ConnectionInterface
     public function enableQueryLog()
     {
         $this->loggingQueries = true;
+
+        if(!$this->logger)
+        {
+            $this->logger = new LogArray();
+        }
 
         return $this;
     }
@@ -755,5 +736,25 @@ class Connection implements ConnectionInterface
         $this->getQueryGrammar()->setTablePrefix($prefix);
 
         return $this;
+    }
+
+    /**
+     * Sets a logger.
+     *
+     * @param LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    /**
+     * Get the logger.
+     *
+     * @return LoggerInterface $logger
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 }
