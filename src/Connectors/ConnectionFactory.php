@@ -103,7 +103,7 @@ class ConnectionFactory implements ConnectionFactoryInterface
     {
         $connection = $this->createConnection();
 
-        $logSafeParams = array_diff_key($config, array('password'));
+        $logSafeParams = array_diff_key($config, array('password' => 1));
 
         $connection
             ->setExceptionHandler(new ExceptionHandler($logSafeParams))
