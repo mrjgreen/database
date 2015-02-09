@@ -6,6 +6,8 @@ use Database\Query\Grammars\MySqlGrammar;
 use Database\Query\Grammars\PostgresGrammar;
 use Database\Query\Grammars\SqlServerGrammar;
 use Database\Query\Grammars\SQLiteGrammar;
+use Database\QueryLogger;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class ConnectionFactory
@@ -41,12 +43,18 @@ class ConnectionFactory implements ConnectionFactoryInterface
      */
     protected $connectionClassName = 'Database\Connection';
 
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
-    public function __construct($connectionClassName = null)
+    public function __construct($connectionClassName = null, LoggerInterface $logger = null)
     {
         if ($connectionClassName) {
             $this->connectionClassName = $connectionClassName;
         }
+
+        $this->logger = $logger ?: new QueryLogger();
     }
 
     /**
@@ -100,7 +108,8 @@ class ConnectionFactory implements ConnectionFactoryInterface
         $connection
             ->setExceptionHandler(new ExceptionHandler($logSafeParams))
             ->setQueryGrammar($this->createQueryGrammar($config['driver']))
-            ->setTablePrefix(isset($config['prefix']) ? $config['prefix'] : '');
+            ->setTablePrefix(isset($config['prefix']) ? $config['prefix'] : '')
+            ->setLogger($this->logger);
 
         if(!$lazy)
         {
