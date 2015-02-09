@@ -12,7 +12,9 @@ class QueryException extends PDOException
      */
     public function __construct($message, \Exception $previous)
     {
-        parent::__construct($message, $previous->getCode(), $previous);
+        parent::__construct($message, 0, $previous);
+
+        $this->code = $previous->getCode();
 
         if ($previous instanceof PDOException) {
             $this->errorInfo = $previous->errorInfo;
