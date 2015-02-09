@@ -37,12 +37,34 @@ class ExceptionHandler implements ExceptionHandlerInterface
      */
     private function formatArrayParameters(array $parameters)
     {
+        $parameters = $this->flattenArray($parameters);
+
         foreach($parameters as $name => $value)
         {
             $parameters[$name] = $name . ': ' . $value;
         }
 
         return implode(PHP_EOL, $parameters);
+    }
+
+    /**
+     * @param array $array
+     * @param string $prepend
+     * @return array
+     */
+    private function flattenArray(array $array, $prepend = '')
+    {
+        $results = array();
+
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $results = array_merge($results, $this->flattenArray($value, $prepend . $key . '.'));
+            } else {
+                $results[$prepend . $key] = $value;
+            }
+        }
+
+        return $results;
     }
 
     /**
