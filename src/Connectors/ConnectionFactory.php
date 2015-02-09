@@ -48,6 +48,11 @@ class ConnectionFactory implements ConnectionFactoryInterface
      */
     protected $logger;
 
+    /**
+     * @var array
+     */
+    protected $excludedLogParams = array('password');
+
     public function __construct($connectionClassName = null, LoggerInterface $logger = null)
     {
         if ($connectionClassName) {
@@ -103,10 +108,8 @@ class ConnectionFactory implements ConnectionFactoryInterface
     {
         $connection = $this->createConnection();
 
-        $logSafeParams = array_diff_key($config, array('password' => 1));
-
         $connection
-            ->setExceptionHandler(new ExceptionHandler($logSafeParams))
+            ->setExceptionHandler($this->createExceptionHandler($config))
             ->setQueryGrammar($this->createQueryGrammar($config['driver']))
             ->setTablePrefix(isset($config['prefix']) ? $config['prefix'] : '')
             ->setLogger($this->logger);
@@ -269,5 +272,12 @@ class ConnectionFactory implements ConnectionFactoryInterface
         }
 
         throw new \InvalidArgumentException("Unsupported driver [$driver]");
+    }
+
+    protected function createExceptionHandler(array $config)
+    {
+        $logSafeParams = array_diff_key($config, array_flip($this->excludedLogParams));
+
+        return new ExceptionHandler($logSafeParams);
     }
 }

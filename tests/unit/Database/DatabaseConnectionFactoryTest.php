@@ -16,7 +16,7 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 
 	public function testMakeCallsCreateConnection()
 	{
-		$factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector', 'createConnection', 'createQueryGrammar'));
+		$factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector', 'createConnection', 'createQueryGrammar', 'createExceptionHandler'));
 
 		$config = array('driver' => 'mysql', 'prefix' => 'prefix', 'database' => 'database');
 
@@ -26,12 +26,14 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 		$connector->shouldReceive('connect')->once()->with($config)->andReturn($pdo);
 
 		$mockGrammar = $this->getMock('Database\Query\Grammars\MysqlGrammar');
+		$mockExceptionHandler = $this->getMock('Database\Exception\ExceptionHandlerInterface');
 
 		$mockConnection = $this->getMockConnectionWithExpectations($pdo, $mockGrammar);
 
 		$factory->expects($this->once())->method('createConnector')->with($config['driver'])->will($this->returnValue($connector));
 		$factory->expects($this->once())->method('createQueryGrammar')->with('mysql')->will($this->returnValue($mockGrammar));
 		$factory->expects($this->once())->method('createConnection')->will($this->returnValue($mockConnection));
+		$factory->expects($this->once())->method('createExceptionHandler')->with($config)->will($this->returnValue($mockExceptionHandler));
 
         $connection = $factory->make($config);
 
