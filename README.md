@@ -17,6 +17,8 @@ Features:
 * Sub Queries
 * Nested Queries
 * Bulk Inserts
+* Lazy Connections
+* PSR Compatible Logging
 * Database Connection Resolver
 
 The component is based on Laravel's Illuminate\Database and has very familiar syntax. The core Query Builder is mostly compatible. The main alterations are to the composition of the objects, and most significantly the creation and resolution of connections within the ConnectionFactory and ConnectionResolver classes.
