@@ -1156,7 +1156,7 @@ class Builder
     /**
      * @param $file
      * @param callable $builder
-     * @return \PDOStatement
+     * @return Builder
      */
     public function intoOutfile($file, Closure $builder = null)
     {
@@ -1166,7 +1166,7 @@ class Builder
     /**
      * @param $file
      * @param callable $builder
-     * @return \PDOStatement
+     * @return Builder
      */
     public function intoDumpfile($file, Closure $builder = null)
     {
@@ -1176,21 +1176,19 @@ class Builder
     /**
      * @param $type
      * @param $file
-     * @param callable $builder
-     * @return \PDOStatement
+     * @param $builder
+     * @return $this
      */
     private function outfile($type, $file, $builder)
     {
-        $clone = clone $this;
-
-        $clone->outfile = $clause = new OutfileClause($file, $type);
+        $this->outfile = $clause = new OutfileClause($file, $type);
 
         if($builder)
         {
             $builder($clause);
         }
 
-        return $this->connection->query($clone->toSql(), $clone->getBindings());
+        return $this;
     }
 
     /**

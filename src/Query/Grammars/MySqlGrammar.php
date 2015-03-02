@@ -213,27 +213,24 @@ class MySqlGrammar extends Grammar
      */
     protected function compileOutfile(Builder $query, OutfileClause $outfileClause)
     {
-        $sqlParts = array("into $outfileClause->type ?");
-
-        $query->addBinding($outfileClause->file, 'outfile');
+        $sqlParts = array("into $outfileClause->type '$outfileClause->file'");
 
         $optionally = $outfileClause->enclosedBy ? 'optionally ' : '';
 
         $parts = array(
-            'fieldsTerminatedBy'    => 'fields terminated by ?',
-            'enclosedBy'            => $optionally . 'enclosed by ?',
-            'escapedBy'             => 'escaped by ?',
-            'linesTerminatedBy'     => 'lines terminated by ?',
+            'fieldsTerminatedBy'    => 'fields terminated by',
+            'enclosedBy'            => $optionally . 'enclosed by',
+            'escapedBy'             => 'escaped by',
+            'linesTerminatedBy'     => 'lines terminated by',
         );
 
-        foreach ($parts as $property => $sql) {
+        foreach ($parts as $property => $sql)
+        {
             if(!is_null($outfileClause->$property))
             {
-                $sqlParts[] = $sql;
-                $query->addBinding($outfileClause->$property, 'outfile');
+                $sqlParts[] = "$sql '{$outfileClause->$property}'";
             }
         }
-
 
         return implode(' ', $sqlParts);
     }

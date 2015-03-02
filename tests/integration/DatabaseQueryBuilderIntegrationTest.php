@@ -1,34 +1,9 @@
 <?php
 
-class DatabaseQueryBuilderIntegrationTest extends PHPUnit_Framework_TestCase
+class DatabaseQueryBuilderIntegrationTest extends AbstractDatabaseIntegrationTest
 {
-    /**
-     * @var \Database\Connection
-     */
-    protected $connection;
-
-    protected $tableName = 'test.database_integration_test';
-
-    public function setUp()
-    {
-        $factory = new \Database\Connectors\ConnectionFactory();
-
-        $this->connection = $factory->make(include __DIR__ . '/config.php');
-    }
-
-    public function createTable()
-    {
-        $this->connection->query("CREATE DATABASE IF NOT EXISTS test");
-
-        $this->connection->query("CREATE TABLE IF NOT EXISTS $this->tableName (`name` varchar(255),`value` integer(8)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-
-        $this->connection->query("TRUNCATE TABLE $this->tableName");
-    }
-
     public function testInsertUpdateDelete()
     {
-        $this->createTable();
-
         $statement = $this->connection->table($this->tableName)
             ->insert(array(
                 'name'  => 'joe',
@@ -67,5 +42,37 @@ class DatabaseQueryBuilderIntegrationTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse($exists);
 
+    }
+
+    public function testOutfile()
+    {
+        $file = new SplFileInfo('/var/tmp/integrationtest.tmp');
+        @unlink($file);
+
+        $this->connection
+            ->table($this->tableName)
+            ->where('name', '=', 'joe')
+            ->intoOutfile($file)
+            ->query();
+
+        @unlink($file);
+    }
+
+    public function testOutfileWithTerminators()
+    {
+        $file = new SplFileInfo('/var/tmp/integrationtest.tmp');
+        @unlink($file);
+
+        $this->connection
+            ->table($this->tableName)
+            ->where('name', '=', 'joe')
+            ->intoOutfile($file, function(\Database\Query\OutfileClause $outfile){
+                $outfile
+                    ->linesTerminatedBy("\n")
+                    ->fieldsTerminatedBy("\t");
+            })
+            ->query();
+
+        @unlink($file);
     }
 }

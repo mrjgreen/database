@@ -1,30 +1,7 @@
 <?php
 
-class DatabaseConnectionIntegrationTest extends PHPUnit_Framework_TestCase
+class DatabaseConnectionIntegrationTest extends AbstractDatabaseIntegrationTest
 {
-    /**
-     * @var \Database\Connection
-     */
-    protected $connection;
-
-    protected $tableName = 'test.database_integration_test';
-
-    public function setUp()
-    {
-        $factory = new \Database\Connectors\ConnectionFactory();
-
-        $this->connection = $factory->make(include __DIR__ . '/config.php');
-    }
-
-    public function createTable()
-    {
-        $this->connection->query("CREATE DATABASE IF NOT EXISTS test");
-
-        $this->connection->query("CREATE TABLE IF NOT EXISTS $this->tableName (`name` varchar(255),`value` integer(8)) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-
-        $this->connection->query("TRUNCATE TABLE $this->tableName");
-    }
-
     public function testItReturnsCorrectValuesForUtilityFunctions()
     {
         $pdo = $this->connection->getPdo();
@@ -39,8 +16,6 @@ class DatabaseConnectionIntegrationTest extends PHPUnit_Framework_TestCase
 
     public function testItPerformsTransactions()
     {
-        $this->createTable();
-
         $this->connection->transaction(function($connection){
             $connection->query("INSERT INTO $this->tableName (name, value) VALUES (?,?)", array('joe', 1));
         });
@@ -61,6 +36,5 @@ class DatabaseConnectionIntegrationTest extends PHPUnit_Framework_TestCase
         $rows = $this->connection->fetchAll("SELECT * FROM $this->tableName");
 
         $this->assertCount(1, $rows);
-
     }
 }

@@ -1099,33 +1099,36 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	{
 		$builder = $this->getMySqlBuilder();
 		$builder->getConnection()->shouldReceive('query')->once()->with(
-			'select * into outfile ? from `foo` where `bar` = ?',
-			array('filename', 'baz')
+			'select * into outfile \'filename\' from `foo` where `bar` = ?',
+			array('baz')
 		);
-		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename');
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename')->query();
+	}
 
+	public function testMySqlOutfileWithParams()
+	{
 		$builder = $this->getMySqlBuilder();
 		$builder->getConnection()->shouldReceive('query')->once()->with(
-			'select * into outfile ? fields terminated by ? optionally enclosed by ? escaped by ? lines terminated by ? from `foo` where `bar` = ?',
-			array('filename',',', '.', '\\', "\n\r", 'baz')
+			"select * into outfile 'filename' fields terminated by ',' optionally enclosed by '.' escaped by '\' lines terminated by '\n\r' from `foo` where `bar` = ?",
+			array('baz')
 		);
-		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename', function(\Database\Query\OutfileClause $of){
-            $of->enclosedBy(".", true)
-                ->escapedBy("\\")
-                ->linesTerminatedBy("\n\r")
-                ->fieldsTerminatedBy(',');
-        });
 
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename', function(\Database\Query\OutfileClause $of){
+			$of->enclosedBy(".", true)
+				->escapedBy("\\")
+				->linesTerminatedBy("\n\r")
+				->fieldsTerminatedBy(',');
+		})->query();
 	}
 
 	public function testMySqlDumpfile()
 	{
 		$builder = $this->getMySqlBuilder();
 		$builder->getConnection()->shouldReceive('query')->once()->with(
-			'select * into dumpfile ? from `foo` where `bar` = ?',
-			array('filename', 'baz')
+			"select * into dumpfile 'filename' from `foo` where `bar` = ?",
+			array('baz')
 		);
-		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoDumpfile('filename');
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoDumpfile('filename')->query();
 	}
 
 
