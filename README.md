@@ -17,6 +17,7 @@ Features:
 * Sub Queries
 * Nested Queries
 * Bulk Inserts
+* MySQL `SELECT * INTO OUTFILE '...'`
 * Lazy Connections
 * PSR Compatible Logging
 * Database Connection Resolver
@@ -80,6 +81,7 @@ $connection->query("SELECT id, username FROM customers");
     - [Group By, Order By and Having](#group-by-order-by-and-having)
     - [Joins](#joins)
     - [Sub Selects](#sub-selects)
+    - [MySQL Outfile](#mysql-outfile)
  - [Insert](#insert)
     - [Insert Ignore](#insert-ignore)
     - [Replace](#replace)
@@ -348,6 +350,22 @@ $count = $connection->table('users')->avg('age');
 #####Sum
 ```PHP
 $count = $connection->table('users')->sum('age');
+```
+
+####MySQL Outfile
+
+```PHP
+$connection
+	->table('users')
+	->select('*')
+	->where('bar', '=', 'baz')
+	->intoOutfile('filename', function(\Database\Query\OutfileClause $out){
+		$out
+		->enclosedBy(".")
+		->escapedBy("\\")
+		->linesTerminatedBy("\n\r")
+		->fieldsTerminatedBy(',');
+	})->query();
 ```
 
 ###Insert
