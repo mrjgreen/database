@@ -46,8 +46,7 @@ class DatabaseQueryBuilderIntegrationTest extends AbstractDatabaseIntegrationTes
 
     public function testOutfile()
     {
-        $file = new SplFileInfo('/var/tmp/integrationtest.tmp');
-        @unlink($file);
+        $file = '/var/tmp/db_integration_test_' . uniqid();
 
         $this->connection
             ->table($this->tableName)
@@ -60,8 +59,7 @@ class DatabaseQueryBuilderIntegrationTest extends AbstractDatabaseIntegrationTes
 
     public function testOutfileWithTerminators()
     {
-        $file = new SplFileInfo('/var/tmp/integrationtest.tmp');
-        @unlink($file);
+        $file = '/var/tmp/db_integration_test_' . uniqid();
 
         $this->connection
             ->table($this->tableName)
