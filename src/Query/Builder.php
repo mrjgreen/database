@@ -1447,7 +1447,7 @@ class Builder
      * Insert a new record into the database.
      *
      * @param  array $values
-     * @return bool
+     * @return \PDOStatement
      */
     public function insert(array $values)
     {
