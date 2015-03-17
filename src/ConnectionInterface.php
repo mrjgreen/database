@@ -105,11 +105,11 @@ interface ConnectionInterface
     public function rollBack();
 
     /**
-     * Get the number of active transactions.
+     * Checks the connection to see if there is an active transaction
      *
      * @return int
      */
-    public function transactionLevel();
+    public function inTransaction();
 
     /**
      * Execute the given callback in "dry run" mode.

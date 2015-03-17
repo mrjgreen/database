@@ -26,15 +26,16 @@ class DatabaseConnectionTest extends PHPUnit_Framework_TestCase {
 	public function testFetchProperlyCallsPDO()
 	{
 		$pdo = $this->getMock('DatabaseConnectionTestMockPDO', array('prepare'));
-		$writePdo = $this->getMock('DatabaseConnectionTestMockPDO', array('prepare'));
+		$writePdo = $this->getMock('DatabaseConnectionTestMockPDO', array('prepare', 'inTransaction'));
 		$writePdo->expects($this->never())->method('prepare');
+		$writePdo->expects($this->exactly(2))->method('inTransaction')->willReturn(false);
 		$statement = $this->getMock('PDOStatement', array('execute', 'fetch'));
 		$statement->expects($this->once())->method('execute')->with($this->equalTo(array('foo' => 'bar')));
 		$statement->expects($this->once())->method('fetch')->will($this->returnValue(array('boom')));
 		$pdo->expects($this->once())->method('prepare')->with('foo')->will($this->returnValue($statement));
 		$mock = $this->getMockConnection(array('prepareBindings', 'query'), $writePdo);
 		$mock->setReadPdo($pdo);
-		$mock->setPdo($pdo);
+		$mock->setPdo($writePdo);
 		$mock->expects($this->once())->method('prepareBindings')->with($this->equalTo(array('foo' => 'bar')))->will($this->returnValue(array('foo' => 'bar')));
 		$results = $mock->fetch('foo', array('foo' => 'bar'));
 		$this->assertEquals(array('boom'), $results);

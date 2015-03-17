@@ -49,13 +49,6 @@ class Connection implements ConnectionInterface
     protected $fetchMode = PDO::FETCH_ASSOC;
 
     /**
-     * The number of active transactions.
-     *
-     * @var int
-     */
-    protected $transactions = 0;
-
-    /**
      * Indicates whether queries are being logged.
      *
      * @var bool
@@ -433,15 +426,13 @@ class Connection implements ConnectionInterface
     /**
      * Start a new database transaction.
      *
-     * @return void
+     * @return $this
      */
     public function beginTransaction()
     {
-        ++$this->transactions;
+        $this->reconnectIfMissingConnection();
 
-        if ($this->transactions == 1) {
-            $this->pdo->beginTransaction();
-        }
+        $this->pdo->beginTransaction();
 
         return $this;
     }
@@ -449,49 +440,43 @@ class Connection implements ConnectionInterface
     /**
      * Commit the active database transaction.
      *
-     * @return void
+     * @return $this
      */
     public function commit()
     {
-        if ($this->transactions == 1) $this->pdo->commit();
+        $this->reconnectIfMissingConnection();
 
-        --$this->transactions;
+        $this->pdo->commit();
 
         return $this;
     }
 
     /**
-     * Rollback the active database transaction.
-     *
-     * @return void
+     * @return $this
      */
     public function rollBack()
     {
-        if ($this->transactions == 1) {
-            $this->transactions = 0;
+        $this->reconnectIfMissingConnection();
 
-            $this->pdo->rollBack();
-        } else {
-            --$this->transactions;
-        }
+        $this->pdo->rollBack();
 
         return $this;
     }
 
     /**
-     * Get the number of active transactions.
-     *
-     * @return int
+     * @return bool
      */
-    public function transactionLevel()
+    public function inTransaction()
     {
-        return $this->transactions;
+        $this->reconnectIfMissingConnection();
+
+        return $this->pdo->inTransaction();
     }
 
     /**
      * Disconnect from the underlying PDO connection.
      *
-     * @return void
+     * @return $this
      */
     public function disconnect()
     {
@@ -575,9 +560,12 @@ class Connection implements ConnectionInterface
      */
     public function getReadPdo()
     {
-        if ($this->transactions >= 1) return $this->getPdo();
+        if (!$this->readPdo || $this->pdo->inTransaction())
+        {
+            return $this->getPdo();
+        }
 
-        return $this->readPdo ?: $this->pdo;
+        return $this->readPdo;
     }
 
     /**
