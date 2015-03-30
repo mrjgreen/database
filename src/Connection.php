@@ -505,7 +505,15 @@ class Connection implements ConnectionInterface
     public function reconnect()
     {
         if (is_callable($this->reconnector)) {
-            return call_user_func($this->reconnector, $this);
+
+            try
+            {
+                return call_user_func($this->reconnector, $this);
+            }
+            catch(\PDOException $e)
+            {
+                $this->exceptionHandler->handle("Connection attempt", array(), $e);
+            }
         }
 
         throw new \LogicException("Lost connection and no reconnector available.");

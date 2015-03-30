@@ -20,11 +20,11 @@ class ExceptionHandler implements ExceptionHandlerInterface
      * @param array $bindings
      * @param \Exception $previousException
      */
-    public function handle($query, array $bindings = array(), \Exception $previousException)
+    public function handle($query = '', array $bindings = array(), \Exception $previousException)
     {
         $parameters = $this->parameters;
 
-        $parameters['SQL'] = $this->replaceArray('\?', $bindings, $query);
+        $query and $parameters['SQL'] = $this->replaceArray('\?', $bindings, $query);
 
         $message =  $previousException->getMessage() . PHP_EOL . $this->formatArrayParameters($parameters);
 
