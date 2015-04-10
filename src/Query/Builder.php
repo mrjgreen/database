@@ -1163,7 +1163,7 @@ class Builder
      * @param $file
      * @param $columns
      * @param callable $builder
-     * @return $this
+     * @return \PDOStatement
      */
     public function infile($file, $columns, Closure $builder = null)
     {
