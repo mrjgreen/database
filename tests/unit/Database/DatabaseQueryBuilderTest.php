@@ -1139,13 +1139,13 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$tablename = 'foo';
 
 		$builder->getConnection()->shouldReceive('query')->once()->with(
-			"load data infile '$filepath' ignore into table `$tablename` fields terminated by ',' optionally enclosed by '.' escaped by '\' lines starting by '$' terminated by '\n\r' (`col1`, `col2`, `col3`) set `fizz` = baz + 1, `buzz` = ?",
+			"load data infile '$filepath' ignore into table `$tablename` fields terminated by ',' optionally enclosed by '.' escaped by '\' lines starting by '$' terminated by '\n\r' (`col1`, col2, `col3`) set `fizz` = baz + 1, `buzz` = ?",
 			array('bar')
 		);
 
 		$builder
 			->from($tablename)
-			->infile($filepath, array('col1', 'col2', 'col3'), function(\Database\Query\InfileClause $if){
+			->infile($filepath, array('col1', new \Database\Query\Expression('col2'), 'col3'), function(\Database\Query\InfileClause $if){
 				$if
 					->ignore()
 					->rules(array(
