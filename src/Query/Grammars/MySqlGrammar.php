@@ -1,6 +1,7 @@
 <?php namespace Database\Query\Grammars;
 
 use Database\Query\Builder;
+use Database\Query\InfileClause;
 use Database\Query\OutfileClause;
 
 class MySqlGrammar extends Grammar
@@ -209,6 +210,7 @@ class MySqlGrammar extends Grammar
 
     /**
      * @param Builder $query
+     * @param OutfileClause $outfileClause
      * @return string
      */
     protected function compileOutfile(Builder $query, OutfileClause $outfileClause)
@@ -218,21 +220,85 @@ class MySqlGrammar extends Grammar
         $optionally = $outfileClause->enclosedBy ? 'optionally ' : '';
 
         $parts = array(
-            'fieldsTerminatedBy'    => 'fields terminated by',
-            'enclosedBy'            => $optionally . 'enclosed by',
-            'escapedBy'             => 'escaped by',
-            'linesTerminatedBy'     => 'lines terminated by',
+            'fields' => array(
+                'fieldsTerminatedBy'    => 'terminated by',
+                'enclosedBy'            => $optionally . 'enclosed by',
+                'escapedBy'             => 'escaped by',
+            ),
+            'lines' => array(
+                'linesTerminatedBy'     => 'terminated by',
+            )
         );
 
-        foreach ($parts as $property => $sql)
+        if($options = $this->buildBulkComponents($parts, $outfileClause))
         {
-            if(!is_null($outfileClause->$property))
-            {
-                $sqlParts[] = "$sql '{$outfileClause->$property}'";
-            }
+            $sqlParts[] = $options;
         }
 
         return implode(' ', $sqlParts);
     }
 
+    /**
+     * @param Builder $query
+     * @param InfileClause $infile
+     * @return string
+     */
+    public function compileInfile(Builder $query, InfileClause $infile)
+    {
+        $local = $infile->local ? 'local ' : '';
+
+        $type = $infile->type ? ($infile->type . ' ') : '';
+
+        $sqlParts = array("load data {$local}infile '$infile->file' {$type}into table " . $this->wrapTable($query->from));
+
+        $optionally = $infile->enclosedBy ? 'optionally ' : '';
+
+        $parts = array(
+            'fields' => array(
+                'fieldsTerminatedBy'    => 'terminated by',
+                'enclosedBy'            => $optionally . 'enclosed by',
+                'escapedBy'             => 'escaped by',
+            ),
+            'lines' => array(
+                'linesStartingBy'       => 'starting by',
+                'linesTerminatedBy'     => 'terminated by',
+            )
+        );
+
+        if($options = $this->buildBulkComponents($parts, $infile))
+        {
+            $sqlParts[] = $options;
+        }
+
+        $sqlParts[] = '(' . $this->columnize($infile->columns) . ')';
+
+        $sqlParts[] = $infile->rules ? ('set ' . $this->getUpdateColumns($infile->rules)) : '';
+
+        return implode(' ', $sqlParts);
+    }
+
+    /**
+     * @param array $parts
+     * @param InfileClause|OutfileClause $infile
+     * @return string
+     */
+    private function buildBulkComponents(array $parts, $infile)
+    {
+        $sqlParts = array();
+
+        foreach ($parts as $type => $components)
+        {
+            foreach($components as $property => $sql)
+            {
+                if(!is_null($infile->$property))
+                {
+                    $sqlParts[] = trim("$type $sql '{$infile->$property}'");
+
+                    $type = '';
+                }
+            }
+        }
+
+        return implode(' ', $sqlParts);
+    }
 }

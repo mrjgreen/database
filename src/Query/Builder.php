@@ -28,7 +28,6 @@ class Builder
      */
     protected $bindings = array(
         'select' => [],
-        'outfile' => [],
         'join' => [],
         'where' => [],
         'having' => [],
@@ -132,6 +131,13 @@ class Builder
      * @var
      */
     public $outfile;
+
+    /**
+     * Should the insert be from an infile
+     *
+     * @var
+     */
+    public $infile;
 
     /**
      * The backups of fields while doing a pagination count.
@@ -1155,6 +1161,26 @@ class Builder
 
     /**
      * @param $file
+     * @param $columns
+     * @param callable $builder
+     * @return $this
+     */
+    public function infile($file, $columns, Closure $builder = null)
+    {
+        $clause = new InfileClause($file, $columns);
+
+        if($builder)
+        {
+            $builder($clause);
+        }
+
+        $sql = $this->grammar->compileInfile($this, $clause);
+
+        return $this->connection->query($sql, $this->cleanBindings($clause->rules));
+    }
+
+    /**
+     * @param $file
      * @param callable $builder
      * @return Builder
      */
@@ -1912,7 +1938,7 @@ class Builder
     /**
      * Get the query grammar instance.
      *
-     * @return \Database\Grammar
+     * @return \Database\Query\Grammars\Grammar
      */
     public function getGrammar()
     {

@@ -1131,6 +1131,34 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoDumpfile('filename')->query();
 	}
 
+	public function testInfile()
+	{
+		$builder = $this->getMySqlBuilder();
+
+		$filepath = 'bizbazbar';
+		$tablename = 'foo';
+
+		$builder->getConnection()->shouldReceive('query')->once()->with(
+			"load data infile '$filepath' ignore into table `$tablename` fields terminated by ',' optionally enclosed by '.' escaped by '\' lines starting by '$' terminated by '\n\r' (`col1`, `col2`, `col3`) set `fizz` = baz + 1, `buzz` = ?",
+			array('bar')
+		);
+
+		$builder
+			->from($tablename)
+			->infile($filepath, array('col1', 'col2', 'col3'), function(\Database\Query\InfileClause $if){
+				$if
+					->ignore()
+					->rules(array(
+						'fizz' => new \Database\Query\Expression('baz + 1'),
+						'buzz' => 'bar',
+					))
+					->enclosedBy(".", true)
+					->escapedBy("\\")
+					->linesStartingBy('$')
+					->linesTerminatedBy("\n\r")
+					->fieldsTerminatedBy(',');
+			});
+	}
 
 	public function testPostgresLock()
 	{
