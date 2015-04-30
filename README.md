@@ -96,7 +96,6 @@ $connection->query("SELECT id, username FROM customers");
  - [Get SQL](#get-sql-query-and-bindings)
  - [Raw PDO Instance](#raw-pdo-instance)
 
-
 ## Connection
 The Database component supports MySQL, SQLite, SqlServer and PostgreSQL drivers. You can specify the driver during connection and the associated configuration when creating a new connection. You can also create multiple connections, but you can use alias for only one connection at a time.;
 ```PHP
