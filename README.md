@@ -18,7 +18,7 @@ Features:
 * Nested Queries
 * Bulk Inserts
 * MySQL `SELECT * INTO OUTFILE '...'`
-* * MySQL `LOAD DATA INFILE '...'`
+* MySQL `LOAD DATA INFILE '...'`
 * Lazy Connections
 * PSR Compatible Logging
 * Database Connection Resolver
