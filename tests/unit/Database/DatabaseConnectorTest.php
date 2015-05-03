@@ -120,6 +120,15 @@ class DatabaseConnectorTest extends PHPUnit_Framework_TestCase {
 		$this->assertSame($result, $connection);
 	}
 
+	public function testItThrowsExceptionOnFailedConnection()
+	{
+		$this->setExpectedException('Database\Exception\ConnectionException', "Connection to 'dsn' failed: invalid data source name");
+
+		$connector = new \Database\Connectors\MySqlConnector();
+
+		$connector->createConnection("dsn", array(), array());
+	}
+
 	protected function getDsn(array $config)
 	{
 		extract($config);

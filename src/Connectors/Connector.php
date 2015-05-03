@@ -1,5 +1,6 @@
 <?php namespace Database\Connectors;
 
+use Database\Exception\ConnectionException;
 use PDO;
 
 class Connector
@@ -45,7 +46,14 @@ class Connector
 
         $password = isset($config['password']) ? $config['password'] : null;
 
-        return new PDO($dsn, $username, $password, $options);
+        try
+        {
+            return new PDO($dsn, $username, $password, $options);
+        }catch (\PDOException $e)
+        {
+            throw new ConnectionException("Connection to '$dsn' failed: " . $e->getMessage(), $e);
+        }
+
     }
 
     /**
