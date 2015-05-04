@@ -243,9 +243,17 @@ class MySqlGrammar extends Grammar
             $sqlParts[] = $options;
         }
 
+        if($infile->ignoreLines)
+        {
+            $sqlParts[] = "ignore $infile->ignoreLines lines";
+        }
+
         $sqlParts[] = '(' . $this->columnize($infile->columns) . ')';
 
-        $sqlParts[] = $infile->rules ? ('set ' . $this->getUpdateColumns($infile->rules)) : '';
+        if($infile->rules)
+        {
+            $sqlParts[] = 'set ' . $this->getUpdateColumns($infile->rules);
+        }
 
         return implode(' ', $sqlParts);
     }

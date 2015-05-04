@@ -63,6 +63,11 @@ class InfileClause
     public $linesStartingBy;
 
     /**
+     * @var int
+     */
+    public $ignoreLines;
+
+    /**
      * Create a new infile clause instance.
 
      * @param $file
@@ -145,6 +150,22 @@ class InfileClause
     public function linesTerminatedBy($character)
     {
         $this->linesTerminatedBy = $character;
+
+        return $this;
+    }
+
+    /**
+     * @param $lineCount
+     * @return $this
+     */
+    public function ignoreLines($lineCount)
+    {
+        if(!is_integer($lineCount) || $lineCount < 1)
+        {
+            throw new \InvalidArgumentException("Line count must be a positive, non-zero integer.");
+        }
+
+        $this->ignoreLines = $lineCount;
 
         return $this;
     }

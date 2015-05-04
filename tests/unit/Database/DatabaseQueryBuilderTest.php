@@ -1132,6 +1132,22 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoDumpfile('filename')->query();
 	}
 
+	public function testBasicInfile()
+	{
+		$builder = $this->getMySqlBuilder();
+
+		$filepath = 'bizbazbar';
+		$tablename = 'foo';
+
+		$builder->getConnection()->shouldReceive('query')->once()->with(
+			"load data infile '$filepath' into table `$tablename` (`col1`, col2, `col3`)",
+			array());
+
+		$builder
+			->from($tablename)
+			->infile($filepath, array('col1', new \Database\Query\Expression('col2'), 'col3'));
+	}
+
 	public function testInfile()
 	{
 		$builder = $this->getMySqlBuilder();
@@ -1140,7 +1156,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$tablename = 'foo';
 
 		$builder->getConnection()->shouldReceive('query')->once()->with(
-			"load data infile '$filepath' ignore into table `$tablename` character set utf8 fields terminated by ',' enclosed by '.' escaped by '\' lines starting by '$' terminated by '\n\r' (`col1`, col2, `col3`) set `fizz` = baz + 1, `buzz` = ?",
+			"load data infile '$filepath' ignore into table `$tablename` character set utf8 fields terminated by ',' enclosed by '.' escaped by '\' lines starting by '$' terminated by '\n\r' ignore 4 lines (`col1`, col2, `col3`) set `fizz` = baz + 1, `buzz` = ?",
 			array('bar')
 		);
 
@@ -1158,6 +1174,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 					->escapedBy("\\")
 					->linesStartingBy('$')
 					->linesTerminatedBy("\n\r")
+					->ignoreLines(4)
 					->fieldsTerminatedBy(',');
 			});
 	}
