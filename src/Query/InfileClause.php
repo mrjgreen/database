@@ -30,6 +30,11 @@ class InfileClause
     /**
      * @var string
      */
+    public $characterSet;
+
+    /**
+     * @var string
+     */
     public $escapedBy;
 
     /**
@@ -73,6 +78,17 @@ class InfileClause
         $this->file = $file;
 
         $this->columns = $columns;
+    }
+
+    /**
+     * @param $characterSet
+     * @return $this
+     */
+    public function characterSet($characterSet)
+    {
+        $this->characterSet = $characterSet;
+
+        return $this;
     }
 
     /**

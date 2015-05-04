@@ -217,20 +217,7 @@ class MySqlGrammar extends Grammar
     {
         $sqlParts = array("into $outfileClause->type '$outfileClause->file'");
 
-        $optionally = $outfileClause->enclosedBy ? 'optionally ' : '';
-
-        $parts = array(
-            'fields' => array(
-                'fieldsTerminatedBy'    => 'terminated by',
-                'enclosedBy'            => $optionally . 'enclosed by',
-                'escapedBy'             => 'escaped by',
-            ),
-            'lines' => array(
-                'linesTerminatedBy'     => 'terminated by',
-            )
-        );
-
-        if($options = $this->buildBulkComponents($parts, $outfileClause))
+        if($options = $this->buildInfileOutfileOptions($outfileClause))
         {
             $sqlParts[] = $options;
         }
@@ -251,7 +238,32 @@ class MySqlGrammar extends Grammar
 
         $sqlParts = array("load data {$local}infile '$infile->file' {$type}into table " . $this->wrapTable($query->from));
 
-        $optionally = $infile->enclosedBy ? 'optionally ' : '';
+        if($options = $this->buildInfileOutfileOptions($infile))
+        {
+            $sqlParts[] = $options;
+        }
+
+        $sqlParts[] = '(' . $this->columnize($infile->columns) . ')';
+
+        $sqlParts[] = $infile->rules ? ('set ' . $this->getUpdateColumns($infile->rules)) : '';
+
+        return implode(' ', $sqlParts);
+    }
+
+    /**
+     * @param InfileClause|OutfileClause $infile
+     * @return string
+     */
+    private function buildInfileOutfileOptions($infile)
+    {
+        $sqlParts = array();
+
+        $optionally = $infile->optionallyEnclosedBy ? 'optionally ' : '';
+
+        if(isset($infile->characterSet))
+        {
+            $sqlParts[] = "character set $infile->characterSet";
+        }
 
         $parts = array(
             'fields' => array(
@@ -265,32 +277,11 @@ class MySqlGrammar extends Grammar
             )
         );
 
-        if($options = $this->buildBulkComponents($parts, $infile))
-        {
-            $sqlParts[] = $options;
-        }
-
-        $sqlParts[] = '(' . $this->columnize($infile->columns) . ')';
-
-        $sqlParts[] = $infile->rules ? ('set ' . $this->getUpdateColumns($infile->rules)) : '';
-
-        return implode(' ', $sqlParts);
-    }
-
-    /**
-     * @param array $parts
-     * @param InfileClause|OutfileClause $infile
-     * @return string
-     */
-    private function buildBulkComponents(array $parts, $infile)
-    {
-        $sqlParts = array();
-
         foreach ($parts as $type => $components)
         {
             foreach($components as $property => $sql)
             {
-                if(!is_null($infile->$property))
+                if(isset($infile->$property))
                 {
                     $sqlParts[] = trim("$type $sql '{$infile->$property}'");
 

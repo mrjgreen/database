@@ -1109,13 +1109,14 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 	{
 		$builder = $this->getMySqlBuilder();
 		$builder->getConnection()->shouldReceive('query')->once()->with(
-			"select * into outfile 'filename' fields terminated by ',' optionally enclosed by '.' escaped by '\' lines terminated by '\n\r' from `foo` where `bar` = ?",
+			"select * into outfile 'filename' character set binary fields terminated by ',' optionally enclosed by '.' escaped by '\' lines terminated by '\n\r' from `foo` where `bar` = ?",
 			array('baz')
 		);
 
 		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->intoOutfile('filename', function(\Database\Query\OutfileClause $of){
 			$of->enclosedBy(".", true)
 				->escapedBy("\\")
+				->characterSet('binary')
 				->linesTerminatedBy("\n\r")
 				->fieldsTerminatedBy(',');
 		})->query();
@@ -1139,7 +1140,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$tablename = 'foo';
 
 		$builder->getConnection()->shouldReceive('query')->once()->with(
-			"load data infile '$filepath' ignore into table `$tablename` fields terminated by ',' optionally enclosed by '.' escaped by '\' lines starting by '$' terminated by '\n\r' (`col1`, col2, `col3`) set `fizz` = baz + 1, `buzz` = ?",
+			"load data infile '$filepath' ignore into table `$tablename` character set utf8 fields terminated by ',' enclosed by '.' escaped by '\' lines starting by '$' terminated by '\n\r' (`col1`, col2, `col3`) set `fizz` = baz + 1, `buzz` = ?",
 			array('bar')
 		);
 
@@ -1152,7 +1153,8 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 						'fizz' => new \Database\Query\Expression('baz + 1'),
 						'buzz' => 'bar',
 					))
-					->enclosedBy(".", true)
+					->characterSet('utf8')
+					->enclosedBy(".")
 					->escapedBy("\\")
 					->linesStartingBy('$')
 					->linesTerminatedBy("\n\r")

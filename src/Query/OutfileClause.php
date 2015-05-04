@@ -15,6 +15,11 @@ class OutfileClause
     /**
      * @var string
      */
+    public $characterSet;
+
+    /**
+     * @var string
+     */
     public $escapedBy;
 
     /**
@@ -52,6 +57,17 @@ class OutfileClause
         $this->file = $file;
 
         $this->type = $type;
+    }
+
+    /**
+     * @param $characterSet
+     * @return $this
+     */
+    public function characterSet($characterSet)
+    {
+        $this->characterSet = $characterSet;
+
+        return $this;
     }
 
     /**
