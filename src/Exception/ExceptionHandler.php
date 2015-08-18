@@ -6,6 +6,8 @@ class ExceptionHandler implements ExceptionHandlerInterface
      * @var array
      */
     private $parameters;
+    
+    private $maxQueryLength = 1000;
 
     /**
      * @param array $parameters
@@ -13,6 +15,14 @@ class ExceptionHandler implements ExceptionHandlerInterface
     public function __construct(array $parameters = array())
     {
         $this->parameters = $parameters;
+    }
+    
+    /**
+     * @param array $maxQueryLength
+     */
+    public function setMaxQueryLength($maxQueryLength)
+    {
+        $this->maxQueryLength = $maxQueryLength;
     }
 
     /**
@@ -24,8 +34,16 @@ class ExceptionHandler implements ExceptionHandlerInterface
     {
         $parameters = $this->parameters;
 
-        $query and $parameters['SQL'] = $this->replaceArray('\?', $bindings, $query);
-
+        if($query){
+            $sql = $this->replaceArray('\?', $bindings, $query);
+        
+            if($this->maxQueryLength && strlen($sql) > $this->maxQueryLength){
+                $sql = substr($sql, 0, $this->maxQueryLength);
+            }
+    
+            $parameters['SQL'] = $sql;
+        }
+    
         $message =  $previousException->getMessage() . PHP_EOL . $this->formatArrayParameters($parameters);
 
         throw new QueryException($message, $previousException);
