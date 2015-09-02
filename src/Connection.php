@@ -430,6 +430,8 @@ class Connection implements ConnectionInterface
      */
     public function beginTransaction()
     {
+        $this->reconnectIfMissingConnection();
+        
         $this->pdo->beginTransaction();
 
         return $this;
