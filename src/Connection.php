@@ -430,8 +430,6 @@ class Connection implements ConnectionInterface
      */
     public function beginTransaction()
     {
-        $this->reconnectIfMissingConnection();
-
         $this->pdo->beginTransaction();
 
         return $this;
@@ -444,8 +442,6 @@ class Connection implements ConnectionInterface
      */
     public function commit()
     {
-        $this->reconnectIfMissingConnection();
-
         $this->pdo->commit();
 
         return $this;
@@ -456,8 +452,6 @@ class Connection implements ConnectionInterface
      */
     public function rollBack()
     {
-        $this->reconnectIfMissingConnection();
-
         $this->pdo->rollBack();
 
         return $this;
@@ -468,8 +462,6 @@ class Connection implements ConnectionInterface
      */
     public function inTransaction()
     {
-        $this->reconnectIfMissingConnection();
-
         return $this->pdo->inTransaction();
     }
 
