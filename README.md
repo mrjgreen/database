@@ -315,9 +315,9 @@ If you need more than one criterion to join a table then you can pass a closure 
 $query = $connection->table('users')
             ->selectSub(function($subQuery){
             	$subQuery
-            	->table('customer')
+            	->from('customer')
             	->select('name')
-            	->where('id', '=', 'users.id');
+            	->where('id', '=', $subQuery->raw('users.id'));
             }, 'tmp');
 ```
 
