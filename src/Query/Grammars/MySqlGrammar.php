@@ -72,6 +72,18 @@ class MySqlGrammar extends Grammar
     }
 
     /**
+     * Compile the "group by" portions of the query.
+     *
+     * @param  \Database\Query\Builder $query
+     * @param  array $groups
+     * @return string
+     */
+    protected function compileGroups(Builder $query, $groups)
+    {
+        return parent::compileGroups($query, $groups) . ($query->rollup ? ' with rollup' : '');
+    }
+
+    /**
      * Compile an insert statement into SQL.
      *
      * @param  \Database\Query\Builder $query

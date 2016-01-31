@@ -84,6 +84,13 @@ class Builder
     public $groups;
 
     /**
+     * Roll up groups.
+     *
+     * @var bool
+     */
+    public $rollup;
+
+    /**
      * The having constraints for the query.
      *
      * @var array
@@ -169,9 +176,9 @@ class Builder
     /**
      * Create a new query builder instance.
      *
-     * @param  \Database\ConnectionInterface $connection
-     * @param  \Database\Query\Grammars\Grammar $grammar
-     * @return void
+     * Builder constructor.
+     * @param ConnectionInterface $connection
+     * @param Grammar $grammar
      */
     public function __construct(ConnectionInterface $connection,
                                 Grammar $grammar)
@@ -901,6 +908,18 @@ class Builder
     }
 
     /**
+     * Add a "roll up" specification to the "group by" clause.
+     *
+     * @return $this
+     */
+    public function withRollUp()
+    {
+        $this->rollup = true;
+
+        return $this;
+    }
+
+    /**
      * Add a "having" clause to the query.
      *
      * @param  string $column
@@ -1181,7 +1200,7 @@ class Builder
 
     /**
      * @param $file
-     * @param callable $builder
+     * @param Closure $builder
      * @return Builder
      */
     public function intoOutfile($file, Closure $builder = null)
@@ -1191,7 +1210,7 @@ class Builder
 
     /**
      * @param $file
-     * @param callable $builder
+     * @param Closure $builder
      * @return Builder
      */
     public function intoDumpfile($file, Closure $builder = null)

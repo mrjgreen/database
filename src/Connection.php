@@ -110,7 +110,7 @@ class Connection implements ConnectionInterface
     /**
      * @param $table
      * @param $values
-     * @return bool
+     * @return \PDOStatement
      */
     public function insert($table, array $values)
     {
@@ -120,7 +120,7 @@ class Connection implements ConnectionInterface
     /**
      * @param $table
      * @param $values
-     * @return bool
+     * @return \PDOStatement
      */
     public function insertIgnore($table, array $values)
     {
@@ -130,7 +130,7 @@ class Connection implements ConnectionInterface
     /**
      * @param $table
      * @param $values
-     * @return bool
+     * @return \PDOStatement
      */
     public function replace($table, array $values)
     {
@@ -141,7 +141,7 @@ class Connection implements ConnectionInterface
      * @param $table
      * @param $values
      * @param $updateValues
-     * @return bool
+     * @return \PDOStatement
      */
     public function insertUpdate($table, array $values, array $updateValues)
     {
@@ -152,7 +152,7 @@ class Connection implements ConnectionInterface
      * @param $table
      * @param $where
      * @param $bindings
-     * @return bool
+     * @return \PDOStatement
      */
     public function delete($table, $where, array $bindings = array())
     {
@@ -164,7 +164,7 @@ class Connection implements ConnectionInterface
      * @param $values
      * @param $where
      * @param $bindings
-     * @return bool
+     * @return \PDOStatement
      */
     public function update($table, $values, $where, array $bindings = array())
     {

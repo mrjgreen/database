@@ -1081,6 +1081,21 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		return $builder->select('*')->from('users')->where('email', 'foo@bar.com');
 	}
 
+	public function testMySqlRollup()
+	{
+		$builder = $this->getMySqlBuilder();
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->groupBy('foo', 'bar')->withRollUp();
+		$this->assertEquals('select * from `foo` where `bar` = ? group by `foo`, `bar` with rollup', $builder->toSql());
+		$this->assertEquals(array('baz'), $builder->getBindings());
+	}
+
+	public function testMySqlRollupIsIgnoredWithoutGroupBy()
+	{
+		$builder = $this->getMySqlBuilder();
+		$builder->select('*')->from('foo')->where('bar', '=', 'baz')->withRollUp();
+		$this->assertEquals('select * from `foo` where `bar` = ?', $builder->toSql());
+		$this->assertEquals(array('baz'), $builder->getBindings());
+	}
 
 	public function testMySqlLock()
 	{
