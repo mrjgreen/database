@@ -9,18 +9,21 @@
             "email": "joe.green0991@gmail.com"
         }
     ],
+    "scripts" : {
+      "test": "./vendor/bin/phpunit"
+    },
     "require": {
         "php": ">=5.4.0",
         "psr/log": "~1.0"
-    },
-    "require-dev": {
-        "mockery/mockery": "*",
-        "satooshi/php-coveralls": "dev-master",
-        "phpunit/phpunit": "*"
     },
     "autoload": {
         "psr-4": {
             "Database\\": "src"
         }
+    },
+    "require-dev": {
+        "mockery/mockery": "^0.9.9",
+        "satooshi/php-coveralls": "^1.0",
+        "phpunit/phpunit": "^6.1"
     }
 }

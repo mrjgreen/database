@@ -1,6 +1,6 @@
 <?php
 
-abstract class AbstractDatabaseIntegrationTest extends PHPUnit_Framework_TestCase
+abstract class AbstractDatabaseIntegrationTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \Database\Connection

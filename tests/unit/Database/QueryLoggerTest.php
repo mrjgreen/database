@@ -1,6 +1,6 @@
 <?php
 
-class QueryLoggerTest extends PHPUnit_Framework_TestCase {
+class QueryLoggerTest extends \PHPUnit\Framework\TestCase {
 
     private $logMessages = array(
         array('message', array('foo' => 'bar')),

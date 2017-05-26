@@ -4,7 +4,7 @@ use Mockery as m;
 use Database\Query\Builder;
 use Database\Query\Expression as Raw;
 
-class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
+class DatabaseQueryBuilderTest extends \PHPUnit\Framework\TestCase {
 
 	public function tearDown()
 	{
@@ -932,7 +932,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 
     public function testBufferedInsert()
     {
-        $statement = $this->getMock('PDOStatement', array('rowCount'));
+        $statement = $this->createMock('PDOStatement', array('rowCount'));
 
         $statement->expects($this->exactly(2))
             ->method('rowCount')
@@ -1076,7 +1076,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$grammar = new Database\Query\Grammars\Grammar;
 		$processor = m::mock('Database\Query\Processors\Processor');
 
-		$builder = $this->getMock('Database\Query\Builder', array('getFresh'), array($connection, $grammar, $processor));
+		$builder = $this->createMock('Database\Query\Builder', array('getFresh'), array($connection, $grammar, $processor));
 		$builder->expects($this->once())->method('getFresh')->with($this->equalTo(array('*')))->will($this->returnValue(array('results')));
 		return $builder->select('*')->from('users')->where('email', 'foo@bar.com');
 	}
