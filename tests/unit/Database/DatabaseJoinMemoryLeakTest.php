@@ -3,8 +3,8 @@
 use Mockery as m;
 use Database\Query\Builder;
 
-class DatabaseJoinMemoryLeakTest extends \PHPUnit\Framework\TestCase {
-
+class DatabaseJoinMemoryLeakTest extends \PHPUnit\Framework\TestCase
+{
     public function tearDown()
     {
         m::close();
@@ -14,10 +14,9 @@ class DatabaseJoinMemoryLeakTest extends \PHPUnit\Framework\TestCase {
     {
         $builderMain = $this->getBuilder();
 
-        $this->runMemoryTest(function() use($builderMain){
+        $this->runMemoryTest(function () use ($builderMain) {
             $builder = $builderMain->newQuery();
             $builder->select('*')->from('users');
-
         });
     }
 
@@ -25,10 +24,9 @@ class DatabaseJoinMemoryLeakTest extends \PHPUnit\Framework\TestCase {
     {
         $builderMain = $this->getBuilder();
 
-        $this->runMemoryTest(function() use($builderMain){
+        $this->runMemoryTest(function () use ($builderMain) {
             $builder = $builderMain->newQuery();
             $builder->select('*')->join('new', 'col', '=', 'col2')->from('users');
-
         });
     }
 
@@ -38,8 +36,7 @@ class DatabaseJoinMemoryLeakTest extends \PHPUnit\Framework\TestCase {
 
         $last = null;
 
-        while($i--)
-        {
+        while ($i--) {
             $callback();
 
             $prev = $last;
@@ -55,6 +52,4 @@ class DatabaseJoinMemoryLeakTest extends \PHPUnit\Framework\TestCase {
         $grammar = new Database\Query\Grammars\Grammar;
         return new Builder(m::mock('Database\ConnectionInterface'), $grammar);
     }
-
-
 }

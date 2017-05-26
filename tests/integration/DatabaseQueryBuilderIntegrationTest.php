@@ -41,7 +41,6 @@ class DatabaseQueryBuilderIntegrationTest extends AbstractDatabaseIntegrationTes
             ->exists();
 
         $this->assertFalse($exists);
-
     }
 
     public function testOutfile()
@@ -64,7 +63,7 @@ class DatabaseQueryBuilderIntegrationTest extends AbstractDatabaseIntegrationTes
         $this->connection
             ->table($this->tableName)
             ->where('name', '=', 'joe')
-            ->intoOutfile($file, function(\Database\Query\OutfileClause $outfile){
+            ->intoOutfile($file, function (\Database\Query\OutfileClause $outfile) {
                 $outfile
                     ->linesTerminatedBy("\n")
                     ->fieldsTerminatedBy("\t");

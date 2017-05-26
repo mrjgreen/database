@@ -148,5 +148,4 @@ class SQLiteGrammar extends Grammar
 
         return 'strftime(\'' . $type . '\', ' . $this->wrap($where['column']) . ') ' . $where['operator'] . ' ' . $value;
     }
-
 }

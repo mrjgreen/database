@@ -25,5 +25,4 @@ interface ConnectionResolverInterface
      * @return void
      */
     public function setDefaultConnection($name);
-
 }

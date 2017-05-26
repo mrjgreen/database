@@ -2,5 +2,4 @@
 
 class UnsupportedGrammarException extends \Exception
 {
-
 }

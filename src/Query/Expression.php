@@ -40,5 +40,4 @@ class Expression
     {
         return (string)$this->getValue();
     }
-
 }

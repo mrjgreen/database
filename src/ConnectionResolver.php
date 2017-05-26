@@ -55,10 +55,11 @@ class ConnectionResolver implements ConnectionResolverInterface
      */
     public function connection($name = null)
     {
-        if (is_null($name)) $name = $this->getDefaultConnection();
+        if (is_null($name)) {
+            $name = $this->getDefaultConnection();
+        }
 
-        if (!isset($this->connectionCache[$name]))
-        {
+        if (!isset($this->connectionCache[$name])) {
             $this->connectionCache[$name] = $this->newConnection($name);
         }
 
@@ -73,7 +74,9 @@ class ConnectionResolver implements ConnectionResolverInterface
      */
     public function newConnection($name = null)
     {
-        if (is_null($name)) $name = $this->getDefaultConnection();
+        if (is_null($name)) {
+            $name = $this->getDefaultConnection();
+        }
 
         return $this->connectionFactory->make($this->connectionConfig($name));
     }
@@ -86,7 +89,9 @@ class ConnectionResolver implements ConnectionResolverInterface
      */
     public function connectionConfig($name = null)
     {
-        if (is_null($name)) $name = $this->getDefaultConnection();
+        if (is_null($name)) {
+            $name = $this->getDefaultConnection();
+        }
 
         return $this->value($this->connections[$name]);
     }

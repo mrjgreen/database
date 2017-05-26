@@ -1038,7 +1038,9 @@ class Builder
      */
     public function limit($value)
     {
-        if ($value > 0) $this->limit = $value;
+        if ($value > 0) {
+            $this->limit = $value;
+        }
 
         return $this;
     }
@@ -1173,7 +1175,9 @@ class Builder
      */
     public function get($columns = array('*'))
     {
-        if (is_null($this->columns)) $this->columns = $columns;
+        if (is_null($this->columns)) {
+            $this->columns = $columns;
+        }
 
         return $this->connection->fetchAll($this->toSql(), $this->getBindings());
     }
@@ -1188,8 +1192,7 @@ class Builder
     {
         $clause = new InfileClause($file, $columns);
 
-        if($builder)
-        {
+        if ($builder) {
             $builder($clause);
         }
 
@@ -1228,8 +1231,7 @@ class Builder
     {
         $this->outfile = $clause = new OutfileClause($file, $type);
 
-        if($builder)
-        {
+        if ($builder) {
             $builder($clause);
         }
 
@@ -1244,7 +1246,9 @@ class Builder
      */
     public function query($columns = array('*'))
     {
-        if (is_null($this->columns)) $this->columns = $columns;
+        if (is_null($this->columns)) {
+            $this->columns = $columns;
+        }
 
         return $this->connection->query($this->toSql(), $this->getBindings());
     }
@@ -1313,7 +1317,9 @@ class Builder
      */
     public function implode($column, $glue = null)
     {
-        if (is_null($glue)) return implode($this->lists($column));
+        if (is_null($glue)) {
+            return implode($this->lists($column));
+        }
 
         return implode($glue, $this->lists($column));
     }
@@ -1349,7 +1355,6 @@ class Builder
 
             $this->{$field} = null;
         }
-
     }
 
     /**
@@ -1480,8 +1485,7 @@ class Builder
      */
     public function buffer($chunkSize = null)
     {
-        if(is_null($chunkSize))
-        {
+        if (is_null($chunkSize)) {
             $chunkSize = $this->defaultChunkSize;
         }
 
@@ -1565,8 +1569,7 @@ class Builder
      */
     private function prepareInsertSelect($select)
     {
-        if($select instanceof Closure)
-        {
+        if ($select instanceof Closure) {
             $callback = $select;
 
             $select = $this->newQuery();
@@ -1574,8 +1577,7 @@ class Builder
             call_user_func($callback, $select);
         }
 
-        if(!$select instanceof Builder)
-        {
+        if (!$select instanceof Builder) {
             throw new \Exception("Argument 1 must be a closure or an instance of Database\\Query\\Builder");
         }
 
@@ -1632,9 +1634,10 @@ class Builder
 
         $bindings = $select->getBindings();
 
-        foreach($updateValues as $value)
-        {
-            if(!$value instanceof Expression) $bindings[] = $value;
+        foreach ($updateValues as $value) {
+            if (!$value instanceof Expression) {
+                $bindings[] = $value;
+            }
         }
 
         return $this->connection->query($sql, $bindings);
@@ -1671,9 +1674,10 @@ class Builder
 
         $bindings = $this->buildBulkInsertBindings($values);
 
-        foreach($updateValues as $value)
-        {
-            if(!$value instanceof Expression) $bindings[] = $value;
+        foreach ($updateValues as $value) {
+            if (!$value instanceof Expression) {
+                $bindings[] = $value;
+            }
         }
 
         $sql = $this->grammar->compileInsertOnDuplicateKeyUpdate($this, $values, $updateValues);
@@ -1706,7 +1710,9 @@ class Builder
 
         foreach ($values as $record) {
             foreach ($record as $value) {
-                if(!$value instanceof Expression) $bindings[] = $value;
+                if (!$value instanceof Expression) {
+                    $bindings[] = $value;
+                }
             }
         }
 
@@ -1793,7 +1799,9 @@ class Builder
         // If an ID is passed to the method, we will set the where clause to check
         // the ID to allow developers to simply and quickly remove a single row
         // from their database without manually specifying the where clauses.
-        if (!is_null($id)) $this->where('id', '=', $id);
+        if (!is_null($id)) {
+            $this->where('id', '=', $id);
+        }
 
         $sql = $this->grammar->compileDelete($this);
 

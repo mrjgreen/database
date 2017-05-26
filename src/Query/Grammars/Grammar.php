@@ -5,7 +5,6 @@ use Database\Query\Expression;
 
 class Grammar
 {
-
     const DATE_SQL = 'Y-m-d H:i:s';
     /**
      * The components that make up a select clause.
@@ -53,7 +52,9 @@ class Grammar
      */
     public function wrapTable($table)
     {
-        if ($this->isExpression($table)) return $this->getValue($table);
+        if ($this->isExpression($table)) {
+            return $this->getValue($table);
+        }
 
         return $this->wrap($this->tablePrefix . $table);
     }
@@ -66,7 +67,9 @@ class Grammar
      */
     public function wrap($value)
     {
-        if ($this->isExpression($value)) return $this->getValue($value);
+        if ($this->isExpression($value)) {
+            return $this->getValue($value);
+        }
 
         // If the value being wrapped has a column alias we will need to separate out
         // the pieces so we can wrap each of the segments of the expression on it
@@ -103,7 +106,9 @@ class Grammar
      */
     protected function wrapValue($value)
     {
-        if ($value === '*') return $value;
+        if ($value === '*') {
+            return $value;
+        }
 
         return '"' . str_replace('"', '""', $value) . '"';
     }
@@ -204,7 +209,9 @@ class Grammar
      */
     public function compileSelect(Builder $query)
     {
-        if (is_null($query->columns)) $query->columns = array('*');
+        if (is_null($query->columns)) {
+            $query->columns = array('*');
+        }
 
         return trim($this->concatenate($this->compileComponents($query)));
     }
@@ -266,7 +273,9 @@ class Grammar
         // If the query is actually performing an aggregating select, we will let that
         // compiler handle the building of the select clauses, as it will need some
         // more syntax that is best handled by that function to keep things neat.
-        if (!is_null($query->aggregate)) return;
+        if (!is_null($query->aggregate)) {
+            return;
+        }
 
         $select = $query->distinct ? 'select distinct ' : 'select ';
 
@@ -355,7 +364,9 @@ class Grammar
     {
         $sql = array();
 
-        if (is_null($query->wheres)) return '';
+        if (is_null($query->wheres)) {
+            return '';
+        }
 
         // Each type of where clauses has its own compiler function which is responsible
         // for actually creating the where clauses SQL. This helps keep the code nice
@@ -670,11 +681,12 @@ class Grammar
     protected function compileOrders(Builder $query, $orders)
     {
         return 'order by ' . implode(', ', array_map(function ($order) {
-                if (isset($order['sql'])) return $order['sql'];
-
-                return $this->wrap($order['column']) . ' ' . $order['direction'];
+            if (isset($order['sql'])) {
+                return $order['sql'];
             }
-            , $orders));
+
+            return $this->wrap($order['column']) . ' ' . $order['direction'];
+        }, $orders));
     }
 
     /**
@@ -1009,5 +1021,4 @@ class Grammar
     {
         throw new UnsupportedGrammarException("$grammarDescription is not supported by the " . get_called_class() . " grammar driver");
     }
-
 }

@@ -118,5 +118,4 @@ interface ConnectionInterface
      * @return array
      */
     public function pretend(Closure $callback);
-
 }
