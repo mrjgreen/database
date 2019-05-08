@@ -221,12 +221,12 @@ If you intend to iterate through the rows, it may be more efficient to get the P
 $rows = $connection->table('users')->query();
 ```
 
-####Get All
+#### Get All
 ```PHP
 $rows = $connection->table('users')->get();
 ```
 
-####Get First Row
+#### Get First Row
 ```PHP
 $row = $connection->table('users')->first();
 ```
