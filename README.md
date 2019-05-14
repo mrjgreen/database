@@ -436,12 +436,13 @@ $connection->table('users')->insertUpdate(
 ```
 
 #### Insert Select
+```PHP
 $connection->table('users')->insertSelect(function($select){
     $select->from('admin')
             ->select('name', 'email')
             ->where('status', '=', 1);
-
 }, array('name','email'));
+```
 
 `insertIgnoreSelect` and `replaceSelect` methods are supported for the MySQL grammar driver.
 
