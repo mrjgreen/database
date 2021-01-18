@@ -1,6 +1,6 @@
 <?php
 
-abstract class AbstractDatabaseIntegrationTest extends PHPUnit_Framework_TestCase
+abstract class AbstractDatabaseIntegrationTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \Database\Connection
@@ -15,17 +15,15 @@ abstract class AbstractDatabaseIntegrationTest extends PHPUnit_Framework_TestCas
 
         $configs = include __DIR__ . '/config.php';
 
-        foreach($configs as $config)
-        {
-            try
-            {
+        foreach ($configs as $config) {
+            try {
                 $this->connection = $factory->make($config);
 
                 $this->createTable();
 
                 return;
+            } catch (\PDOException $e) {
             }
-            catch(\PDOException $e) {}
         }
 
         throw $e;

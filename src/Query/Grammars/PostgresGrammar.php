@@ -25,7 +25,9 @@ class PostgresGrammar extends Grammar
      */
     protected function compileLock(Builder $query, $value)
     {
-        if (is_string($value)) return $value;
+        if (is_string($value)) {
+            return $value;
+        }
 
         return $value ? 'for update' : 'for share';
     }
@@ -81,7 +83,9 @@ class PostgresGrammar extends Grammar
      */
     protected function compileUpdateFrom(Builder $query)
     {
-        if (!isset($query->joins)) return '';
+        if (!isset($query->joins)) {
+            return '';
+        }
 
         $froms = array();
 
@@ -92,7 +96,9 @@ class PostgresGrammar extends Grammar
             $froms[] = $this->wrapTable($join->table);
         }
 
-        if (count($froms) > 0) return ' from ' . implode(', ', $froms);
+        if (count($froms) > 0) {
+            return ' from ' . implode(', ', $froms);
+        }
     }
 
     /**
@@ -105,7 +111,9 @@ class PostgresGrammar extends Grammar
     {
         $baseWhere = $this->compileWheres($query);
 
-        if (!isset($query->joins)) return $baseWhere;
+        if (!isset($query->joins)) {
+            return $baseWhere;
+        }
 
         // Once we compile the join constraints, we will either use them as the where
         // clause or append them to the existing base where clauses. If we need to
@@ -151,7 +159,9 @@ class PostgresGrammar extends Grammar
      */
     public function compileInsertGetId(Builder $query, $values, $sequence)
     {
-        if (is_null($sequence)) $sequence = 'id';
+        if (is_null($sequence)) {
+            $sequence = 'id';
+        }
 
         return $this->compileInsert($query, $values) . ' returning ' . $this->wrap($sequence);
     }
@@ -166,5 +176,4 @@ class PostgresGrammar extends Grammar
     {
         return array('truncate ' . $this->wrapTable($query->from) . ' restart identity' => array());
     }
-
 }

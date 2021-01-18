@@ -83,5 +83,4 @@ class PostgresConnector extends Connector implements ConnectorInterface
 
         return $dsn;
     }
-
 }

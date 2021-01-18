@@ -66,7 +66,9 @@ class MySqlGrammar extends Grammar
      */
     protected function compileLock(Builder $query, $value)
     {
-        if (is_string($value)) return $value;
+        if (is_string($value)) {
+            return $value;
+        }
 
         return $value ? 'for update' : 'lock in share mode';
     }
@@ -215,7 +217,9 @@ class MySqlGrammar extends Grammar
      */
     protected function wrapValue($value)
     {
-        if ($value === '*') return $value;
+        if ($value === '*') {
+            return $value;
+        }
 
         return '`' . str_replace('`', '``', $value) . '`';
     }
@@ -229,8 +233,7 @@ class MySqlGrammar extends Grammar
     {
         $sqlParts = array("into $outfileClause->type '$outfileClause->file'");
 
-        if($options = $this->buildInfileOutfileOptions($outfileClause))
-        {
+        if ($options = $this->buildInfileOutfileOptions($outfileClause)) {
             $sqlParts[] = $options;
         }
 
@@ -250,20 +253,17 @@ class MySqlGrammar extends Grammar
 
         $sqlParts = array("load data {$local}infile '$infile->file' {$type}into table " . $this->wrapTable($query->from));
 
-        if($options = $this->buildInfileOutfileOptions($infile))
-        {
+        if ($options = $this->buildInfileOutfileOptions($infile)) {
             $sqlParts[] = $options;
         }
 
-        if($infile->ignoreLines)
-        {
+        if ($infile->ignoreLines) {
             $sqlParts[] = "ignore $infile->ignoreLines lines";
         }
 
         $sqlParts[] = '(' . $this->columnize($infile->columns) . ')';
 
-        if($infile->rules)
-        {
+        if ($infile->rules) {
             $sqlParts[] = 'set ' . $this->getUpdateColumns($infile->rules);
         }
 
@@ -280,8 +280,7 @@ class MySqlGrammar extends Grammar
 
         $optionally = $infile->optionallyEnclosedBy ? 'optionally ' : '';
 
-        if(isset($infile->characterSet))
-        {
+        if (isset($infile->characterSet)) {
             $sqlParts[] = "character set $infile->characterSet";
         }
 
@@ -297,12 +296,9 @@ class MySqlGrammar extends Grammar
             )
         );
 
-        foreach ($parts as $type => $components)
-        {
-            foreach($components as $property => $sql)
-            {
-                if(isset($infile->$property))
-                {
+        foreach ($parts as $type => $components) {
+            foreach ($components as $property => $sql) {
+                if (isset($infile->$property)) {
                     $sqlParts[] = trim("$type $sql '{$infile->$property}'");
 
                     $type = '';

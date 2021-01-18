@@ -75,8 +75,7 @@ class InfileClause
      */
     public function __construct($file, array $columns)
     {
-        if($file instanceof \SplFileInfo)
-        {
+        if ($file instanceof \SplFileInfo) {
             $file = $file->getPathname();
         }
 
@@ -160,8 +159,7 @@ class InfileClause
      */
     public function ignoreLines($lineCount)
     {
-        if(!is_integer($lineCount) || $lineCount < 1)
-        {
+        if (!is_integer($lineCount) || $lineCount < 1) {
             throw new \InvalidArgumentException("Line count must be a positive, non-zero integer.");
         }
 

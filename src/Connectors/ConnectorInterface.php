@@ -10,5 +10,4 @@ interface ConnectorInterface
      * @return \PDO
      */
     public function connect(array $config);
-
 }

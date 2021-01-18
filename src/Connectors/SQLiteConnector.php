@@ -33,5 +33,4 @@ class SQLiteConnector extends Connector implements ConnectorInterface
 
         return $this->createConnection("sqlite:{$path}", $config, $options);
     }
-
 }

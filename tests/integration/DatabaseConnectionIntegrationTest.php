@@ -16,7 +16,7 @@ class DatabaseConnectionIntegrationTest extends AbstractDatabaseIntegrationTest
 
     public function testItPerformsTransactions()
     {
-        $this->connection->transaction(function($connection){
+        $this->connection->transaction(function ($connection) {
             $connection->query("INSERT INTO $this->tableName (name, value) VALUES (?,?)", array('joe', 1));
         });
 
@@ -25,13 +25,14 @@ class DatabaseConnectionIntegrationTest extends AbstractDatabaseIntegrationTest
         $this->assertCount(1, $rows);
         $this->assertEquals(array('name' => 'joe', 'value' => 1), $rows[0]);
 
-        try{
-            $this->connection->transaction(function($connection){
+        try {
+            $this->connection->transaction(function ($connection) {
                 $connection->query("INSERT INTO $this->tableName (name, value) VALUES (?,?)", array('joseph', 2));
 
                 throw new \Exception("rollback");
             });
-        }catch (\Exception $e){}
+        } catch (\Exception $e) {
+        }
 
         $rows = $this->connection->fetchAll("SELECT * FROM $this->tableName");
 

@@ -339,7 +339,9 @@ class Connection implements ConnectionInterface
      */
     private function execute($query, $bindings, $useReadPdo)
     {
-        if ($this->pretending()) return new \PDOStatement();
+        if ($this->pretending()) {
+            return new \PDOStatement();
+        }
 
         $pdo = $useReadPdo ? $this->getReadPdo() : $this->getPdo();
 
@@ -354,9 +356,7 @@ class Connection implements ConnectionInterface
             // If an exception occurs when attempting to run a query, we'll call the exception handler
             // if there is one, or throw the exception if not
         catch (\Exception $e) {
-
-            if($this->exceptionHandler)
-            {
+            if ($this->exceptionHandler) {
                 $this->exceptionHandler->handle($query, $this->prepareBindings($bindings), $e);
             }
 
@@ -499,13 +499,9 @@ class Connection implements ConnectionInterface
     public function reconnect()
     {
         if (is_callable($this->reconnector)) {
-
-            try
-            {
+            try {
                 return call_user_func($this->reconnector, $this);
-            }
-            catch(\PDOException $e)
-            {
+            } catch (\PDOException $e) {
                 $this->exceptionHandler->handle("Connection attempt", array(), $e);
             }
         }
@@ -535,7 +531,9 @@ class Connection implements ConnectionInterface
      */
     protected function logQuery($query, $bindings, $start = null)
     {
-        if (!$this->loggingQueries || !$this->logger) return;
+        if (!$this->loggingQueries || !$this->logger) {
+            return;
+        }
 
         $time = $start ? round((microtime(true) - $start) * 1000, 2) : null;
 
@@ -562,8 +560,7 @@ class Connection implements ConnectionInterface
      */
     public function getReadPdo()
     {
-        if (!$this->readPdo || $this->pdo->inTransaction())
-        {
+        if (!$this->readPdo || $this->pdo->inTransaction()) {
             return $this->getPdo();
         }
 
@@ -684,8 +681,7 @@ class Connection implements ConnectionInterface
     {
         $this->loggingQueries = true;
 
-        if(!$this->logger)
-        {
+        if (!$this->logger) {
             $this->logger = new QueryLogger();
         }
 

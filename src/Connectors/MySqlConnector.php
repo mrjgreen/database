@@ -98,5 +98,4 @@ class MySqlConnector extends Connector implements ConnectorInterface
 
         return $dsn;
     }
-
 }

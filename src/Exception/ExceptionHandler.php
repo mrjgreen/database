@@ -34,10 +34,10 @@ class ExceptionHandler implements ExceptionHandlerInterface
     {
         $parameters = $this->parameters;
 
-        if($query){
+        if ($query) {
             $sql = $this->replaceArray('\?', $bindings, $query);
         
-            if($this->maxQueryLength && strlen($sql) > $this->maxQueryLength){
+            if ($this->maxQueryLength && strlen($sql) > $this->maxQueryLength) {
                 $sql = substr($sql, 0, $this->maxQueryLength);
             }
     
@@ -57,8 +57,7 @@ class ExceptionHandler implements ExceptionHandlerInterface
     {
         $parameters = $this->flattenArray($parameters);
 
-        foreach($parameters as $name => $value)
-        {
+        foreach ($parameters as $name => $value) {
             $parameters[$name] = $name . ': ' . $value;
         }
 

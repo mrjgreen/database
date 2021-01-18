@@ -2,21 +2,21 @@
 
 use Mockery as m;
 
-class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
+class DatabaseConnectionResolverTest extends \PHPUnit\Framework\TestCase
+{
+    public function tearDown()
+    {
+        m::close();
+    }
 
-	public function tearDown()
-	{
-		m::close();
-	}
 
-
-	public function testConnectionsCanBeAddedAtConstruction()
-	{
+    public function testConnectionsCanBeAddedAtConstruction()
+    {
         $configs = array(
-            'test1' => array(
-                'foo' => 'bar'
-            ),
-        );
+        'test1' => array(
+            'foo' => 'bar'
+        ),
+    );
 
         $factory = m::mock('Database\Connectors\ConnectionFactory');
 
@@ -24,14 +24,14 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
 
         $factory->shouldReceive('make')->once()->with($configs['test1'])->andReturn($connectionMock);
 
-		$resolver = $this->getMock('Database\ConnectionResolver', null, array($configs, $factory));
+        $resolver = new \Database\ConnectionResolver($configs, $factory);
 
-		$this->assertTrue($resolver->hasConnection('test1'));
+        $this->assertTrue($resolver->hasConnection('test1'));
 
         $connection = $resolver->connection('test1');
 
         $this->assertSame($connectionMock, $connection);
-	}
+    }
 
     public function testItReturnsADefaultConnection()
     {
@@ -47,7 +47,7 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
 
         $factory->shouldReceive('make')->once()->with($configs['test'])->andReturn($connectionMock);
 
-        $resolver = $this->getMock('Database\ConnectionResolver', null, array($configs, $factory));
+        $resolver = new \Database\ConnectionResolver($configs, $factory);
 
         $resolver->setDefaultConnection('test');
 

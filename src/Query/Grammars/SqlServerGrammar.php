@@ -45,7 +45,9 @@ class SqlServerGrammar extends Grammar
      */
     protected function compileColumns(Builder $query, $columns)
     {
-        if (!is_null($query->aggregate)) return;
+        if (!is_null($query->aggregate)) {
+            return;
+        }
 
         $select = $query->distinct ? 'select distinct ' : 'select ';
 
@@ -70,7 +72,9 @@ class SqlServerGrammar extends Grammar
     {
         $from = parent::compileFrom($query, $table);
 
-        if (is_string($query->lock)) return $from . ' ' . $query->lock;
+        if (is_string($query->lock)) {
+            return $from . ' ' . $query->lock;
+        }
 
         if (!is_null($query->lock)) {
             return $from . ' with(rowlock,' . ($query->lock ? 'updlock,' : '') . 'holdlock)';
@@ -212,9 +216,10 @@ class SqlServerGrammar extends Grammar
      */
     protected function wrapValue($value)
     {
-        if ($value === '*') return $value;
+        if ($value === '*') {
+            return $value;
+        }
 
         return '[' . str_replace(']', ']]', $value) . ']';
     }
-
 }

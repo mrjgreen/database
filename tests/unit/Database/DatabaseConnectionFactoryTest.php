@@ -2,123 +2,133 @@
 
 use Mockery as m;
 
-class DatabaseConnectionFactoryPDOStub extends PDO {
-	public function __construct() {}
+class DatabaseConnectionFactoryPDOStub extends PDO
+{
+    public function __construct()
+    {
+    }
 }
 
-class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
+class DatabaseConnectionFactoryTest extends \PHPUnit\Framework\TestCase
+{
+    public function tearDown()
+    {
+        m::close();
+    }
 
-	public function tearDown()
-	{
-		m::close();
-	}
 
+    public function testMakeCallsCreateConnection()
+    {
+        $factory = $this
+        ->getMockBuilder('Database\Connectors\ConnectionFactory')
+        ->setMethods(array('createConnector', 'createConnection', 'createQueryGrammar', 'createExceptionHandler'))
+        ->getMock();
 
-	public function testMakeCallsCreateConnection()
-	{
-		$factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector', 'createConnection', 'createQueryGrammar', 'createExceptionHandler'));
+        $config = array('driver' => 'mysql', 'prefix' => 'prefix', 'database' => 'database');
 
-		$config = array('driver' => 'mysql', 'prefix' => 'prefix', 'database' => 'database');
-
-		$pdo = new DatabaseConnectionFactoryPDOStub;
+        $pdo = new DatabaseConnectionFactoryPDOStub;
 
         $connector = m::mock('stdClass');
-		$connector->shouldReceive('connect')->once()->with($config)->andReturn($pdo);
+        $connector->shouldReceive('connect')->once()->with($config)->andReturn($pdo);
 
-		$mockGrammar = $this->getMock('Database\Query\Grammars\MysqlGrammar');
-		$mockExceptionHandler = $this->getMock('Database\Exception\ExceptionHandlerInterface');
-
-		$mockConnection = $this->getMockConnectionWithExpectations($pdo, $mockGrammar);
-
-		$factory->expects($this->once())->method('createConnector')->with($config['driver'])->will($this->returnValue($connector));
-		$factory->expects($this->once())->method('createQueryGrammar')->with('mysql')->will($this->returnValue($mockGrammar));
-		$factory->expects($this->once())->method('createConnection')->will($this->returnValue($mockConnection));
-		$factory->expects($this->once())->method('createExceptionHandler')->with($config)->will($this->returnValue($mockExceptionHandler));
-
-        $connection = $factory->make($config);
-
-		$this->assertSame($mockConnection, $connection);
-	}
-
-
-	public function testMakeCallsCreateConnectionForReadWrite()
-	{
-		$factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector', 'createConnection', 'createQueryGrammar'));
-		$connector = m::mock('stdClass');
-		$config = array(
-			'read' => array('database' => 'database'),
-			'write' => array('database' => 'database'),
-			'driver' => 'mysql', 'prefix' => 'prefix', 'name' => 'foo'
-		);
-		$expect = $config;
-		unset($expect['read']);
-		unset($expect['write']);
-		$expect['database'] = 'database';
-		$pdo = new DatabaseConnectionFactoryPDOStub;
-		$connector->shouldReceive('connect')->twice()->with($expect)->andReturn($pdo);
-
-		$mockGrammar = $this->getMock('Database\Query\Grammars\MysqlGrammar');
+        $mockGrammar = $this->createMock('Database\Query\Grammars\MysqlGrammar');
+        $mockExceptionHandler = $this->createMock('Database\Exception\ExceptionHandlerInterface');
 
         $mockConnection = $this->getMockConnectionWithExpectations($pdo, $mockGrammar);
 
-        $factory->expects($this->exactly(2))->method('createConnector')->with($expect['driver'])->will($this->returnValue($connector));
-		$factory->expects($this->once())->method('createQueryGrammar')->with('mysql')->will($this->returnValue($mockGrammar));
-		$factory->expects($this->once())->method('createConnection')->will($this->returnValue($mockConnection));
+        $factory->expects($this->once())->method('createConnector')->with($config['driver'])->willReturn($connector);
+        $factory->expects($this->once())->method('createQueryGrammar')->with('mysql')->willReturn($mockGrammar);
+        $factory->expects($this->once())->method('createConnection')->willReturn($mockConnection);
+        $factory->expects($this->once())->method('createExceptionHandler')->with($config)->willReturn($mockExceptionHandler);
 
-		$connection = $factory->make($config, 'foo');
+        $connection = $factory->make($config);
 
-		$this->assertSame($mockConnection, $connection);
-	}
+        $this->assertSame($mockConnection, $connection);
+    }
 
-	private function getMockConnectionWithExpectations($pdo, $grammar)
-	{
-		$mockConnection = $this->getMock('Database\Connection', array('setPdo','setReconnector', 'setQueryGrammar', 'setExceptionHandler'), array($pdo));
-		$mockConnection->expects($this->once())->method('setReconnector')->will($this->returnSelf());
-		$mockConnection->expects($this->once())->method('setQueryGrammar')->with($grammar)->will($this->returnSelf());
-		$mockConnection->expects($this->once())->method('setExceptionHandler')->will($this->returnSelf());
 
-		$mockConnection->expects($this->once())->method('setPdo')->with($pdo)->will($this->returnValue($mockConnection));
+    public function testMakeCallsCreateConnectionForReadWrite()
+    {
+        $factory = $this->getMockBuilder('Database\Connectors\ConnectionFactory')
+        ->setMethods(array('createConnector', 'createConnection', 'createQueryGrammar'))
+        ->getMock();
+        $connector = m::mock('stdClass');
+        $config = array(
+            'read' => array('database' => 'database'),
+            'write' => array('database' => 'database'),
+            'driver' => 'mysql', 'prefix' => 'prefix', 'name' => 'foo'
+        );
+        $expect = $config;
+        unset($expect['read']);
+        unset($expect['write']);
+        $expect['database'] = 'database';
+        $pdo = new DatabaseConnectionFactoryPDOStub;
+        $connector->shouldReceive('connect')->twice()->with($expect)->andReturn($pdo);
 
-		return $mockConnection;
-	}
+        $mockGrammar = $this->createMock('Database\Query\Grammars\MysqlGrammar');
 
-	public function testProperInstancesAreReturnedForProperDrivers()
-	{
-		$factory = new Database\Connectors\ConnectionFactory();
-		$this->assertInstanceOf('Database\Connectors\MySqlConnector', $factory->createConnector('mysql'));
-		$this->assertInstanceOf('Database\Connectors\PostgresConnector', $factory->createConnector('pgsql'));
-		$this->assertInstanceOf('Database\Connectors\SQLiteConnector', $factory->createConnector('sqlite'));
-		$this->assertInstanceOf('Database\Connectors\SqlServerConnector', $factory->createConnector('sqlsrv'));
-	}
+        $mockConnection = $this->getMockConnectionWithExpectations($pdo, $mockGrammar);
+
+        $factory->expects($this->exactly(2))->method('createConnector')->with($expect['driver'])->willReturn($connector);
+        $factory->expects($this->once())->method('createQueryGrammar')->with('mysql')->willReturn($mockGrammar);
+        $factory->expects($this->once())->method('createConnection')->willReturn($mockConnection);
+
+        $connection = $factory->make($config, 'foo');
+
+        $this->assertSame($mockConnection, $connection);
+    }
+
+    private function getMockConnectionWithExpectations($pdo, $grammar)
+    {
+        $mockConnection = $this->getMockBuilder('Database\Connection')
+        ->setConstructorArgs(array($pdo))
+        ->getMock();
+        //->setMethods(array('setPdo','setReconnector', 'setQueryGrammar', 'setExceptionHandler'));
+        $mockConnection->expects($this->once())->method('setReconnector')->will($this->returnSelf());
+        $mockConnection->expects($this->once())->method('setQueryGrammar')->with($grammar)->will($this->returnSelf());
+        $mockConnection->expects($this->once())->method('setExceptionHandler')->will($this->returnSelf());
+        $mockConnection->expects($this->once())->method('setTablePrefix')->will($this->returnSelf());
+
+        $mockConnection->expects($this->once())->method('setPdo')->with($pdo)->willReturn($mockConnection);
+
+        return $mockConnection;
+    }
+
+    public function testProperInstancesAreReturnedForProperDrivers()
+    {
+        $factory = new Database\Connectors\ConnectionFactory();
+        $this->assertInstanceOf('Database\Connectors\MySqlConnector', $factory->createConnector('mysql'));
+        $this->assertInstanceOf('Database\Connectors\PostgresConnector', $factory->createConnector('pgsql'));
+        $this->assertInstanceOf('Database\Connectors\SQLiteConnector', $factory->createConnector('sqlite'));
+        $this->assertInstanceOf('Database\Connectors\SqlServerConnector', $factory->createConnector('sqlsrv'));
+    }
 
     /**
      * @dataProvider driversGrammarProvider
      */
-	public function testProperGrammarInstancesAreReturnedForProperDrivers($driver, $instance)
-	{
-		$factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector'), array());
+    public function testProperGrammarInstancesAreReturnedForProperDrivers($driver, $instance)
+    {
+        $factory = $this->getMockBuilder('Database\Connectors\ConnectionFactory')
+            ->setMethods(array('createConnector'))
+            ->getMock();
 
-        if(is_null($instance))
-        {
+        if (is_null($instance)) {
             $this->setExpectedException('InvalidArgumentException');
-        }
-		else
-		{
-			$mock = m::mock('stdClass');
-			$mock->shouldReceive('connect')->andReturn(m::mock('PDO'));
+        } else {
+            $mock = m::mock('stdClass');
+            $mock->shouldReceive('connect')->andReturn(m::mock('PDO'));
 
-			$factory->expects($this->once())->method('createConnector')->willReturn($mock);
-		}
+            $factory->expects($this->once())->method('createConnector')->willReturn($mock);
+        }
 
         $connection = $factory->make(array(
             'driver' => $driver
         ));
 
-		if(!is_null($instance))
-        {
+        if (!is_null($instance)) {
             $this->assertInstanceOf($instance, $connection->getQueryGrammar());
         }
-	}
+    }
 
     public function driversGrammarProvider()
     {
@@ -132,23 +142,22 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
     }
 
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
-	public function testIfDriverIsntSetExceptionIsThrown()
-	{
-		$factory = new Database\Connectors\ConnectionFactory();
-		$factory->make(array('foo'));
-	}
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testIfDriverIsntSetExceptionIsThrown()
+    {
+        $factory = new Database\Connectors\ConnectionFactory();
+        $factory->make(array('foo'));
+    }
 
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
-	public function testExceptionIsThrownOnUnsupportedDriver()
-	{
-		$factory = new Database\Connectors\ConnectionFactory();
-		$factory->make(array('driver' => 'foo'));
-	}
-
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testExceptionIsThrownOnUnsupportedDriver()
+    {
+        $factory = new Database\Connectors\ConnectionFactory();
+        $factory->make(array('driver' => 'foo'));
+    }
 }

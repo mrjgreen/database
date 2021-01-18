@@ -114,8 +114,7 @@ class ConnectionFactory implements ConnectionFactoryInterface
             ->setTablePrefix(isset($config['prefix']) ? $config['prefix'] : '')
             ->setLogger($this->logger);
 
-        if(!$lazy)
-        {
+        if (!$lazy) {
             $connection->setPdo($this->createConnector($config['driver'])->connect($config));
         }
 
@@ -141,8 +140,7 @@ class ConnectionFactory implements ConnectionFactoryInterface
     {
         $connection = $this->createSingleConnection($this->getWriteConfig($config), $lazy);
 
-        if(!$lazy)
-        {
+        if (!$lazy) {
             $connection->setReadPdo($this->createReadPdo($config));
         }
 

@@ -13,7 +13,7 @@ return array(
         )
     ),
     array(
-        'host'      => 'localhost',
+        'host'      => '127.0.0.1',
         'driver'    => 'mysql',
         'username'  => 'root',
         'password'  => 'password',

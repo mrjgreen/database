@@ -63,5 +63,4 @@ class SqlServerConnector extends Connector implements ConnectorInterface
     {
         return PDO::getAvailableDrivers();
     }
-
 }
