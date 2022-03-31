@@ -1264,9 +1264,11 @@ class Builder
         // then we can associate those values with the column if it was specified
         // otherwise we can just give these values back without a specific key.
         $results = $this->get($columns);
+        
+        $results = array_change_key_case($results, CASE_UPPER);
 
         $values = array_map(function ($row) use ($columns) {
-            return $row[$columns[0]];
+            return $row[strtoupper($columns[0])];
         }, $results);
 
         // If a key was specified and we have results, we will go ahead and combine
