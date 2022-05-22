@@ -1,26 +1,34 @@
 {
-    "name": "mrjgreen/database",
-    "description" : "Expressive Database Layer for PHP - Based on Illuminate/Database",
-    "license": "MIT",
-    "keywords": ["database", "sql", "dbal", "query builder"],
-    "authors": [
-        {
-            "name": "Joe Green",
-            "email": "joe.green0991@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=5.4.0",
-        "psr/log": "~1.0"
-    },
-    "require-dev": {
-        "mockery/mockery": "*",
-        "satooshi/php-coveralls": "dev-master",
-        "phpunit/phpunit": "*"
-    },
-    "autoload": {
-        "psr-4": {
-            "Database\\": "src"
-        }
+  "name": "mrjgreen/database",
+  "description": "Expressive Database Layer for PHP - Based on Illuminate/Database",
+  "license": "MIT",
+  "keywords": [
+    "database",
+    "sql",
+    "dbal",
+    "query builder"
+  ],
+  "authors": [
+    {
+      "name": "Joe Green",
+      "email": "joe.green0991@gmail.com"
     }
+  ],
+  "scripts": {
+    "test": "php vendor/bin/phpunit"
+  },
+  "require": {
+    "php": ">=5.4.0",
+    "psr/log": "~1.0"
+  },
+  "require-dev": {
+    "mockery/mockery": "*",
+    "php-coveralls/php-coveralls": "^2.5",
+    "phpunit/phpunit": "~9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Database\\": "src"
+    }
+  }
 }

@@ -4,9 +4,9 @@ use Mockery as m;
 use Database\Query\Builder;
 use Database\Query\Expression as Raw;
 
-class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
+class DatabaseQueryBuilderTest extends \PHPUnit\Framework\TestCase {
 
-	public function tearDown()
+	protected function tearDown(): void
 	{
 		m::close();
 	}
@@ -71,11 +71,10 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(array('baz'), $builder->getBindings());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testSubSelectThrowsInvalidArgument()
     {
+		$this->expectException(InvalidArgumentException::class);
+
         $builder = $this->getBuilder();
 
         $builder->selectSub(array('test'), 'tmp')->from('users');
@@ -932,7 +931,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 
     public function testBufferedInsert()
     {
-        $statement = $this->getMock('PDOStatement', array('rowCount'));
+        $statement = $this->getMockBuilder(PDOStatement::class)->setMethods(array('rowCount'))->getMock();
 
         $statement->expects($this->exactly(2))
             ->method('rowCount')
@@ -1055,12 +1054,10 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('select * from "users" where "foo" is null', $builder->toSql());
 	}
 
-
-	/**
-	 * @expectedException BadMethodCallException
-	 */
 	public function testBuilderThrowsExpectedExceptionWithUndefinedMethod()
 	{
+		$this->expectException(BadMethodCallException::class);
+
 		$builder = $this->getBuilder();
 
 		$builder->noValidMethodHere();
@@ -1076,7 +1073,7 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
 		$grammar = new Database\Query\Grammars\Grammar;
 		$processor = m::mock('Database\Query\Processors\Processor');
 
-		$builder = $this->getMock('Database\Query\Builder', array('getFresh'), array($connection, $grammar, $processor));
+		$builder = $this->getMockBuilder(Database\Query\Builder::class)->setMethods(array('getFresh'))->setConstructorArgs(array($connection, $grammar, $processor))->getMock();
 		$builder->expects($this->once())->method('getFresh')->with($this->equalTo(array('*')))->will($this->returnValue(array('results')));
 		return $builder->select('*')->from('users')->where('email', 'foo@bar.com');
 	}
@@ -1324,11 +1321,10 @@ class DatabaseQueryBuilderTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($bindings, $builder->getBindings());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testSettingInvalidBindingThrowsException()
     {
+		$this->expectException(InvalidArgumentException::class);
+
         $builder = $this->getBuilder();
 
         $builder->setBindings(array(1), 'non-existent');

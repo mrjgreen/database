@@ -2,5 +2,5 @@
 
 interface ExceptionHandlerInterface
 {
-    public function handle($query, array $bindings = array(), \Exception $previousException);
+    public function handle($query, array $bindings, \Exception $previousException);
 }

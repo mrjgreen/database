@@ -2,9 +2,9 @@
 
 use Mockery as m;
 
-class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
+class DatabaseConnectionResolverTest extends \PHPUnit\Framework\TestCase {
 
-	public function tearDown()
+	protected function tearDown(): void
 	{
 		m::close();
 	}
@@ -24,7 +24,7 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
 
         $factory->shouldReceive('make')->once()->with($configs['test1'])->andReturn($connectionMock);
 
-		$resolver = $this->getMock('Database\ConnectionResolver', null, array($configs, $factory));
+		$resolver = new \Database\ConnectionResolver($configs, $factory);
 
 		$this->assertTrue($resolver->hasConnection('test1'));
 
@@ -47,7 +47,7 @@ class DatabaseConnectionResolverTest extends PHPUnit_Framework_TestCase {
 
         $factory->shouldReceive('make')->once()->with($configs['test'])->andReturn($connectionMock);
 
-        $resolver = $this->getMock('Database\ConnectionResolver', null, array($configs, $factory));
+        $resolver = new \Database\ConnectionResolver($configs, $factory);
 
         $resolver->setDefaultConnection('test');
 

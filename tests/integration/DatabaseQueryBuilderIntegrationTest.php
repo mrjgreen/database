@@ -48,11 +48,13 @@ class DatabaseQueryBuilderIntegrationTest extends AbstractDatabaseIntegrationTes
     {
         $file = '/var/tmp/db_integration_test_' . uniqid();
 
-        $this->connection
+        $res = $this->connection
             ->table($this->tableName)
             ->where('name', '=', 'joe')
             ->intoOutfile($file)
             ->query();
+
+        $this->assertEquals(0, $res->rowCount());
 
         @unlink($file);
     }
@@ -61,7 +63,7 @@ class DatabaseQueryBuilderIntegrationTest extends AbstractDatabaseIntegrationTes
     {
         $file = '/var/tmp/db_integration_test_' . uniqid();
 
-        $this->connection
+        $res = $this->connection
             ->table($this->tableName)
             ->where('name', '=', 'joe')
             ->intoOutfile($file, function(\Database\Query\OutfileClause $outfile){
@@ -70,6 +72,8 @@ class DatabaseQueryBuilderIntegrationTest extends AbstractDatabaseIntegrationTes
                     ->fieldsTerminatedBy("\t");
             })
             ->query();
+
+        $this->assertEquals(0, $res->rowCount());
 
         @unlink($file);
     }

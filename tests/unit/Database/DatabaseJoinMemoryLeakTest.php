@@ -3,9 +3,9 @@
 use Mockery as m;
 use Database\Query\Builder;
 
-class DatabaseJoinMemoryLeakTest extends PHPUnit_Framework_TestCase {
+class DatabaseJoinMemoryLeakTest extends \PHPUnit\Framework\TestCase {
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         m::close();
     }

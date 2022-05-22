@@ -30,7 +30,7 @@ class ExceptionHandler implements ExceptionHandlerInterface
      * @param array $bindings
      * @param \Exception $previousException
      */
-    public function handle($query = '', array $bindings = array(), \Exception $previousException)
+    public function handle($query, array $bindings, \Exception $previousException)
     {
         $parameters = $this->parameters;
 

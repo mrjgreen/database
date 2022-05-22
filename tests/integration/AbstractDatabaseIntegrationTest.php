@@ -1,6 +1,6 @@
 <?php
 
-abstract class AbstractDatabaseIntegrationTest extends PHPUnit_Framework_TestCase
+abstract class AbstractDatabaseIntegrationTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \Database\Connection
@@ -9,7 +9,7 @@ abstract class AbstractDatabaseIntegrationTest extends PHPUnit_Framework_TestCas
 
     protected $tableName = 'test.database_integration_test';
 
-    public function setUp()
+    protected function setUp(): void
     {
         $factory = new \Database\Connectors\ConnectionFactory();
 

@@ -6,9 +6,9 @@ class DatabaseConnectionFactoryPDOStub extends PDO {
 	public function __construct() {}
 }
 
-class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
+class DatabaseConnectionFactoryTest extends \PHPUnit\Framework\TestCase {
 
-	public function tearDown()
+	protected function tearDown(): void
 	{
 		m::close();
 	}
@@ -16,8 +16,10 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 
 	public function testMakeCallsCreateConnection()
 	{
-		$factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector', 'createConnection', 'createQueryGrammar', 'createExceptionHandler'));
-
+		$factory = $this->getMockBuilder(\Database\Connectors\ConnectionFactory::class)
+						->setMethods(array('createConnector', 'createConnection', 'createQueryGrammar', 'createExceptionHandler'))
+						->getMock();
+		
 		$config = array('driver' => 'mysql', 'prefix' => 'prefix', 'database' => 'database');
 
 		$pdo = new DatabaseConnectionFactoryPDOStub;
@@ -25,8 +27,8 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
         $connector = m::mock('stdClass');
 		$connector->shouldReceive('connect')->once()->with($config)->andReturn($pdo);
 
-		$mockGrammar = $this->getMock('Database\Query\Grammars\MysqlGrammar');
-		$mockExceptionHandler = $this->getMock('Database\Exception\ExceptionHandlerInterface');
+		$mockGrammar = $this->getMockBuilder(\Database\Query\Grammars\MysqlGrammar::class)->getMock();
+		$mockExceptionHandler = $this->getMockBuilder(\Database\Exception\ExceptionHandlerInterface::class)->getMock();
 
 		$mockConnection = $this->getMockConnectionWithExpectations($pdo, $mockGrammar);
 
@@ -43,7 +45,10 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 
 	public function testMakeCallsCreateConnectionForReadWrite()
 	{
-		$factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector', 'createConnection', 'createQueryGrammar'));
+		$factory = $this->getMockBuilder(\Database\Connectors\ConnectionFactory::class)
+					    ->setMethods(array('createConnector', 'createConnection', 'createQueryGrammar'))
+						->getMock();
+						
 		$connector = m::mock('stdClass');
 		$config = array(
 			'read' => array('database' => 'database'),
@@ -57,7 +62,7 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 		$pdo = new DatabaseConnectionFactoryPDOStub;
 		$connector->shouldReceive('connect')->twice()->with($expect)->andReturn($pdo);
 
-		$mockGrammar = $this->getMock('Database\Query\Grammars\MysqlGrammar');
+		$mockGrammar = $this->getMockBuilder(\Database\Query\Grammars\MysqlGrammar::class)->getMock();
 
         $mockConnection = $this->getMockConnectionWithExpectations($pdo, $mockGrammar);
 
@@ -72,7 +77,11 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
 
 	private function getMockConnectionWithExpectations($pdo, $grammar)
 	{
-		$mockConnection = $this->getMock('Database\Connection', array('setPdo','setReconnector', 'setQueryGrammar', 'setExceptionHandler'), array($pdo));
+		$mockConnection = $this->getMockBuilder(\Database\Connection::class)
+								->setMethods(array('setPdo','setReconnector', 'setQueryGrammar', 'setExceptionHandler'))
+								->setConstructorArgs(array($pdo))
+								->getMock();
+
 		$mockConnection->expects($this->once())->method('setReconnector')->will($this->returnSelf());
 		$mockConnection->expects($this->once())->method('setQueryGrammar')->with($grammar)->will($this->returnSelf());
 		$mockConnection->expects($this->once())->method('setExceptionHandler')->will($this->returnSelf());
@@ -96,11 +105,13 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
      */
 	public function testProperGrammarInstancesAreReturnedForProperDrivers($driver, $instance)
 	{
-		$factory = $this->getMock('Database\Connectors\ConnectionFactory', array('createConnector'), array());
+		$factory = $this->getMockBuilder(\Database\Connectors\ConnectionFactory::class)
+					    ->setMethods(array('createConnector'))
+						->getMock();
 
         if(is_null($instance))
         {
-            $this->setExpectedException('InvalidArgumentException');
+            $this->expectException(InvalidArgumentException::class);
         }
 		else
 		{
@@ -131,22 +142,18 @@ class DatabaseConnectionFactoryTest extends PHPUnit_Framework_TestCase {
         );
     }
 
-
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testIfDriverIsntSetExceptionIsThrown()
 	{
+		$this->expectException(InvalidArgumentException::class);
+
 		$factory = new Database\Connectors\ConnectionFactory();
 		$factory->make(array('foo'));
 	}
 
-
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testExceptionIsThrownOnUnsupportedDriver()
 	{
+		$this->expectException(InvalidArgumentException::class);
+
 		$factory = new Database\Connectors\ConnectionFactory();
 		$factory->make(array('driver' => 'foo'));
 	}
