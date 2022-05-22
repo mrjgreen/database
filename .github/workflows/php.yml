@@ -35,8 +35,7 @@ jobs:
         run: mkdir -p build/logs
 
       - name: Run test suite
-        run: make
-        #run: XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+        run: make ci
 
       - name: Upload coverage results to Coveralls
         env:
