@@ -35,7 +35,7 @@ jobs:
         run: mkdir -p build/logs
 
       - name: Set up MySQL
-        run: sudo cat /etc/my.cnf /etc/mysql/my.cnf /usr/etc/my.cnf ~/.my.cnf
+        run: sudo cat /etc/mysql/conf.d/* /etc/mysql/mysql.conf.d/*
 
       - name: Run test suite
         run: XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-clover build/logs/clover.xml
