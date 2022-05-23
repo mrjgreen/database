@@ -18,7 +18,7 @@ return array(
         'port'      => 3306,
         'driver'    => 'mysql',
         'username'  => 'root',
-        'password'  => 'password',
+        'password'  => 'root',
         'charset'   => 'utf8',
         'collation' => 'utf8_unicode_ci',
         'prefix'    => '',

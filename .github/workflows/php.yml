@@ -34,9 +34,6 @@ jobs:
       - name: Create build output folder
         run: mkdir -p build/logs
 
-      - name: Start MySQL
-        run: make up
-
       - name: Run test suite
         run: XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
