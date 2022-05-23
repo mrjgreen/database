@@ -2,7 +2,7 @@ name: Database Build
 
 on:
   push:
-    branches: [master, actions]
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -34,13 +34,8 @@ jobs:
       - name: Create build output folder
         run: mkdir -p build/logs
 
-      - name: Set up MySQL
-        run: |
-          echo "[mysqld]\nsecure-file-priv = \"\"" | sudo tee /etc/mysql/conf.d/custom.cnf
-          sudo /etc/init.d/mysql start
-
       - name: Run test suite
-        run: XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+        run: make ci
 
       - name: Upload coverage results to Coveralls
         env:
