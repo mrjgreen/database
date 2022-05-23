@@ -2,7 +2,7 @@ name: Database Build
 
 on:
   push:
-    branches: [master]
+    branches: [master, actions]
   pull_request:
     branches: [master]
 
