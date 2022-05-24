@@ -18,7 +18,7 @@ jobs:
         image: mysql
         ports:
           - 3306:3306
-        environment:
+        env:
           MYSQL_ROOT_PASSWORD: password
         command: --secure-file-priv=""
         # needed because the mysql container does not provide a healthcheck
