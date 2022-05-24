@@ -13,16 +13,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_ROOT_PASSWORD: password
-        # needed because the mysql container does not provide a healthcheck
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
-
     steps:
       - uses: actions/checkout@v3
 
@@ -45,9 +35,9 @@ jobs:
         run: mkdir -p build/logs
 
       - name: Run test suite
-        run: XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+        run: make ci
 
-      - name: Upload coverage results to Coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: php vendor/bin/php-coveralls --coverage_clover=build/logs/clover.xml -v
+      # - name: Upload coverage results to Coveralls
+      #   env:
+      #     COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: php vendor/bin/php-coveralls --coverage_clover=build/logs/clover.xml -v

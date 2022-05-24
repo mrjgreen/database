@@ -16,3 +16,5 @@ coverage:
 
 down: 
 	$(COMPOSE) down -v
+
+ci: up install coverage down
