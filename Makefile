@@ -17,4 +17,6 @@ coverage:
 down: 
 	$(COMPOSE) down -v
 
-ci: up install coverage down
+mysql:
+	$(COMPOSE) run mysql -d
+	until nc -z 127.0.0.1 3306; do echo "Waiting for MySQL..."; sleep 5; done
