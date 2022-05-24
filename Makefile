@@ -16,7 +16,3 @@ coverage:
 
 down: 
 	$(COMPOSE) down -v
-
-mysql:
-	$(COMPOSE) run mysql
-	until nc -z 127.0.0.1 3306; do echo "Waiting for MySQL..."; sleep 5; done

@@ -13,6 +13,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql
+        ports:
+          - 3306:3306
+        environment:
+          MYSQL_ROOT_PASSWORD: password
+        command: --secure-file-priv=""
+        # needed because the mysql container does not provide a healthcheck
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
+
     steps:
       - uses: actions/checkout@v3
 
@@ -33,9 +44,6 @@ jobs:
 
       - name: Create build output folder
         run: mkdir -p build/logs
-
-      - name: Start MySQL container
-        run: make mysql
 
       - name: Run test suite
         run: XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-clover build/logs/clover.xml
