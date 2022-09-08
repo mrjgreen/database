@@ -5,7 +5,7 @@ use Database\Exception\ExceptionHandlerInterface;
 use Database\Query\Grammars\Grammar;
 use PDO;
 use Closure;
-use DateTime;
+use DateTimeInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 
@@ -380,7 +380,7 @@ class Connection implements ConnectionInterface
             // We need to transform all instances of the DateTime class into an actual
             // date string. Each query grammar maintains its own date string format
             // so we'll just ask the grammar for the format to get from the date.
-            if ($value instanceof DateTime) {
+            if ($value instanceof DateTimeInterface) {
                 $bindings[$key] = $value->format($grammar->getDateFormat());
             } elseif ($value === false) {
                 $bindings[$key] = 0;
